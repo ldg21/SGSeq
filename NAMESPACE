@@ -1,0 +1,111 @@
+## IMPORT NAMESPACES
+
+import(BiocGenerics)
+import(BiocParallel)
+import(IRanges)
+import(GenomicAlignments)
+import(GenomicRanges)
+import(methods)
+import(S4Vectors)
+
+## IMPORT FUNCTIONS
+
+importFrom(AnnotationDbi, select)
+importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate)
+importFrom(igraph, clusters, degree, edge.connectivity, get.data.frame,
+ get.shortest.paths, graph.data.frame, induced.subgraph, neighborhood,
+ plot.igraph, shortest.paths, subcomponent)
+importFrom(GenomicFeatures, exonsBy)
+importFrom(GenomeInfoDb, seqinfo, seqlengths, seqlevels)
+importFrom(parallel, mclapply)
+importFrom(Rsamtools, BamFile, scanBam, ScanBamParam)
+importFrom(rtracklayer, export)
+
+## EXPORT FUNCTIONS
+
+export(
+ analyzeFeatures,
+ analyzeVariants,
+ annotate,
+ convertToSGFeatures,
+ convertToTxFeatures,
+ exportFeatures,
+ filterTerminalExons,
+ findTxVariants,
+ getBamInfo,
+ getSGFeatureCounts,
+ getTxVariantCounts,
+ mergeTxFeatures,
+ plotFeatures,
+ plotSpliceGraph,
+ plotVariants,
+ predictTxFeatures
+)
+
+## EXPORT CONSTRUCTORS
+
+export(
+ TxFeatures,
+ SGFeatures,
+ TxVariants,
+ SGFeatureCounts,
+ TxVariantCounts
+)
+
+## EXPORT ACCESSORS
+
+exportMethods(
+ type,
+ txName,
+ geneName,
+ splice5p,
+ splice3p,
+ featureID,
+ geneID,
+ from,
+ to,
+ segmentID,
+ eventID,
+ variantID,
+ closed5p,
+ closed3p,
+ variantType,
+ variantName,
+ featureID5p,
+ featureID3p,
+ counts,
+ FPKM,
+ countsVariant5p,
+ countsVariant3p,
+ countsTotal5p,
+ countsTotal3p,
+ variantFreq
+)
+
+exportMethods(
+ 'type<-',
+ 'txName<-',
+ 'geneName<-',
+ 'splice5p<-',
+ 'splice3p<-',
+ 'featureID<-',
+ 'geneID<-',
+ 'from<-',
+ 'to<-',
+ 'segmentID<-',
+ 'eventID<-',
+ 'variantID<-',
+ 'closed5p<-',
+ 'closed3p<-',
+ 'variantType<-',
+ 'variantName<-',
+ 'featureID5p<-',
+ 'featureID3p<-',
+ 'counts<-',
+ 'FPKM<-',
+ 'countsVariant5p<-',
+ 'countsVariant3p<-',
+ 'countsTotal5p<-',
+ 'countsTotal3p<-',
+ 'variantFreq<-'
+)
