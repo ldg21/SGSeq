@@ -26,4 +26,5 @@ for terminal exon prediction.
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

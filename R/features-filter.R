@@ -11,6 +11,7 @@
 ##'   including elementMetadata columns \dQuote{N}, \dQuote{N_splicesite} and
 ##'   \dQuote{coverage}.
 ##' @return \code{TxFeatures} object with filtered features
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 filterFeatures <- function(features, paired_end, read_length, frag_length,
@@ -106,6 +107,7 @@ filterExonsTerminal <- function(features, junctions, type = c("F", "L"),
 ##' @inheritParams filterTerminalExons
 ##' @return \code{TxFeatures} object with filtered features,
 ##'   or indices of retained features if \code{return_index = TRUE}
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 removeExonsIsolated <- function(features, return_index = FALSE)

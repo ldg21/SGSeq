@@ -21,4 +21,5 @@ Remove exons with no flanking splice junctions
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

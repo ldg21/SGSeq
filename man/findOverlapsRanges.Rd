@@ -24,4 +24,5 @@ Modified \code{findOverlaps} function for \code{IRanges},
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

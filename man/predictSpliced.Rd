@@ -45,4 +45,5 @@ should be limited to identification of splice junctions only}
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

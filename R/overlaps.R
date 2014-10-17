@@ -4,6 +4,7 @@
 ##' @inheritParams exonCompatible
 ##' @param junctions \code{IRanges} of splice junctions
 ##' @return Counts or list of indices of compatible fragments
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 junctionCompatible <- function(junctions, frag_intron, counts = TRUE)
@@ -30,6 +31,7 @@ junctionCompatible <- function(junctions, frag_intron, counts = TRUE)
 ##' @param counts Logical indicating whether counts or indices of
 ##'   compatible fragments should be returned
 ##' @return Counts or list of indices of compatible fragments
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 exonCompatible <- function(exons, spliceL, spliceR, frag_exonic,
@@ -79,6 +81,7 @@ exonCompatible <- function(exons, spliceL, spliceR, frag_exonic,
 ##'   that are spliced at the site (\dQuote{spliced}) or those that are
 ##'   not spliced, i.e. extend into the adjacent intron (\dQuote{unspliced})
 ##' @return Counts or list of indices of compatible fragments
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 splicesiteOverlap <- function(splicesites, side, frag_exonic,
@@ -148,6 +151,7 @@ splicesiteOverlap <- function(splicesites, side, frag_exonic,
 ##' @param subject \code{IRanges} or \code{IRangesList} object
 ##' @param type Passed to \code{findOverlaps}
 ##' @return \code{Hits} object
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 findOverlapsRanges <- function(query, subject, type = "any")

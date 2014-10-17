@@ -376,6 +376,7 @@ SGFeatures <- function(x, type = mcols(x)$type,
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer elementMetadata columns
 ##' @return A \code{TxSegments} object
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 TxSegments <- function(x)

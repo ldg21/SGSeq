@@ -22,4 +22,5 @@ Identify fragments compatible with splice junctions.
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

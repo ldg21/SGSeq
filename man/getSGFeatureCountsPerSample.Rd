@@ -30,4 +30,5 @@ Obtain counts of compatible fragments for splice graph features.
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

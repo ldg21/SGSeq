@@ -69,6 +69,7 @@
 ##'   should be limited to identification of splice junctions only
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictTxFeaturesPerSample <- function(file_bam, which = NULL,
@@ -152,6 +153,7 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
 ##'   chromosome and strand
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @return \code{GRanges} of predicted features
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictTxFeaturesRanges <- function(file_bam, paired_end, which,
@@ -188,6 +190,7 @@ predictTxFeaturesRanges <- function(file_bam, paired_end, which,
 ##' @param frag_intron \code{IRangesList} with introns implied by spliced
 ##'   alignments
 ##' @return \code{IRanges} with predicted features
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
@@ -281,6 +284,7 @@ constructGRangesFromRanges <- function(x, seqname, strand, seqinfo)
 ##'   column \dQuote{type} and optionally \dQuote{N} (for
 ##'   \code{include_counts = TRUE}), \dQuote{N_splicesite} (for
 ##'   \code{retain_coverage = TRUE})
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
@@ -340,6 +344,7 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
 ##' @param islands \code{IRanges} of genomic regions with minimal read
 ##'   coverage required for internal exon prediction
 ##' @return \code{IRanges} of candidate internal exons 
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictCandidatesInternal <- function(junctions, islands)
@@ -379,6 +384,7 @@ predictCandidatesInternal <- function(junctions, islands)
 ##'   \dQuote{type} and optionally \dQuote{N} (for
 ##'   \code{include_counts = TRUE}), \dQuote{N_splicesite},
 ##'   \dQuote{coverage} (for \code{retain_coverage = TRUE})
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
@@ -430,6 +436,7 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
 ##'   should be identified to the left (\dQuote{exon_L}) or right
 ##'   (\dQuote{exon_R}) of provided splice junctions 
 ##' @return \code{IRanges} of candidate terminal exons
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictCandidatesTerminal <- function(junctions, islands,
@@ -472,6 +479,7 @@ predictCandidatesTerminal <- function(junctions, islands,
 ##'   \dQuote{type} and optionally \dQuote{N} (for
 ##'   \code{include_counts = TRUE}), \dQuote{N_splicesite},
 ##'   \dQuote{coverage} (for \code{retain_coverage = TRUE})
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,

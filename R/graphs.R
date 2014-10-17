@@ -783,6 +783,7 @@ findAllPaths <- function(from, to, path, ref, nodes)
 ##' @param variants \code{TxVariants} object
 ##' @return \code{variants} with added elementMetadata column
 ##'   \dQuote{variantType} indicating canonical event(s)
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 annotateTxVariants <- function(variants)

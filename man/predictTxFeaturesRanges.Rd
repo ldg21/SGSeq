@@ -50,4 +50,5 @@ Identification of splice junctions and exons for a given
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

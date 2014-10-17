@@ -71,7 +71,7 @@ coordinates of the \emph{FBXO31} gene.
 The \Rclass{data.frame} with sample information contains columns with
 alignment information, including paired-end status, median read length, 
 median insert size and the total number of alignments. These were obtained
-from the original BAM files using function \Rfunction{getLibraryInfo}. 
+from the original BAM files using function \Rfunction{getBamInfo}. 
 We set the correct BAM file paths in the sample information.
 
 <<>>=

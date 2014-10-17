@@ -34,4 +34,5 @@ Identify fragments with alignments extending across exon/intron boundaries.
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

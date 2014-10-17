@@ -4,6 +4,7 @@
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param features \code{SGFeatures} object
 ##' @return Numeric vector of compatible fragment counts
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
