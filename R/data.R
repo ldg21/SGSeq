@@ -6,6 +6,8 @@
 ##' @format A \code{data.frame} with columns \dQuote{sample_name},
 ##' \dQuote{file_bam}, \dQuote{paired_end}, \dQuote{read_length},
 ##' \dQuote{frag_length} and \dQuote{lib_size}.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name si
 NULL
 
@@ -14,6 +16,8 @@ NULL
 ##' FBXO31 gene locus, based on UCSC knownGene annotation.
 ##'
 ##' @format A \code{GRanges} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name gr
 NULL
 
@@ -22,6 +26,8 @@ NULL
 ##' Transcript features for FBXO31, based on UCSC knownGene annotation.
 ##'
 ##' @format A \code{TxFeatures} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name txf
 NULL
 
@@ -30,6 +36,8 @@ NULL
 ##' Splice graph features for FBXO31, predicted from example BAM files.
 ##'
 ##' @format An \code{SGFeatures} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name sgf
 NULL
 
@@ -38,6 +46,8 @@ NULL
 ##' Compatible counts and FPKMs for predicted FBXO31 splice graph features.
 ##'
 ##' @format An \code{SGFeatureCounts} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name sgfc
 NULL
 
@@ -47,6 +57,8 @@ NULL
 ##' from example BAM files.
 ##'
 ##' @format A \code{TxVariants} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name txv
 NULL
 
@@ -56,5 +68,7 @@ NULL
 ##' features were predicted and counts obtained from example BAM files.
 ##'
 ##' @format A \code{TxVariantCounts} object.
+##' @keywords internal
+##' @author Leonard Goldstein
 ##' @name txvc
 NULL

@@ -6,4 +6,8 @@
 \description{
 Compatible counts and FPKMs for predicted FBXO31 splice graph features.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

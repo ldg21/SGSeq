@@ -7,4 +7,8 @@
 Transcript variant counts and frequencies for FBXO31. Splice graph
 features were predicted and counts obtained from example BAM files.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

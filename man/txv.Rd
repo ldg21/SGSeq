@@ -7,4 +7,8 @@
 Transcript variants for FBXO31, based on splice graph features predicted
 from example BAM files.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

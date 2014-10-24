@@ -9,4 +9,8 @@
 Sample information for example BAM files included in the
 \code{SGSeq} package.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

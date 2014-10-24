@@ -6,4 +6,8 @@
 \description{
 FBXO31 gene locus, based on UCSC knownGene annotation.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

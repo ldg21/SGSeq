@@ -6,4 +6,8 @@
 \description{
 Splice graph features for FBXO31, predicted from example BAM files.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 

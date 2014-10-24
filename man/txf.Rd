@@ -6,4 +6,8 @@
 \description{
 Transcript features for FBXO31, based on UCSC knownGene annotation.
 }
+\author{
+Leonard Goldstein
+}
+\keyword{internal}
 
