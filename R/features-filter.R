@@ -104,13 +104,12 @@ filterExonsTerminal <- function(features, junctions, type = c("F", "L"),
 }
 
 ##' @title Remove exons with no flanking splice junctions
-##' @inheritParams filterTerminalExons
-##' @return \code{TxFeatures} object with filtered features,
-##'   or indices of retained features if \code{return_index = TRUE}
+##' @inheritParams processTerminalExons
+##' @return \code{TxFeatures} object with filtered features
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-removeExonsIsolated <- function(features, return_index = FALSE)
+removeExonsIsolated <- function(features)
 {
 
     i_J <- which(type(features) == "J")
@@ -152,51 +151,59 @@ removeExonsIsolated <- function(features, return_index = FALSE)
 
     }
 
-    index <- which(!seq_along(features) %in% remove)
+    filtered <- features[!seq_along(features) %in% remove]
 
-    if (return_index) {
-
-        return(index)
-
-    } else {
-                
-        return(features[index])
-
-    }
+    return(filtered)
     
 }
 
-##' Terminal exons that share their splice site with an internal exon are
-##' filtered based on the overhang with respect to the internal exon. 
-##'
-##' \code{predictTxFeatures} predicts flanking terminal exons for each
-##' identified splice junction. Thus splice junctions are guaranteed to
-##' have flanking exons, even after filtering exons during merging with
-##' \code{mergeTxFeatures}. However, many predicted terminal exons share
-##' a splice site with predicted internal exons and are often contained
-##' within them. Many of these predictions are unlikely to be real terminal
-##' exons and are excluded before further analysis.
+##' Prediction of transcript starts and ends from RNA-seq data is imprecise.
+##' Due to the employed prediction strategy, further processing of predicted
+##' terminal exons is required to avoid common artifacts.
 ##' 
-##' @title Filter terminal exons that share splice sites with internal exons
+##' Processing of terminal exon predictions is done in two steps:
+##' (1) terminal exons that share a splice site with an internal exon are
+##' filtered, and (2) remaining terminal exons that overlap other exons
+##' are trimmed.
+##' 
+##' \code{predictTxFeatures} predicts flanking terminal exons for each
+##' identified splice junction. This ensures that each splice junction
+##' has a flanking exon after merging with \code{mergeTxFeatures}.
+##' This approach results in many predicted terminal exons that
+##' share a splice site with predicted internal exons (often contained
+##' within them or with a short overhang due to incorrect alignments).
+##' Most of these are not real terminal exons and are filtered before
+##' further analysis. Filtering based on the overhang is possible via
+##' argument \code{min_overhang}.
+##'
+##' Some of the remaining predicted terminal exons overlap other exons
+##' such that their unspliced boundary shows a short overhang with
+##' respect to a spliced boundary of the overlapping exon. Often these
+##' exon extensions into an intron are due to incorrect alignments.
+##' Terminal exons with overhang smaller than \code{min_overhang} are
+##' trimmed such that their trimmmed unspliced boundary coincides with
+##' the spliced boundary of the overlapping exon. 
+##' 
+##' @title Process predicted terminal exons
 ##' @param features \code{TxFeatures} object
 ##' @param min_overhang For terminal exons sharing a splice site with an
-##'   internal exon, minimum overhang required for terminal exon to be
-##'   included. Use \code{NA} to remove all terminal exons sharing a splice
-##'   site with an internal exon.
-##' @param return_index Logical indicating whether indices of retained
-##'   features should be returned instead of filtered features
-##' @return \code{TxFeatures} object with filtered features,
-##'   or indices of retained features if \code{return_index = TRUE}
+##'   internal exon, minimum overhang required for terminal exons to be
+##'   included. For remaining terminal exons overlapping other exons,
+##'   minimum overhang required to suppress trimming. Use \code{NA} to
+##'   remove all terminal exons sharing a splice with an internal exon
+##'   and trim all remaining terminal exons overlapping other exons.
+##' @return \code{TxFeatures} object with processed features
 ##' @examples
-##' txf_filtered <- filterTerminalExons(txf)
+##' txf_processed <- processTerminalExons(txf)
 ##' @author Leonard Goldstein
 
-filterTerminalExons <- function(features, min_overhang = NA,
-    return_index = FALSE)
+processTerminalExons <- function(features, min_overhang = NA)
 {
 
+    ## (1) filter terminal exons that share a splice site with an internal exon
+  
     f_I <- features[type(features) == "I"]
-
+    
     remove <- vector()
     
     for (type in c("F", "L")) {
@@ -230,16 +237,60 @@ filterTerminalExons <- function(features, min_overhang = NA,
 
     }
 
-    index <- which(!seq_along(features) %in% remove)
+    filtered <- features[!seq_along(features) %in% remove]
 
-    if (return_index) {
+    ## (2) trim terminal exons overlapping other exons
+    
+    processed <- filtered
+  
+    for (type in c("F", "L")) {
+    
+        i_Z <- which(type(filtered) == type)
+        f_Z <- filtered[i_Z]
 
-        return(index)
-
-    } else {
+        type_2 <- c("I", switch(type, "F" = "L", "L" = "F"))
+        f_X <- filtered[type(filtered) %in% type_2]
         
-        return(features[index])
+        if (length(f_Z) > 0 && length(f_X) > 0) {
+
+            hits <- findOverlaps(f_Z, f_X)
+
+            start <- switch(type, "F" = TRUE, "L" = FALSE)
+            u_Z <- flank(f_Z, -1, start)
+            s_X <- flank(f_X, -1, start)
+
+            hits_2 <- findOverlaps(u_Z[queryHits(hits)],
+                f_X[subjectHits(hits)])
+            hits_2 <- hits_2[queryHits(hits_2) == subjectHits(hits_2)]
+            hits <- hits[!seq_along(hits) %in% queryHits(hits_2)]
+
+            if (length(hits) > 0) {
+            
+                w <- abs(start(u_Z)[queryHits(hits)] -
+                    start(s_X)[subjectHits(hits)])
+                
+                q_min_w <- tapply(w, queryHits(hits), min)
+
+                if (!is.na(min_overhang)) {
+                
+                    q <- as.integer(names(which(q_min_w < min_overhang)))
+                
+                } else {
+                
+                    q <- unique(queryHits(hits))
+
+                }
+
+                processed[i_Z][q] <- flank(filtered[i_Z][q],
+                    -1 * width(filtered[i_Z][q]) + q_min_w[as.character(q)],
+                    !start)
+
+            }
+                
+        }
 
     }
+
+    return(processed)
 
 }

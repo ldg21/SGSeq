@@ -28,7 +28,7 @@
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
-##' @inheritParams filterTerminalExons
+##' @inheritParams processTerminalExons
 ##' @param features \code{TxFeatures} or \code{SGFeatures} object
 ##' @param predict Logical indicating whether transcript
 ##'   features should be predicted from BAM files
@@ -185,11 +185,11 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
     
 }
 
-##' Transcript features are predicted for each sample and subsequently
-##' merged across samples. Terminal exons that share a splice site with
-##' internal exons are filtered. For details see the help pages for
-##' \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}}
-##' and \code{\link{filterTerminalExons}}.
+##' Transcript features are predicted for each sample and merged across
+##' samples. Subsequently, terminal exons are filtered and trimmed
+##' (if applicable). For details, see the help pages for
+##' \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
+##' and \code{\link{processTerminalExons}}.
 ##' 
 ##' @title Transcript feature prediction from BAM files
 ##' @inheritParams predictTxFeaturesPerSample
@@ -197,19 +197,20 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 ##' @param sample_info \code{data.frame} containing sample information.
 ##'   Columns \dQuote{sample_name}, \dQuote{file_bam} and \dQuote{paired_end}
 ##'   are sufficient for use with argument \code{min_junction_count}.
-##'   For use with argument \code{alpha}, specifying minimum fragment
+##'   For use with argument \code{alpha}, which specifies minimum fragment
 ##'   count for splice junction prediction in FPKM units, additional
 ##'   columns \dQuote{read_length}, \dQuote{frag_length} and \dQuote{lib_size}
 ##'   are required.
-##' @param min_overhang After merging, all or a subset of terminal exons
-##'   sharing a splice site with an internal exon are removed.
-##'   \code{min_overhang} specifies the minimum overhang required for a
-##'   terminal exon to be included. Use \code{NA} to remove all terminal
-##'   exons sharing a splice site with an internal exon. Use \code{NULL}
-##'   to disable filtering (not usually recommended, as this will result
-##'   in terminal exon predictions for each splice site; disabling filtering
-##'   is useful if results are subsequently merged with other predictions
-##'   and filtering is postponed until after the merging step).
+##' @param min_overhang After merging, terminal exons are processed.
+##'   For terminal exons sharing a splice site with an internal exon,
+##'   minimum overhang required for terminal exons to be included.
+##'   For remaining terminal exons overlapping other exons, minimum 
+##'   overhang required to suppress trimming. Use \code{NA} to remove all
+##'   terminal exons sharing a splice with an internal exon and trim all
+##'   remaining terminal exons overlapping other exons. Use \code{NULL}
+##'   to disable processing (disabling processing is useful if results are
+##'   subsequently merged with other predictions and processing is
+##'   postponed until after the merging step).
 ##' @param cores_per_sample Number of cores per sample
 ##' @param BPPARAM \code{BiocParallelParam} for processing samples in parallel,
 ##'   defaults to \code{MulticoreParam(1)}
@@ -254,7 +255,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 
     if (!is.null(min_overhang)) {
 
-        features <- filterTerminalExons(features, min_overhang)
+        features <- processTerminalExons(features, min_overhang)
 
     }
 

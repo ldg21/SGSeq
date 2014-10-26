@@ -11,7 +11,7 @@ predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
 \item{sample_info}{\code{data.frame} containing sample information.
 Columns \dQuote{sample_name}, \dQuote{file_bam} and \dQuote{paired_end}
 are sufficient for use with argument \code{min_junction_count}.
-For use with argument \code{alpha}, specifying minimum fragment
+For use with argument \code{alpha}, which specifies minimum fragment
 count for splice junction prediction in FPKM units, additional
 columns \dQuote{read_length}, \dQuote{frag_length} and \dQuote{lib_size}
 are required.}
@@ -40,15 +40,16 @@ junction to be included. If specified, argument \code{alpha} is ignored.}
 \item{min_n_sample}{Minimum number of samples a feature must be
 observed in to be included}
 
-\item{min_overhang}{After merging, all or a subset of terminal exons
-sharing a splice site with an internal exon are removed.
-\code{min_overhang} specifies the minimum overhang required for a
-terminal exon to be included. Use \code{NA} to remove all terminal
-exons sharing a splice site with an internal exon. Use \code{NULL}
-to disable filtering (not usually recommended, as this will result
-in terminal exon predictions for each splice site; disabling filtering
-is useful if results are subsequently merged with other predictions
-and filtering is postponed until after the merging step).}
+\item{min_overhang}{After merging, terminal exons are processed.
+For terminal exons sharing a splice site with an internal exon,
+minimum overhang required for terminal exons to be included.
+For remaining terminal exons overlapping other exons, minimum
+overhang required to suppress trimming. Use \code{NA} to remove all
+terminal exons sharing a splice with an internal exon and trim all
+remaining terminal exons overlapping other exons. Use \code{NULL}
+to disable processing (disabling processing is useful if results are
+subsequently merged with other predictions and processing is
+postponed until after the merging step).}
 
 \item{cores_per_sample}{Number of cores per sample}
 
@@ -59,11 +60,11 @@ defaults to \code{MulticoreParam(1)}}
 A \code{TxFeatures} object
 }
 \description{
-Transcript features are predicted for each sample and subsequently
-merged across samples. Terminal exons that share a splice site with
-internal exons are filtered. For details see the help pages for
-\code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}}
-and \code{\link{filterTerminalExons}}.
+Transcript features are predicted for each sample and merged across
+samples. Subsequently, terminal exons are filtered and trimmed
+(if applicable). For details, see the help pages for
+\code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
+and \code{\link{processTerminalExons}}.
 }
 \examples{
 dir <- system.file("extdata", package = "SGSeq")

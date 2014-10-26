@@ -34,15 +34,16 @@ to be included}
 \item{min_n_sample}{Minimum number of samples a feature must be
 observed in to be included}
 
-\item{min_overhang}{After merging, all or a subset of terminal exons
-sharing a splice site with an internal exon are removed.
-\code{min_overhang} specifies the minimum overhang required for a
-terminal exon to be included. Use \code{NA} to remove all terminal
-exons sharing a splice site with an internal exon. Use \code{NULL}
-to disable filtering (not usually recommended, as this will result
-in terminal exon predictions for each splice site; disabling filtering
-is useful if results are subsequently merged with other predictions
-and filtering is postponed until after the merging step).}
+\item{min_overhang}{After merging, terminal exons are processed.
+For terminal exons sharing a splice site with an internal exon,
+minimum overhang required for terminal exons to be included.
+For remaining terminal exons overlapping other exons, minimum
+overhang required to suppress trimming. Use \code{NA} to remove all
+terminal exons sharing a splice with an internal exon and trim all
+remaining terminal exons overlapping other exons. Use \code{NULL}
+to disable processing (disabling processing is useful if results are
+subsequently merged with other predictions and processing is
+postponed until after the merging step).}
 
 \item{annotation}{\code{TxFeatures} object used for annotation}
 

@@ -3,17 +3,13 @@
 \alias{removeExonsIsolated}
 \title{Remove exons with no flanking splice junctions}
 \usage{
-removeExonsIsolated(features, return_index = FALSE)
+removeExonsIsolated(features)
 }
 \arguments{
 \item{features}{\code{TxFeatures} object}
-
-\item{return_index}{Logical indicating whether indices of retained
-features should be returned instead of filtered features}
 }
 \value{
-\code{TxFeatures} object with filtered features,
-  or indices of retained features if \code{return_index = TRUE}
+\code{TxFeatures} object with filtered features
 }
 \description{
 Remove exons with no flanking splice junctions

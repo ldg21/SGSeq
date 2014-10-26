@@ -30,7 +30,6 @@ export(
  convertToSGFeatures,
  convertToTxFeatures,
  exportFeatures,
- filterTerminalExons,
  findTxVariants,
  getBamInfo,
  getSGFeatureCounts,
@@ -39,7 +38,8 @@ export(
  plotFeatures,
  plotSpliceGraph,
  plotVariants,
- predictTxFeatures
+ predictTxFeatures,
+ processTerminalExons
 )
 
 ## EXPORT CONSTRUCTORS
