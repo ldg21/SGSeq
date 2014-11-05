@@ -197,8 +197,8 @@ findOverlapsRanges <- function(query, subject, type = "any")
     hits <- unique(cbind(qH, sH))
 
     hits <- new2("Hits",
-        queryHits = hits[, 1],
-        subjectHits = hits[, 2],
+        queryHits = as.integer(hits[, 1]),
+        subjectHits = as.integer(hits[, 2]),
         queryLength = length(query),
         subjectLength = length(subject),
         check = FALSE)
