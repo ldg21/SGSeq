@@ -154,7 +154,7 @@ annotateFrame <- function(query, subject)
     i_pos <- which(strand(query[qH]) == "+")
     i_neg <- which(strand(query[qH]) == "-")
 
-    offset <- rep(NA, length(hits))
+    offset <- rep(NA_integer_, length(hits))
     offset[i_pos] <- start(query)[qH][i_pos] - start(subject)[sH][i_pos]
     offset[i_neg] <- end(subject)[sH][i_neg] - end(query)[qH][i_neg]
     
@@ -170,12 +170,12 @@ annotateFrame <- function(query, subject)
     qH_cdsStart_unlisted <- unlist(sH_cdsStart) - offset[togroup(sH_cdsStart)]
     i_na <- which(qH_cdsStart_unlisted < 0 |
         qH_cdsStart_unlisted > width(query)[qH][togroup(sH_cdsStart)])
-    qH_cdsStart_unlisted[i_na] <- NA
+    qH_cdsStart_unlisted[i_na] <- NA_integer_
     
     qH_cdsEnd_unlisted <- unlist(sH_cdsEnd) - offset[togroup(sH_cdsEnd)]
     i_na <- which(qH_cdsEnd_unlisted < 0 |
         qH_cdsEnd_unlisted > width(query)[qH][togroup(sH_cdsEnd)])
-    qH_cdsEnd_unlisted[i_na] <- NA
+    qH_cdsEnd_unlisted[i_na] <- NA_integer_
     
     qH_frameStart_unlisted <- unlist(qH_frameStart)
     qH_frameStart_unlisted[!is.na(qH_cdsStart_unlisted)] <- -1

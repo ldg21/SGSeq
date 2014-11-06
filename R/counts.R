@@ -267,7 +267,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 
     if (is(features, "SGFeatures")) {
                         
-        L <- rep(NA, length(features))
+        L <- rep(NA_integer_, length(features))
         i <- which(type(features) %in% c("J", "A", "D"))
         if (length(i) > 0) { L[i] <- 0 }        
         i <- which(type(features) == "E")
@@ -287,7 +287,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
     n_features <- length(features)
     n_samples <- length(paired_end)
 
-    E <- matrix(NA, nrow = n_features, ncol = n_samples)
+    E <- matrix(NA_real_, nrow = n_features, ncol = n_samples)
 
     i_PE <- which(paired_end)
     n_PE <- length(i_PE)
@@ -475,7 +475,7 @@ representativeFeatures <- function(variant_info, features,
 collapseRows <- function(x, list_i, fun = sum)
 {
 
-    y <- matrix(NA, nrow = length(list_i), ncol = ncol(x))
+    y <- matrix(NA_integer_, nrow = length(list_i), ncol = ncol(x))
     
     j <- which(elementLengths(list_i) == 1)
 
@@ -520,18 +520,18 @@ getVariantFreq <- function(SE)
     i_start <- which(informative_start & !informative_end)
     i_end <- which(!informative_start & informative_end)
 
-    U <- matrix(NA, nrow = nrow(SE), ncol = ncol(SE))
+    U <- matrix(NA_integer_, nrow = nrow(SE), ncol = ncol(SE))
     U[i_both, ] <- U_start[i_both, ] + U_end[i_both, ]
     U[i_start, ] <- U_start[i_start, ]
     U[i_end, ] <- U_end[i_end, ]
 
-    V <- matrix(NA, nrow = nrow(SE), ncol = ncol(SE))
+    V <- matrix(NA_integer_, nrow = nrow(SE), ncol = ncol(SE))
     V[i_both, ] <- V_start[i_both, ] + V_end[i_both, ]
     V[i_start, ] <- V_start[i_start, ]
     V[i_end, ] <- V_end[i_end, ]
 
     X <- U/V
-    X[is.na(X)] <- NA
+    X[is.na(X)] <- NA_real_
 
     assay(SE, "variantFreq") <- X
         

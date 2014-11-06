@@ -176,7 +176,7 @@ exonFrame <- function(ex, ex_tx, tx)
         end = tx_cdsEnd[ex_coding_tx])
     ex_coding_cds_length <- unlist(tapply(width(ex_coding_cds),
         ex_coding_tx, cumsum), use.names = FALSE)
-    ex_coding_cds_offset <- c(NA,
+    ex_coding_cds_offset <- c(NA_integer_,
         ex_coding_cds_length[-length(ex_coding_cds_length)])
     ex_coding_cds_offset[i_5p_pos] <- start(ex_coding)[i_5p_pos] -
         start(ex_coding_cds)[i_5p_pos]
@@ -188,30 +188,30 @@ exonFrame <- function(ex, ex_tx, tx)
     
     tx_invalid <- as.integer(names(i_3p))[which(
         ex_coding_cds_length[i_3p] %% 3 != 0)]
-    ex_coding_frame[ex_coding_tx %in% tx_invalid] <- NA
+    ex_coding_frame[ex_coding_tx %in% tx_invalid] <- NA_integer_
 
     ## set frame for all exons
     
-    ex_frame <- ifelse(is.na(tx_status[ex_tx]), NA, -1)
+    ex_frame <- ifelse(is.na(tx_status[ex_tx]), NA_integer_, -1)
     ex_frame[i_ex_coding] <- ex_coding_frame
     mcols(ex)$frame <- as.integer(ex_frame)
 
     ## set cdsStart / cdsEnd for all exons
 
-    ex_cdsStart <- rep(NA, length(ex))
+    ex_cdsStart <- rep(NA_integer_, length(ex))
     ex_cdsStart[i_ex_coding][i_5p_pos] <- tx_cdsStart[ex_coding_tx][i_5p_pos] -
         start(ex_coding)[i_5p_pos]
     ex_cdsStart[i_ex_coding][i_5p_neg] <- end(ex_coding)[i_5p_neg] -
         tx_cdsEnd[ex_coding_tx][i_5p_neg]
-    ex_cdsStart[ex_tx %in% tx_invalid] <- NA
+    ex_cdsStart[ex_tx %in% tx_invalid] <- NA_integer_
     mcols(ex)$cdsStart <- as.integer(ex_cdsStart)
     
-    ex_cdsEnd <- rep(NA, length(ex))
+    ex_cdsEnd <- rep(NA_integer_, length(ex))
     ex_cdsEnd[i_ex_coding][i_3p_pos] <- tx_cdsEnd[ex_coding_tx][i_3p_pos] -
         start(ex_coding)[i_3p_pos] + 1
     ex_cdsEnd[i_ex_coding][i_3p_neg] <- end(ex_coding)[i_3p_neg] -
         tx_cdsStart[ex_coding_tx][i_3p_neg] + 1
-    ex_cdsEnd[ex_tx %in% tx_invalid] <- NA
+    ex_cdsEnd[ex_tx %in% tx_invalid] <- NA_integer_
     mcols(ex)$cdsEnd <- as.integer(ex_cdsEnd)
 
     return(ex)

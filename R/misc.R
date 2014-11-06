@@ -230,7 +230,7 @@ getBamInfoPerSample <- function(file_bam, yieldSize = NULL)
 
     } else {
 
-        frag_length <- NA
+        frag_length <- NA_real_
 
     }
 
