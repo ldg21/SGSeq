@@ -5,7 +5,7 @@
 \usage{
 plotFeatures(x, geneID = NULL, geneName = NULL, which = NULL,
   toscale = c("exon", "none", "gene"), color = "grey",
-  color_novel = "red", color_alpha = 1, color_labels = FALSE,
+  color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
   border = "fill", cexLab = 1, cexExon = 1, score = NULL,
   score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.2, 0.1),
   score_nbin = 400, main = NULL, cexMain = 1, tx_view = FALSE,
