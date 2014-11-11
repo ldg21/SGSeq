@@ -347,7 +347,8 @@ getPlottingParameters <- function(g, toscale, border, asp, tx_view, tx_dist)
     }
     
     ## exon coordinates relative to gene locus
-    ir_exon <- ranges(mapCoords(gr_exon, split(gr_gene, 1)))
+    ir_exon <- ranges(mapCoords(gr_exon, split(gr_gene, 1),
+        ignore.strand = FALSE))
 
     ## exonic regions
     ir_exonic <- reduce(ir_exon)
