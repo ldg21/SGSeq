@@ -9,8 +9,8 @@ analyzeFeatures(sample_info, which = NULL, features = NULL,
   cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} containing sample information with
-mandatory columns \dQuote{sample_name} and \dQuote{file_bam}}
+\item{sample_info}{\code{data.frame} with sample information including
+mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 
 \item{which}{\code{GRanges} of genomic regions to be considered for
 feature prediction, passed to \code{ScanBamParam}}

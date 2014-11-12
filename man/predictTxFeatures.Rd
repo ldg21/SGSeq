@@ -8,13 +8,11 @@ predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
   min_overhang = NA, cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} containing sample information.
-Columns \dQuote{sample_name}, \dQuote{file_bam} and \dQuote{paired_end}
-are sufficient for use with argument \code{min_junction_count}.
-For use with argument \code{alpha}, which specifies minimum fragment
-count for splice junction prediction in FPKM units, additional
-columns \dQuote{read_length}, \dQuote{frag_length} and \dQuote{lib_size}
-are required.}
+\item{sample_info}{\code{data.frame} with sample information.
+Required columns are \dQuote{sample_name}, \dQuote{file_bam},
+\dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
+and \dQuote{lib_size}. Alignment information can be obtained with
+function \code{getBamInfo}.}
 
 \item{which}{\code{GRanges} of genomic regions to be considered for
 feature prediction, passed to \code{ScanBamParam}}

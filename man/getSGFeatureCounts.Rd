@@ -7,10 +7,11 @@ getSGFeatureCounts(sample_info, features, cores_per_sample = 1,
   BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} containing sample information.
+\item{sample_info}{\code{data.frame} with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-(for paired-end data) and \dQuote{lib_size}.}
+and \dQuote{lib_size}. Alignment information can be obtained with
+function \code{getBamInfo}.}
 
 \item{features}{\code{SGFeatures} object}
 

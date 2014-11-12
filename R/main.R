@@ -49,7 +49,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 {
     
     if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data.frame with
+        stop("sample_info must be a data.frame including
             character columns sample_name, file_bam")
     
     if (is.null(features) && !predict)
@@ -143,8 +143,8 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' Note that library size can only be obtained if \code{yieldSize} is {NULL}.
 ##' 
 ##' @title Obtain alignment information from BAM files
-##' @param sample_info \code{data.frame} containing sample information with
-##'   mandatory columns \dQuote{sample_name} and \dQuote{file_bam}
+##' @param sample_info \code{data.frame} with sample information including
+##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
 ##' @param yieldSize Number of records used for obtaining alignment
 ##'   information, or \code{NULL} for all records
 ##' @param BPPARAM \code{BiocParallelParam} for processing samples in
@@ -164,7 +164,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 {
 
     if (!validSampleInfo(sample_info))
-        stop("sample_info must contain columns sample_name, file_bam")
+        stop("sample_info must be a data.frame including
+            character columns sample_name, file_bam")
 
     list_bamInfo <- bplapply(
         sample_info$file_bam,
@@ -194,13 +195,11 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 ##' @title Transcript feature prediction from BAM files
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
-##' @param sample_info \code{data.frame} containing sample information.
-##'   Columns \dQuote{sample_name}, \dQuote{file_bam} and \dQuote{paired_end}
-##'   are sufficient for use with argument \code{min_junction_count}.
-##'   For use with argument \code{alpha}, which specifies minimum fragment
-##'   count for splice junction prediction in FPKM units, additional
-##'   columns \dQuote{read_length}, \dQuote{frag_length} and \dQuote{lib_size}
-##'   are required.
+##' @param sample_info \code{data.frame} with sample information.
+##'   Required columns are \dQuote{sample_name}, \dQuote{file_bam},
+##'   \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
+##'   and \dQuote{lib_size}. Alignment information can be obtained with
+##'   function \code{getBamInfo}.
 ##' @param min_overhang After merging, terminal exons are processed.
 ##'   For terminal exons sharing a splice site with an internal exon,
 ##'   minimum overhang required for terminal exons to be included.
@@ -226,8 +225,12 @@ predictTxFeatures <- function(sample_info, which = NULL,
     min_junction_count = NULL, min_n_sample = 1, min_overhang = NA,
     cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
-    
-    if (!validSampleInfo(sample_info) || !validBamInfo(sample_info))
+
+    if (!validSampleInfo(sample_info))
+        stop("sample_info must be a data.frame including
+            character columns sample_name, file_bam")
+
+    if (!validBamInfo(sample_info))
         stop("Incomplete sample_info")
     
     list_features <- bpmapply(
@@ -269,10 +272,6 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @title Compatible counts for splice graph features from BAM files
 ##' @inheritParams getSGFeatureCountsPerSample
 ##' @inheritParams predictTxFeatures
-##' @param sample_info \code{data.frame} containing sample information.
-##'   Required columns are \dQuote{sample_name}, \dQuote{file_bam},
-##'   \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-##'   (for paired-end data) and \dQuote{lib_size}.
 ##' @return An \code{SGFeatureCounts} object
 ##' @examples
 ##' dir <- system.file("extdata", package = "SGSeq")
@@ -284,7 +283,11 @@ getSGFeatureCounts <- function(sample_info, features, cores_per_sample = 1,
     BPPARAM = MulticoreParam(1))
 {
 
-    if (!validSampleInfo(sample_info) || !validBamInfo(sample_info))
+    if (!validSampleInfo(sample_info))
+        stop("sample_info must be a data.frame including
+            character columns sample_name, file_bam")
+
+    if (!validBamInfo(sample_info))
         stop("Incomplete sample_info")
     
     if (!is(features, "SGFeatures"))        
