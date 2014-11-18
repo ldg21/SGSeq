@@ -15,10 +15,10 @@ Character vector with transcript variant names
 This function creates interpretable transcript variant names
 taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
 GENE is based on geneName if available, and geneID otherwise.
-EVENT and TYPE are based on eventID and variantType, respectively.
-VARIANT enumerates transcript variants in the same event, while
-ORDER indicates the total number of variants in the event (e.g. 1/2
-refers to the first out of two transcript variants in the event).
+EVENT and VARIANT enumerate events and variants for the same gene
+and event, respectively. ORDER indicates the total number of
+variants in the same event (e.g. 1/2 refers to the first out of two
+transcript variants in the event). TYPE is based on variantType.
 }
 \examples{
 makeVariantNames(txv)

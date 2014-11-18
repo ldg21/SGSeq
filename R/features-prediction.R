@@ -178,7 +178,6 @@ predictTxFeaturesRanges <- function(file_bam, paired_end, which,
     if (is.null(ir)) { return() }
         
     gr <- constructGRangesFromRanges(ir, seqlevel, strand, si)
-    gr <- gr[gr %over% which]
     
     return(gr)
     

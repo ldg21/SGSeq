@@ -3,7 +3,7 @@
 \alias{findTxVariants}
 \title{Find transcript variants from splice graph}
 \usage{
-findTxVariants(features, maxnvariant = 20, annotate_events = TRUE,
+findTxVariants(features, maxnvariant = NA, annotate_events = TRUE,
   cores = 1)
 }
 \arguments{

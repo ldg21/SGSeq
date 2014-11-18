@@ -367,7 +367,7 @@ findSegmentsPerGene <- function(g, geneID)
 ##' txv <- findTxVariants(sgf)
 ##' @author Leonard Goldstein
 
-findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
+findTxVariants <- function(features, maxnvariant = NA, annotate_events = TRUE,
     cores = 1)
 {
 
@@ -421,7 +421,13 @@ findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
         g = g, maxnvariant = maxnvariant, mc.cores = cores)
     variant_info <- DataFrame(do.call(rbind, list_variant_info))
     rownames(variant_info) <- NULL
-    
+
+    if (!is.na(maxnvariant) && nrow(variant_info) == 0) {
+
+        return(TxVariants())
+
+    }
+
     variant_info$eventID <- eventIDs(variant_info)
     variant_info <- variant_info[order(variant_info$eventID), ]
     variant_info$variantID <- seq_len(nrow(variant_info))
@@ -1027,10 +1033,10 @@ expandSE <- function(SE, eventID = NULL)
 ##' This function creates interpretable transcript variant names
 ##' taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
 ##' GENE is based on geneName if available, and geneID otherwise.
-##' EVENT and TYPE are based on eventID and variantType, respectively.
-##' VARIANT enumerates transcript variants in the same event, while
-##' ORDER indicates the total number of variants in the event (e.g. 1/2
-##' refers to the first out of two transcript variants in the event).
+##' EVENT and VARIANT enumerate events and variants for the same gene
+##' and event, respectively. ORDER indicates the total number of
+##' variants in the same event (e.g. 1/2 refers to the first out of two
+##' transcript variants in the event). TYPE is based on variantType.
 ##' @title Create interpretable transcript variant names 
 ##' @param variants \code{TxVariants} object
 ##' @return Character vector with transcript variant names
@@ -1043,38 +1049,37 @@ makeVariantNames <- function(variants)
 
     if (all(elementLengths(geneName(variants)) == 0)) {
         
-        gene <- geneID(variants)
+        GENE <- geneID(variants)
 
     } else {
 
-        gene <- unstrsplit(geneName(variants), ",")
-        gene[gene == ""] <- "NA"
+        GENE <- unstrsplit(geneName(variants), ",")
+        GENE[GENE == ""] <- "NA"
 
     }
-    
-    tmp <- unique(cbind(gene, eventID(variants)))
-    tmp_i <- reindex(tmp[, 1])
-    eventID <- setNames(tmp_i, tmp[, 2])[
-        as.character(eventID(variants))]
-    
-    variantID <- reindex(eventID(variants))
-    n_variant <- table(eventID(variants))[
-        as.character(eventID(variants))]
+
+    original_eventID <- as.character(eventID(variants))    
+    tmp <- unique(cbind(GENE, original_eventID))
+    tmp_index <- reindex(tmp[, 1])
+    EVENT <- tmp_index[match(original_eventID, tmp[, 2])]
+    VARIANT <- reindex(original_eventID)
+    eventID_n <- table(original_eventID)
+    ORDER <- eventID_n[match(original_eventID, names(eventID_n))]
 
     if (all(elementLengths(variantType(variants)) == 0)) {
 
-        type <- NA
+        TYPE <- NA
 
     } else {
     
-        type <- unstrsplit(variantType(variants), ",")
-        type <- gsub(":\\S", "", type)
-        type[type == ""] <- "OTHER"
+        TYPE <- unstrsplit(variantType(variants), ",")
+        TYPE <- gsub(":\\S", "", TYPE)
+        TYPE[TYPE == ""] <- "OTHER"
 
     }
     
-    variantName <- paste(gene, eventID,
-        paste(variantID, n_variant, sep = "/"), type, sep = "_")
+    variantName <- paste(GENE, EVENT,
+        paste0(VARIANT, "/", ORDER), TYPE, sep = "_")
 
     return(variantName)
     
@@ -1084,11 +1089,10 @@ reindex <- function(f)
 {
 
     f <- as.character(f)
-    u <- sort(unique(f))
-    u_n <- table(f)[u]
+    f_n <- table(f)
+    f_n <- f_n[order(names(f_n))]
     o <- order(f)
-    g <- f[o]
-    i <- as.integer(IRanges(1, u_n))    
-    i[match(seq_along(i), o)]
-
+    i <- as.integer(IRanges(1, f_n))
+    i[match(seq_along(f), o)]
+        
 }
