@@ -8,7 +8,7 @@ predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
   min_overhang = NA, cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} with sample information.
+\item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
 and \dQuote{lib_size}. Alignment information can be obtained with

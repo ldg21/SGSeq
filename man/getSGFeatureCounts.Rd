@@ -3,11 +3,11 @@
 \alias{getSGFeatureCounts}
 \title{Compatible counts for splice graph features from BAM files}
 \usage{
-getSGFeatureCounts(sample_info, features, cores_per_sample = 1,
-  BPPARAM = MulticoreParam(1))
+getSGFeatureCounts(sample_info, features, counts_only = FALSE,
+  cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} with sample information.
+\item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
 and \dQuote{lib_size}. Alignment information can be obtained with
@@ -15,13 +15,16 @@ function \code{getBamInfo}.}
 
 \item{features}{\code{SGFeatures} object}
 
+\item{counts_only}{Logical indicating only counts should be returned}
+
 \item{cores_per_sample}{Number of cores per sample}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in parallel,
 defaults to \code{MulticoreParam(1)}}
 }
 \value{
-An \code{SGFeatureCounts} object
+An \code{SGFeatureCounts} object or integer matrix of counts
+  if \code{counts_only = TRUE}
 }
 \description{
 Compatible counts are obtained for each sample and combined into

@@ -34,6 +34,7 @@ export(
  getBamInfo,
  getSGFeatureCounts,
  getTxVariantCounts,
+ makeSGFeatureCounts,
  makeVariantNames,
  mergeTxFeatures,
  plotFeatures,

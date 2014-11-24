@@ -6,7 +6,7 @@
 getBamInfo(sample_info, yieldSize = NULL, BPPARAM = MulticoreParam(1))
 }
 \arguments{
-\item{sample_info}{\code{data.frame} with sample information including
+\item{sample_info}{Data frame with sample information including
 mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 
 \item{yieldSize}{Number of records used for obtaining alignment

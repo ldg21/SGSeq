@@ -49,7 +49,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 {
     
     if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data.frame including
+        stop("sample_info must be a data frame including
             character columns sample_name, file_bam")
     
     if (is.null(features) && !predict)
@@ -143,7 +143,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' Note that library size can only be obtained if \code{yieldSize} is {NULL}.
 ##' 
 ##' @title Obtain alignment information from BAM files
-##' @param sample_info \code{data.frame} with sample information including
+##' @param sample_info Data frame with sample information including
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
 ##' @param yieldSize Number of records used for obtaining alignment
 ##'   information, or \code{NULL} for all records
@@ -164,7 +164,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 {
 
     if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data.frame including
+        stop("sample_info must be a data frame including
             character columns sample_name, file_bam")
 
     list_bamInfo <- bplapply(
@@ -195,7 +195,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 ##' @title Transcript feature prediction from BAM files
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
-##' @param sample_info \code{data.frame} with sample information.
+##' @param sample_info Data frame with sample information.
 ##'   Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 ##'   \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
 ##'   and \dQuote{lib_size}. Alignment information can be obtained with
@@ -227,7 +227,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 {
 
     if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data.frame including
+        stop("sample_info must be a data frame including
             character columns sample_name, file_bam")
 
     if (!validBamInfo(sample_info))
@@ -272,19 +272,21 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @title Compatible counts for splice graph features from BAM files
 ##' @inheritParams getSGFeatureCountsPerSample
 ##' @inheritParams predictTxFeatures
-##' @return An \code{SGFeatureCounts} object
+##' @param counts_only Logical indicating only counts should be returned
+##' @return An \code{SGFeatureCounts} object or integer matrix of counts
+##'   if \code{counts_only = TRUE}
 ##' @examples
 ##' dir <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(dir, "bams", si$file_bam)
 ##' sgfc <- getSGFeatureCounts(si, sgf)
 ##' @author Leonard Goldstein
 
-getSGFeatureCounts <- function(sample_info, features, cores_per_sample = 1,
-    BPPARAM = MulticoreParam(1))
+getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
+    cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
 
     if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data.frame including
+        stop("sample_info must be a data frame including
             character columns sample_name, file_bam")
 
     if (!validBamInfo(sample_info))
@@ -293,7 +295,7 @@ getSGFeatureCounts <- function(sample_info, features, cores_per_sample = 1,
     if (!is(features, "SGFeatures"))        
         stop("features must be an SGFeatures object")
     
-    list_N <- bpmapply(
+    list_counts <- bpmapply(
         getSGFeatureCountsPerSample,
         file_bam = sample_info$file_bam,
         paired_end = sample_info$paired_end,
@@ -305,14 +307,16 @@ getSGFeatureCounts <- function(sample_info, features, cores_per_sample = 1,
         BPPARAM = BPPARAM
     )
 
-    N <- do.call(cbind, list_N)    
+    counts <- do.call(cbind, list_counts)
 
-    counts <- makeSGFeatureCounts(
+    if (counts_only) return(counts)
+    
+    sgfc <- makeSGFeatureCounts(
         rowData = features,
         colData = sample_info,
-        counts = N)
+        counts = counts)
     
-    return(counts)
+    return(sgfc)
         
 }
 
@@ -349,7 +353,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 validSampleInfo <- function(object)
 {
 
-    if (!is.data.frame(object)) {
+    if (!is(object, "data.frame") && !is(object, "DataFrame")) {
       
         return(FALSE)
 
