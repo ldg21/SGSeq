@@ -1,9 +1,10 @@
 ##' Convert a \code{TxDb} object or a \code{GRangesList} of exons
 ##' grouped by transcripts to a \code{TxFeatures} object.
 ##'
-##' In the returned \code{TxFeatures} object, column slot \code{txName}
-##' is based on either \code{tx_name} in the \code{TxDb} object
-##' or \code{names(x)} if \code{x} is a \code{GRangesList}. 
+##' If \code{x} is a \code{GRangesList}, transcript names and gene names
+##' can be specified as character vectors in elementMetadata
+##' columns \code{txName} and \code{geneName}, respectively.
+##' If missing, transcript names are based on \code{names(x)}. 
 ##' 
 ##' @title Convert to TxFeatures object
 ##' @param x \code{TxDb} object, or \code{GRangesList} of exons
@@ -31,9 +32,19 @@ convertToTxFeatures <- function(x)
 
         }
         
+        if (!is.null(mcols(x)$txName)) {
+
+            names(x) <- mcols(x)$txName
+
+        } else if (is.null(names(x))) {
+
+            names(x) <- seq_along(x)
+
+        }
+
+        mcols(x)$txName <- names(x)
+
         tx <- x
-        
-        if (is.null(names(tx))) { names(tx) <- seq_along(tx) }
 
     } else {
 
@@ -64,20 +75,31 @@ convertToTxFeatures <- function(x)
     features <- collapseFeatures(features)
     features <- TxFeatures(features)
 
-    if (is(x, "TxDb")) {
+    if (is(x, "TxDb") || !is.null(mcols(x)$geneName)) {
 
         tx_name <- txName(features)
         tx_name_unlisted <- unlist(tx_name)
-        gene_id_unlisted <- select(x, tx_name_unlisted, "GENEID",
-            "TXNAME")$GENEID
-        i_not_na <- which(!is.na(gene_id_unlisted))
-        i_gene_id <- split(gene_id_unlisted[i_not_na],
+
+        if (is(x, "TxDb")) {
+
+            gene_name_unlisted <- select(x, tx_name_unlisted, "GENEID",
+                "TXNAME")$GENEID
+
+        } else {
+
+            gene_name_unlisted <- mcols(x)$geneName[match(tx_name_unlisted,
+                mcols(x)$txName)]
+          
+        }
+        
+        i_not_na <- which(!is.na(gene_name_unlisted))
+        i_gene_name <- split(gene_name_unlisted[i_not_na],
             togroup(tx_name)[i_not_na])
-        i_gene_id <- CharacterList(i_gene_id)
-        gene_id <- CharacterList(vector("list", length(features)))
-        gene_id[as.integer(names(i_gene_id))] <- i_gene_id
-        gene_id <- unique(gene_id)
-        geneName(features) <- gene_id
+        i_gene_name <- CharacterList(i_gene_name)
+        i_gene_name <- unique(i_gene_name)
+        gene_name <- CharacterList(vector("list", length(features)))
+        gene_name[as.integer(names(i_gene_name))] <- i_gene_name
+        geneName(features) <- gene_name
         
     }
     

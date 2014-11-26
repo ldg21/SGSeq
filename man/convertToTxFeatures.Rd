@@ -17,9 +17,10 @@ Convert a \code{TxDb} object or a \code{GRangesList} of exons
 grouped by transcripts to a \code{TxFeatures} object.
 }
 \details{
-In the returned \code{TxFeatures} object, column slot \code{txName}
-is based on either \code{tx_name} in the \code{TxDb} object
-or \code{names(x)} if \code{x} is a \code{GRangesList}.
+If \code{x} is a \code{GRangesList}, transcript names and gene names
+can be specified as character vectors in elementMetadata
+columns \code{txName} and \code{geneName}, respectively.
+If missing, transcript names are based on \code{names(x)}.
 }
 \examples{
 gr <- GRanges(c(1, 1), IRanges(c(1, 201), c(100, 300)), c("+", "+"))
