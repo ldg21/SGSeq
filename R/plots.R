@@ -841,7 +841,7 @@ plotVariants <- function(x, eventID = NULL,
 
     if (expand_variants) {
     
-        x <- expandSE(x, eventID)
+        x <- expandTxVariantCounts(x, eventID)
 
     }
 
@@ -1127,7 +1127,7 @@ subsetFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
             if (expand_variants) {
             
                 featureIDs <- unique(unlist(strsplit(
-                    unlist(expandPath(featureID(y)[i])), ",", fixed = TRUE)))
+                    unlist(expandString(featureID(y)[i])), ",", fixed = TRUE)))
                 i <- unlist(lapply(featureIDs,
                     function (id) { grep(paste0("(^|,)", id, "(,|$)"),
                         featureID(y)) }))

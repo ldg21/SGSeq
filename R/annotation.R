@@ -109,38 +109,139 @@ annotateFeatures <- function(query, subject)
     
 }
 
+annotateSegments <- function(ids, features)
+{
+
+    ## ids is a character vector with comma-separatated lists of
+    ## feature IDs, or txNames in the format {tx1;...;txn}
+  
+    out <- vector("list", length(ids))
+
+    segment_ids <- strsplit(ids, ",")
+    segment_n <- elementLengths(segment_ids)
+
+    ids <- unlist(segment_ids)
+    ids_segment <- togroup(segment_ids)
+    ids_ann <- vector("list", length(ids))
+    ids_ann <- as(ids_ann, "CompressedCharacterList")
+    
+    i <- grep("^\\d+$", ids)
+
+    if (length(i) > 0) {
+
+        ids_ann[i] <- txName(features)[match(ids[i], featureID(features))]
+
+    }
+
+    i <- grep("^\\{\\S*\\}$", ids)
+
+    if (length(i) > 0) {
+
+        tmp <- ids[i]
+        tmp <- gsub("\\{|\\}", "", tmp)
+        tmp <- strsplit(tmp, ";", fixed = TRUE)
+        tmp <- as(tmp, "CompressedCharacterList")
+        ids_ann[i] <- tmp
+
+    }
+
+    ann <- unlist(ids_ann)
+    ann_id <- togroup(ids_ann)
+    ann_segment <- ids_segment[ann_id]
+
+    if (length(ann) == 0) {
+
+        return(out)
+
+    }
+    
+    segment_ann_n <- table(paste0(ann_segment, ":", ann))
+    x_segment <- sub(":\\S+$", "", names(segment_ann_n))
+    x_ann <- sub("^\\S+:", "", names(segment_ann_n))
+
+    i <- which(segment_ann_n == segment_n[as.integer(x_segment)])
+
+    if (length(i) > 0) {
+
+        x_segment <- x_segment[i]
+        x_ann <- x_ann[i]
+        segment_ann <- split(x_ann, x_segment)
+        out[as.integer(names(segment_ann))] <- segment_ann
+
+    }
+        
+    return(out)
+
+}
+
 annotatePaths <- function(paths)
 {
 
     features <- unlist(paths)
-        
-    paths_expanded <- expandPath(featureID(paths), TRUE)
-
-    list_ids <- strsplit(paths_expanded$x, ",", fixed = TRUE)
-    ids <- unlist(list_ids)
-    ids_path <- togroup(list_ids)
-
-    j <- match(ids, featureID(features))
-    list_txName <- txName(features)[j]
-    txName <- unlist(list_txName)
-    txName_path <- ids_path[togroup(list_txName)]
-
-    paths_n <- elementLengths(list_ids)
-    tab_n <- table(paste0(txName_path, ":", txName))
-    tab_split <- CharacterList(strsplit(names(tab_n), ":", fixed = TRUE))
-    tab_path <- as.integer(pfirst(tab_split))
-    tab_txName <- plast(tab_split)
-
-    i <- which(tab_n == paths_n[tab_path])
     
-    paths_txName <- tapply(tab_txName[i],
-        factor(paths_expanded$f)[tab_path[i]], unique, simplify = FALSE)
-    txName(paths) <- CharacterList(paths_txName)
+    x <- featureID(paths)
+    i <- grep("(", x, fixed = TRUE)
+    
+    while (length(i) > 0) {
 
-    i <- match(geneID(paths), geneID(features))
-    geneName(paths) <- geneName(features)[i]
+        ## find inner event
+        m <- regexpr("\\([^\\(\\)]+\\)", x[i])
+        l <- attr(m, "match.length")
         
+        ## split at event
+        u <- substr(x[i], 1, m - 1)
+        b <- substr(x[i], m + 1, m + l - 2)
+        v <- substr(x[i], m + l, nchar(x)[i])
+        
+        ## annotate event
+        list_ids <- strsplit(b, "|", fixed = TRUE)
+        ids <- unlist(list_ids)
+        ids_path <- i[togroup(list_ids)]
+        ids_ann <- annotateSegments(ids, features)
+        ann <- unlist(ids_ann)
+        ann_id <- togroup(ids_ann)
+        ann_path <- ids_path[ann_id]
+
+        path_ann <- vector("list", length(i))
+
+        if (!is.null(ann)) {
+          
+            tmp <- tapply(ann, ann_path, unique, simplify = FALSE)
+            path_ann[match(names(tmp), i)] <- tmp
+
+        }
+
+        path_ann <- paste0("{", unstrsplit(path_ann, ";"), "}")
+
+        x[i] <- paste0(u, path_ann, v)
+        i <- grep("(", x, fixed = TRUE)
+
+    }
+
+    out <- annotateSegments(x, features)
+    out <- as(out, "CompressedCharacterList")
+    txName(paths) <- out
+    geneName(paths) <- geneName(features)[match(seq_along(paths),
+        togroup(paths))]
+
     return(paths)
+    
+}
+
+plintersect <- function(x, y)
+{
+  
+    n <- length(x)
+    ix <- paste0(togroup(x), ":", unlist(x))
+    iy <- paste0(togroup(y), ":", unlist(y))
+    ix <- ix[ix %in% iy]
+    i <- sub(":\\S+$", "", ix)
+    x <- sub("^\\S+:", "", ix)
+    z <- split(x, i)
+    z <- z[match(seq_len(n), names(z))]
+    names(z) <- NULL
+
+    return(z)
 
 }
 

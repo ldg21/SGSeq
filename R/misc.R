@@ -444,3 +444,24 @@ plast <- function(x, use_names = FALSE)
     unlist(ptail(x, 1), use.names = use_names)
 
 }
+
+rbindListOfDFs <- function(x, cores)
+{
+
+    k <- names(x[[1]])
+
+    df <- vector("list", length(k))
+
+    for (j in seq_along(k)) {
+
+        df[[j]] <- do.call(c, mclapply(x, "[[", j, mc.cores = cores))
+
+    }
+
+    names(df) <- k
+    
+    df <- DataFrame(df, check.names = FALSE)
+
+    return(df)
+  
+}

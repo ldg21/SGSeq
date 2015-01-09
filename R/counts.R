@@ -394,95 +394,7 @@ getTxVariantCounts <- function(object, variants)
     
 }
 
-representativeFeatures <- function(variant_info, features,
-    node = c("start", "end"))
-{
-
-    node <- match.arg(node)
-
-    if (node == "start") {
-
-        variant_node <- variant_info$from
-        variant_informative <- variant_info$closed3p
-        pattern_incl <- "^[^R]"
-        pattern_single_feature <- "^[^\\(]"
-        pattern_multiple_features <- "^\\("
-        pattern_remainder <- ",\\S+$"
-
-    }
-    if (node == "end") {
-
-        variant_node <- variant_info$to
-        variant_informative <- variant_info$closed5p
-        pattern_incl <- "^[^L]"
-        pattern_single_feature <- "[^\\)]$"
-        pattern_multiple_features <- "\\)$"
-        pattern_remainder <- "^\\S+,"
-
-    }
-
-    variant_all_id <- variant_info$featureID
-    variant_rep_id <- vector("list", nrow(variant_info))
-
-    ## for each variant identify first or last feature(s) in the variant
-    
-    i <- grep(pattern_single_feature, variant_all_id)
-    i <- i[grep(pattern_incl, variant_node[i])]
-    
-    if (length(i) > 0) {
-    
-        variant_rep_id[i] <- as.list(as.integer(
-            sub(pattern_remainder, "", variant_all_id[i])))
-
-    }
-
-    i <- grep(pattern_multiple_features, variant_all_id)
-    i <- i[grep(pattern_incl, variant_node[i])]
-
-    if (length(i) > 0) {
-    
-        variant_rep_id[i] <- lapply(expandPath(variant_all_id[i]),
-            function(p) { unique(as.integer(sub(pattern_remainder, "", p))) })
-
-    }
-
-    ## replace exons with splice sites
-
-    index <- which(elementLengths(variant_rep_id) > 0)
-    tmp_id <- variant_rep_id[index]
-    tmp_node <- variant_node[index]
-    
-    tmp_id_unlisted <- unlist(tmp_id)
-    tmp_i_unlisted <- match(tmp_id_unlisted, featureID(features))
-
-    i_E <- which(type(features)[tmp_i_unlisted] == "E")
-
-    if (length(i_E) > 0) {
-    
-        tmp_i_unlisted[i_E] <- match(tmp_node[togroup(tmp_id)][i_E],
-            feature2name(features))
-
-    }
-    
-    tmp_id_unlisted <- featureID(features)[tmp_i_unlisted]
-    tmp_id <- relist(tmp_id_unlisted, tmp_id)
-
-    variant_rep_id[index] <- tmp_id
-    variant_rep_id <- IntegerList(variant_rep_id)
-    
-    ## exclude variants due to open events or ambiguous features
-    event_dup <- tapply(unlist(variant_rep_id),
-        variant_info$eventID[togroup(variant_rep_id)],
-        function(x) { any(duplicated(x)) })
-    i <- which(!variant_informative |
-        variant_info$eventID %in% names(which(event_dup)))
-    variant_rep_id[i] <- vector("list", length(i))    
-
-    return(variant_rep_id)
-    
-}
-
-collapseRows <- function(x, list_i, fun = sum)
+collapseRows <- function(x, list_i, fun = sum, cores = 1)
 {
 
     y <- matrix(NA_integer_, nrow = length(list_i), ncol = ncol(x))
@@ -502,8 +414,9 @@ collapseRows <- function(x, list_i, fun = sum)
 
         i <- unlist(list_i[j])
         f <- togroup(list_i[j])
-        y[j, ] <- apply(x[i, , drop = FALSE], 2,
-            function(z) { tapply(z, f, fun) })
+        y[j, ] <- do.call(cbind, mclapply(seq_len(ncol(x)),
+            function(j) { tapply(x[i, j, drop = FALSE], f, fun) },
+            mc.cores = cores))
 
     }
 

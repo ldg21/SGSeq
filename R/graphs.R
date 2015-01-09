@@ -367,7 +367,7 @@ findSegmentsPerGene <- function(g, geneID)
 ##' txv <- findTxVariants(sgf)
 ##' @author Leonard Goldstein
 
-findTxVariants <- function(features, maxnvariant = NA, annotate_events = TRUE,
+findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
     cores = 1)
 {
 
@@ -419,8 +419,7 @@ findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     
     list_variant_info <- mclapply(geneIDs, findTxVariantsPerGene,
         g = g, maxnvariant = maxnvariant, mc.cores = cores)
-    variant_info <- DataFrame(do.call(rbind, list_variant_info))
-    rownames(variant_info) <- NULL
+    variant_info <- rbindListOfDFs(list_variant_info, cores)
 
     if (!is.na(maxnvariant) && nrow(variant_info) == 0) {
 
@@ -431,10 +430,10 @@ findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     variant_info$eventID <- eventIDs(variant_info)
     variant_info <- variant_info[order(variant_info$eventID), ]
     variant_info$variantID <- seq_len(nrow(variant_info))
-    variant_info$featureID5p <- representativeFeatures(
-        variant_info, features, "start")
-    variant_info$featureID3p <- representativeFeatures(
-        variant_info, features, "end")
+    variant_info$featureID5p <- getRepresentativeFeatureIDs(
+        variant_info, features, TRUE)
+    variant_info$featureID3p <- getRepresentativeFeatureIDs(
+        variant_info, features, FALSE)
     
     variant_featureID <- variant_info$featureID
     variant_featureID <- gsub("(", "", variant_featureID, fixed = TRUE)
@@ -479,7 +478,60 @@ eventIDs <- function(variant_info)
     
 }
 
-findTxVariantsPerGene <- function(g, geneID, maxnvariant = NA)
+getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
+{
+
+    if (start) {
+
+        variant_node <- variant_info$from
+        variant_informative <- variant_info$closed3p
+
+    } else {
+
+        variant_node <- variant_info$to
+        variant_informative <- variant_info$closed5p
+
+    }
+
+    variant_rep_id <- getTerminalFeatureIDs(variant_info$featureID, start)
+
+    ## replace exons with splice sites
+
+    index <- which(elementLengths(variant_rep_id) > 0)
+    tmp_id <- variant_rep_id[index]
+    tmp_node <- variant_node[index]
+    
+    tmp_id_unlisted <- unlist(tmp_id)
+    tmp_i_unlisted <- match(tmp_id_unlisted, featureID(features))
+
+    i_E <- which(type(features)[tmp_i_unlisted] == "E")
+
+    if (length(i_E) > 0) {
+    
+        tmp_i_unlisted[i_E] <- match(tmp_node[togroup(tmp_id)][i_E],
+            feature2name(features))
+
+    }
+    
+    tmp_id_unlisted <- featureID(features)[tmp_i_unlisted]
+    tmp_id <- relist(tmp_id_unlisted, tmp_id)
+
+    variant_rep_id[index] <- tmp_id
+    variant_rep_id <- IntegerList(variant_rep_id)
+    
+    ## exclude variants due to open events or ambiguous features
+    event_dup <- tapply(unlist(variant_rep_id),
+        variant_info$eventID[togroup(variant_rep_id)],
+        function(x) { any(duplicated(x)) })
+    i <- which(!variant_informative |
+        variant_info$eventID %in% names(which(event_dup)))
+    variant_rep_id[i] <- vector("list", length(i))    
+
+    return(variant_rep_id)
+    
+}
+
+findTxVariantsPerGene <- function(g, geneID, maxnvariant)
 {
 
     ## Extract subgraph corresponding to geneID
@@ -504,8 +556,7 @@ findTxVariantsPerGene <- function(g, geneID, maxnvariant = NA)
     ## Initialize data frame of recursively defined paths
     ref <- hd[, c("from", "to", "type", "featureID", "segmentID")]
     ref$segmentID <- as.character(ref$segmentID)
-    ref$order <- 1
-
+    
     for (k in seq_len(nrow(b))) {
 
         from <- hv$name[b$source[k]]
@@ -519,9 +570,8 @@ findTxVariantsPerGene <- function(g, geneID, maxnvariant = NA)
         paths_type <- unstrsplit(split(ref$type[i], f), "")
         paths_featureID <- unstrsplit(split(ref$featureID[i], f), ",")
         paths_segmentID <- unstrsplit(split(ref$segmentID[i], f), ",")
-        paths_order <- tapply(ref$order[i], f, prod)
 
-        if (!is.na(maxnvariant) && sum(paths_order) > maxnvariant) {
+        if (!is.na(maxnvariant) && length(paths_index_ref) > maxnvariant) {
 
             warning(paste("number of variants exceeds maxnvariant in gene",
                 geneID), call. = FALSE, immediate. = TRUE)
@@ -534,7 +584,6 @@ findTxVariantsPerGene <- function(g, geneID, maxnvariant = NA)
         paths_type <- paths_type[o]
         paths_featureID <- paths_featureID[o]
         paths_segmentID <- paths_segmentID[o]
-        paths_order <- paths_order[o]
 
         ## nodes within event (including source and target nodes)
         bv <- intersect(subcomponent(h, b$source[k], "out"),
@@ -566,7 +615,6 @@ findTxVariantsPerGene <- function(g, geneID, maxnvariant = NA)
                         collapse = "|"), ")"),
                     segmentID = paste0("(", paste(paths_segmentID,
                         collapse = "|"), ")"),
-                    order = sum(paths_order),
                     stringsAsFactors = FALSE))
 
                 ref <- ref[-unique(unlist(paths_index_ref)), ]
@@ -803,25 +851,39 @@ findAllPaths <- function(from, to, path, ref, nodes)
 annotateTxVariants <- function(variants)
 {
 
+    ## asymmetric events
+  
+    list_ae_event_1 <- c("SE:I", "S2E:I", "RI:E", "A5SS:P", "A3SS:P")
+    list_ae_event_2 <- c("SE:S", "S2E:S", "RI:R", "A5SS:D", "A3SS:D")
+
+    list_ae_type_1 <- c("^JE+J$", "^JE+JE+J$", "^J$", "^E+J$", "^JE+$")
+    list_ae_type_2 <- c("^J$", "^J$", "^E+$", "^J$", "^J$")
+
+    ## symmetric events
+    
+    list_se_event <- c("AFE", "ALE", "MXE")
+    list_se_type <- c("^E+J$", "^JE+$", "^JE+J$")
+
+    ## maximum number of Js in type patterns
+
+    t <- c(list_ae_type_1, list_ae_type_2, list_se_type)
+    max_n_J <- max(elementLengths(gregexpr("J", t)))
+    
+    ## preliminaries
+    
     path_from_to <- paste(from(variants), to(variants))
     path_event <- CharacterList(vector("list", length(variants)))
-    path_type <- expandPath(type(variants))
+    path_type <- expandType(type(variants), max_n_J)
     
     ## asymmetric events
 
-    list_event_1 <- c("SE:I", "S2E:I", "RI:E", "A5SS:P", "A3SS:P")
-    list_event_2 <- c("SE:S", "S2E:S", "RI:R", "A5SS:D", "A3SS:D")
+    for (k in seq_along(list_ae_type_1)) {
 
-    list_type_1 <- c("^JE+J$", "^JE+JE+J$", "^J$", "^E+J$", "^JE+$")
-    list_type_2 <- c("^J$", "^J$", "^E+$", "^J$", "^J$")
+        event_1 <- list_ae_event_1[k]
+        event_2 <- list_ae_event_2[k]
 
-    for (k in seq_along(list_type_1)) {
-
-        event_1 <- list_event_1[k]
-        event_2 <- list_event_2[k]
-
-        type_1 <- list_type_1[k]
-        type_2 <- list_type_2[k]
+        type_1 <- list_ae_type_1[k]
+        type_2 <- list_ae_type_2[k]
 
         i_1 <- unique(togroup(path_type)[grep(type_1, unlist(path_type))])
         i_2 <- unique(togroup(path_type)[grep(type_2, unlist(path_type))])
@@ -836,13 +898,10 @@ annotateTxVariants <- function(variants)
 
     ## symmetric events
     
-    list_event <- c("AFE", "ALE", "MXE")
-    list_type <- c("^E+J$", "^JE+$", "^JE+J$")
+    for (k in seq_along(list_se_type)) {
 
-    for (k in seq_along(list_type)) {
-
-        event <- list_event[k]
-        type <- list_type[k]
+        event <- list_se_event[k]
+        type <- list_se_type[k]
 
         i <- unique(togroup(path_type)[grep(type, unlist(path_type))])
 
@@ -876,25 +935,32 @@ annotateTxVariants <- function(variants)
 
 }
 
-expandPath <- function(x, return_full = FALSE)
+expandString <- function(x, return_full = FALSE)
 {
 
-    x_f <- seq_along(x)
-    x_d <- as(x, "CompressedCharacterList")
-    
-    while (length(grep("(", x, fixed = TRUE)) > 0) {
+    if (length(grep("(\\[|\\]|:)", x)) > 0) {
 
-        z <- maskInnerEvents(x)
+        stop("x contains characters '[', ']' or ':'")
+      
+    }
+  
+    x_f <- seq_along(x)
+    x_d <- as(x, "CompressedCharacterList")    
+
+    i <- grep("(", x, fixed = TRUE)
+    
+    while (length(i) > 0) {
+
+        z <- maskInnerEvents(x[i])
       
         ## find event
-        m <- regexpr("\\([^\\(\\)]+\\)", z)
+        m <- regexpr("\\(\\S+\\)", z)
         l <- attr(m, "match.length")
-        i <- which(m != -1)
         
         ## split at event
-        u <- substr(z[i], 1, m[i] - 1)
-        b <- substr(z[i], m[i] + 1, m[i] + l[i] - 2)
-        v <- substr(z[i], m[i] + l[i], nchar(z)[i])
+        u <- substr(z, 1, m - 1)
+        b <- substr(z, m + 1, m + l - 2)
+        v <- substr(z, m + l, nchar(z))
 
         ## expand event
         b <- strsplit(b, "|", fixed = TRUE)
@@ -910,6 +976,8 @@ expandPath <- function(x, return_full = FALSE)
         x_f <- c(x_f[-i], y_f)
         x_d <- c(x_d[-i], y_d)
 
+        i <- grep("(", x, fixed = TRUE)
+        
     }
 
     if (return_full) {
@@ -922,6 +990,148 @@ expandPath <- function(x, return_full = FALSE)
         out <- split(x, x_f)
 
     }
+    
+    return(out)
+    
+}
+
+expandType <- function(x, max_n_J = NA)
+{
+
+    x_f <- seq_along(x)    
+
+    i <- grep("(", x, fixed = TRUE)
+    
+    while (length(i) > 0) {
+
+        z <- maskInnerEvents(x[i])
+      
+        ## find event
+        m <- regexpr("\\(\\S+\\)", z)
+        l <- attr(m, "match.length")
+        
+        ## split at event
+        u <- substr(z, 1, m - 1)
+        b <- substr(z, m + 1, m + l - 2)
+        v <- substr(z, m + l, nchar(z))
+
+        if (!is.na(max_n_J)) {
+
+            u2 <- sub("\\[\\S+$", "", u)
+            v2 <- sub("^\\S+\\]", "", v)
+            min_n_J <- elementLengths(gregexpr("J", paste0(u2, v2)))
+            excl <- which(min_n_J > max_n_J)
+            
+            if (length(excl) > 0) {
+
+                x[i][excl] <- ""
+                i <- i[-excl]
+                u <- u[-excl]
+                b <- b[-excl]
+                v <- v[-excl]
+                
+            }
+            
+        }
+
+        if (length(i) > 0) {
+          
+            ## expand event
+            b <- strsplit(b, "|", fixed = TRUE)
+            n <- elementLengths(b)
+            y <- paste0(rep(u, n), unlist(b), rep(v, n))
+            y <- unmaskEvents(y)
+            y_f <- x_f[i][togroup(b)]
+            
+            ## update x, x_f
+            x <- c(x[-i], y)
+            x_f <- c(x_f[-i], y_f)
+
+        }
+
+        i <- grep("(", x, fixed = TRUE)
+        
+    }
+
+    out <- split(x, x_f)
+    
+    return(out)
+    
+}
+
+getTerminalFeatureIDs <- function(x, start = TRUE)
+{
+
+    x_f <- seq_along(x)
+
+    i <- grep("(", x, fixed = TRUE)
+    
+    while (length(i) > 0) {
+        
+        z <- maskInnerEvents(x[i])
+      
+        ## find event
+        m <- regexpr("\\(\\S+\\)", z)
+        l <- attr(m, "match.length")
+      
+        ## split at event
+        u <- substr(z, 1, m - 1)
+        b <- substr(z, m + 1, m + l - 2)
+        v <- substr(z, m + l, nchar(z))
+
+        if (start) {
+
+            terminal <- u
+
+        } else {
+
+            terminal <- v
+
+        }
+
+        done <- which(nchar(terminal) > 0)
+
+        if (length(done) > 0) {
+
+            x[i][done] <- unmaskEvents(terminal[done])
+            i <- i[-done]
+            u <- u[-done]
+            b <- b[-done]
+            v <- v[-done]
+
+        }
+
+        if (length(i) > 0) {
+        
+            ## expand event
+            b <- strsplit(b, "|", fixed = TRUE)
+            n <- elementLengths(b)
+            y <- paste0(rep(u, n), unlist(b), rep(v, n))
+            y <- unmaskEvents(y)
+            y_f <- x_f[i][togroup(b)]
+            
+            ## update x, x_f
+            x <- c(x[-i], y)
+            x_f <- c(x_f[-i], y_f)
+
+        }
+
+        i <- grep("(", x, fixed = TRUE)
+        
+    }
+
+    if (start) {
+
+        x <- sub(",\\S*$", "", x)
+
+    } else {
+
+        x <- sub("^\\S*,", "", x)
+
+    }
+
+    x <- suppressWarnings(as.integer(x))
+    out <- as(tapply(x, x_f, setdiff, NA, simplify = FALSE), "list")
     
     return(out)
     
@@ -984,10 +1194,10 @@ unmaskEvents <- function(x)
   
 }
 
-expandSE <- function(SE, eventID = NULL)
+expandTxVariantCounts <- function(object, eventID = NULL, cores = 1)
 {
     
-    variants <- asGRangesList(rowData(SE))
+    variants <- rowData(object)
     features <- unlist(variants)
 
     if (is.null(eventID)) {
@@ -996,37 +1206,37 @@ expandSE <- function(SE, eventID = NULL)
 
     } else {
 
-        variants_selected <- variants[mcols(variants)$eventID %in% eventID]
+        variants_selected <- variants[eventID(variants) %in% eventID]
 
     }
     
-    expanded <- expandPath(mcols(variants_selected)$featureID, TRUE)
+    expanded <- expandString(featureID(variants_selected), TRUE)
     expandedIDs <- strsplit(expanded$x, ",", fixed = TRUE)    
     expanded_i <- relist(match(unlist(expandedIDs),
         featureID(features)), expandedIDs)
     
     paths_expanded <- variants_selected[expanded$f]
-    mcols(paths_expanded)$type <- unlist(
-        expandPath(mcols(variants_selected)$type))
-    mcols(paths_expanded)$featureID <- expanded$x
+    type(paths_expanded) <- unlist(expandString(type(variants_selected)))
+    featureID(paths_expanded) <- expanded$x
 
     f <- togroup(expanded$d)
-    i <- match(unlist(expanded$d), mcols(variants)$featureID)
+    i <- match(unlist(expanded$d), featureID(variants))
 
-    X <- variantFreq(SE)[i, , drop = FALSE]
-    X <- apply(X, 2, function(x) { tapply(x, f, prod) })
+    X <- variantFreq(object)[i, , drop = FALSE]
+    X <- do.call(cbind, mclapply(seq_len(ncol(X)),
+        function(j) { tapply(X[, j], f, prod) }, mc.cores = cores))
 
     rd <- split(features[unlist(expanded_i)], togroup(expanded_i))
     mcols(rd) <- mcols(paths_expanded)
     rd <- TxVariants(rd)
     
-    SE_expanded <- SummarizedExperiment(assays = list("variantFreq" = X),
-        rowData = rd, colData = colData(SE))
+    object_expanded <- SummarizedExperiment(assays = list("variantFreq" = X),
+        rowData = rd, colData = colData(object))
 
-    colnames(SE_expanded) <- colnames(SE)
-    rownames(SE_expanded) <- NULL
+    colnames(object_expanded) <- colnames(object)
+    rownames(object_expanded) <- NULL
 
-    return(SE_expanded)
+    return(object_expanded)
     
 }
 
