@@ -727,7 +727,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     score_nbin = 400, main = NULL, cexMain = 1, tx_view = FALSE,
     tx_dist = 0.1, tx_cex = 1, assay = "FPKM",
     include = c("junctions", "exons", "both"),
-    transform = function(x) log2(x + 1), Rowv = NULL,
+    transform = function(x) { log2(x + 1) }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
@@ -819,11 +819,11 @@ plotVariants <- function(x, eventID = NULL,
     cexLab = 1, cexExon = 1, score = NULL, score_color = "darkblue",
     score_ylim = NULL, score_ypos = c(0.2, 0.1), score_nbin = 400,
     main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.1, tx_cex = 1,
-    transform = function(x) asin(sqrt(x)), Rowv = NULL,
+    transform = function(x) { x }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
-    zlim = NULL, heightTopPanel = 0.3, expand_variants = FALSE)
+    zlim = c(0, 1), heightTopPanel = 0.3, expand_variants = FALSE)
 {
 
     toscale <- match.arg(toscale)
@@ -928,7 +928,11 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
 
     n_RSC <- length(RowSideColors)
     
-    mat <- rbind(rep(1, 3), rep(0, 3), c(0, 2, 0), rep(0, 3))
+    mat <- rbind(
+        c(1, 1, 1),
+        c(0, 0, 0),
+        c(0, 2, 0),
+        c(0, 0, 0))
     
     for (i in seq_len(n_RSC)) {
         
@@ -937,11 +941,13 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
         
     }
 
+    heightBottomPanel <- 1 - heightTopPanel
+    
     mar_wid <- c(0.05, margin)
-    mar_hei <- c(0.05, 0.05) * (1 - heightTopPanel)
+    mar_hei <- c(0.05, 0.15) * heightBottomPanel
     
     img_wid <- 1 - sum(mar_wid) - 0.025 * n_RSC * 2
-    img_hei <- 1 - heightTopPanel - sum(mar_hei)
+    img_hei <- heightBottomPanel - sum(mar_hei)
     
     wid <- c(mar_wid[1], rep(0.025, n_RSC * 2), img_wid, mar_wid[2])
     hei <- c(heightTopPanel, mar_hei[1], img_hei, mar_hei[2])
@@ -950,7 +956,7 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
 
         padding <- getPadding(n_samples, n_features, wid, hei)
         
-        i_wid_mar <- length(wid) - c(2, 0)
+        i_wid_mar <- c(1, length(wid))
         i_wid_img <- length(wid) - 1
 
         wid[i_wid_mar] <- wid[i_wid_mar] + 0.5 * padding[1]
@@ -964,6 +970,19 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
         
     }
 
+    ## add color key
+
+    k <- ncol(mat)
+    r <- nrow(mat)    
+    mat <- cbind(mat[, seq_len(k - 2)], mat[, k - 1], mat[, k - 1], mat[, k])
+    wid <- c(wid[seq_len(k - 2)], wid[k - 1] * 2/3, wid[k - 1] * 1/3, wid[k])
+    mat <- rbind(mat, 0, 0)
+    mat[nrow(mat) - 1, ncol(mat) - 1] <- max(mat) + 1
+    hei <- c(hei[seq_len(r - 1)], hei[r] - 0.1 * heightBottomPanel, 
+        rep(0.05, 2) * heightBottomPanel)
+    
+    ## splice graph margins and aspect ratio
+    
     ds <- dev.size()
     dev_wid <- ds[1]
     dev_hei <- ds[2]
@@ -1082,6 +1101,10 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
         
     }
 
+    image(matrix(seq_along(col), ncol = 1), col = col, axes = FALSE)
+    mtext(side = 1, at = c(0, 1), text = format(zlim, digits = 2),
+        cex = 0.8, line = 0.5, las = 1)
+    
 }
 
 subsetFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
