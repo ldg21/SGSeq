@@ -143,7 +143,14 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
     
     features <- do.call(c, setNames(list_features, NULL))
     features <- sort(features)
+    
+    slots <- c("type", "txName", "geneName")
+    mc <- names(mcols(features))[!names(mcols(features)) %in% slots]
+    if (length(mc) > 0) { em <- mcols(features)[mc]
+    } else { em <- NULL }
+    
     features <- TxFeatures(features)
+    mcols(features) <- em
     
     return(features)
     

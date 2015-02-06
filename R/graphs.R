@@ -599,32 +599,23 @@ findTxVariantsPerGene <- function(g, geneID, maxnvariant)
         bn_out <- unique(unlist(neighborhood(h, 1, bv, "out")))
         bn_in <- unique(unlist(neighborhood(h, 1, bv, "in")))
 
-        if (k < nrow(b)) {
+        closed3p <- length(intersect(bn_out, ov)) == 0
+        closed5p <- length(intersect(bn_in, ov)) == 0
+        
+        if (k < nrow(b) && closed3p && closed5p) {
+          
+            ## Include event in data frame of recursively defined paths
+            ref <- rbind(ref, data.frame(
+                from = from,
+                to = to,
+                type = paste0("(", paste(paths_type, collapse = "|"), ")"),
+                featureID = paste0("(", paste(paths_featureID,
+                    collapse = "|"), ")"),
+                segmentID = paste0("(", paste(paths_segmentID,
+                    collapse = "|"), ")"),
+                stringsAsFactors = FALSE))
 
-            closed3p <- length(intersect(bn_out, ov)) == 0
-            closed5p <- length(intersect(bn_in, ov)) == 0
-
-            if (closed3p && closed5p) {
-
-                ## Include event in data frame of recursively defined paths
-                ref <- rbind(ref, data.frame(
-                    from = from,
-                    to = to,
-                    type = paste0("(", paste(paths_type, collapse = "|"), ")"),
-                    featureID = paste0("(", paste(paths_featureID,
-                        collapse = "|"), ")"),
-                    segmentID = paste0("(", paste(paths_segmentID,
-                        collapse = "|"), ")"),
-                    stringsAsFactors = FALSE))
-
-                ref <- ref[-unique(unlist(paths_index_ref)), ]
-
-            }
-            
-        } else {
-
-            closed3p <- TRUE
-            closed5p <- TRUE
+            ref <- ref[-unique(unlist(paths_index_ref)), ]
 
         }
         
