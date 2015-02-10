@@ -279,7 +279,7 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
         geneName <- CharacterList()
 
     } else {
-    
+        
         if (is.character(type))
             type <- factor(type, levels = typeLevels("TxFeatures"))
         
@@ -290,9 +290,11 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
             geneName <- CharacterList(vector("list", length(x)))
 
     }
+
+    slots <- c("type", "txName", "geneName")
+    mcols(x) <- mcols(x)[!names(mcols(x)) %in% slots]
         
-    new("TxFeatures", granges(x), type = type, txName = txName,
-        geneName = geneName)
+    new("TxFeatures", x, type = type, txName = txName, geneName = geneName)
 
 }
 

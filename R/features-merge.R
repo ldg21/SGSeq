@@ -159,13 +159,7 @@ mergeSGFeatures <- function(...)
 
     }
 
-    features <- granges(x)
-    mcols(features)$type <- as.character(type(x))
-
-    junctions <- features[mcols(features)$type == "J"]
-    exons <- features[mcols(features)$type == "E"]
-
-    features <- processFeatures(exons, junctions)
+    features <- processFeatures(features)
     features <- addFeatureID(features)
     features <- addGeneID(features)
     features <- SGFeatures(features)

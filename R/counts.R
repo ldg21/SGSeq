@@ -342,7 +342,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 ##' txvc <- getTxVariantCounts(sgfc, txv)
 ##' @author Leonard Goldstein
 
-getTxVariantCounts <- function(object, variants)
+getTxVariantCounts <- function(object, variants, cores = 1)
 {
     
     n_variants <- length(variants)
@@ -367,11 +367,11 @@ getTxVariantCounts <- function(object, variants)
 
     x <- assay(object, "counts")
 
-    variant_x_start <- collapseRows(x, variant_i_start)
-    variant_x_end <- collapseRows(x, variant_i_end)
+    variant_x_start <- collapseRows(x, variant_i_start, cores = cores)
+    variant_x_end <- collapseRows(x, variant_i_end, cores = cores)
     
-    event_x_start <- collapseRows(x, event_i_start)
-    event_x_end <- collapseRows(x, event_i_end)
+    event_x_start <- collapseRows(x, event_i_start, cores = cores)
+    event_x_end <- collapseRows(x, event_i_end, cores = cores)
     
     i <- match(eventID(variants), names(event_i_start))
     variant_x_start_total <- event_x_start[i, , drop = FALSE]

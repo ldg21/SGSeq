@@ -54,8 +54,16 @@ convertToTxFeatures <- function(x)
     
     ## reduce ranges to ensure there are no adjacent exons
 
-    tx <- reduce(tx)
+    tx_reduced <- reduce(tx)
 
+    if (!identical(tx, tx_reduced)) {
+
+      warning("Merged adjacent or overlapping exons")
+      
+    }
+
+    tx <- tx_reduced
+    
     ## remove tx with duplicate names
     
     dup <- names(tx)[duplicated(names(tx))]
@@ -343,11 +351,11 @@ convertToSGFeatures <- function(x, coerce = FALSE)
 
     }
 
-    features <- granges(x)
-    mcols(features)$type <- as.character(type(x))
-
     if (coerce) {
 
+        features <- granges(x)
+        mcols(features)$type <- as.character(type(x))
+      
         splice5p <- mcols(features)$type %in% c("I", "L")
         splice3p <- mcols(features)$type %in% c("I", "F")
 
@@ -360,15 +368,12 @@ convertToSGFeatures <- function(x, coerce = FALSE)
 
     } else {
 
-        junctions <- features[mcols(features)$type == "J"]
-        exons <- features[mcols(features)$type %in% c("I", "F", "L", "U")]
-        features <- processFeatures(exons, junctions)
+        features <- processFeatures(features)
 
     }
 
     features <- addFeatureID(features)
     features <- addGeneID(features)
-    
     features <- SGFeatures(features)
     features <- annotate(features, x)
     
@@ -376,16 +381,39 @@ convertToSGFeatures <- function(x, coerce = FALSE)
     
 }
 
-processFeatures <- function(exons, junctions)
+processFeatures <- function(features)
 {
 
-    D <- unique(flank(junctions, -1, TRUE))
-    mcols(D)$type <- "D"
-    A <- unique(flank(junctions, -1, FALSE))
-    mcols(A)$type <- "A"
+    junctions <- granges(features)[type(features) == "J"]
+    junctions_D <- flank(junctions, -1, TRUE)
+    junctions_A <- flank(junctions, -1, FALSE)
+    mcols(junctions)$type <- rep("J", length(junctions))
+
+    if (is(features, "TxFeatures")) {
+        
+        exons <- features[type(features) %in% c("I", "F", "L", "U")]
+        exons_D <- flank(features[type(features) %in% c("I", "F")], -1, FALSE)
+        exons_A <- flank(features[type(features) %in% c("I", "L")], -1, TRUE)
+        
+    } else if (is(features, "SGFeatures")) {
+
+        exons <- features[type(features) == "E"]
+        exons_D <- flank(features[splice3p(features)], -1, FALSE)
+        exons_A <- flank(features[splice5p(features)], -1, TRUE)
+
+    }
+
+    exons <- granges(exons)
+    exons_D <- granges(exons_D)
+    exons_A <- granges(exons_A)
+    
+    D <- unique(c(junctions_D, exons_D))
+    mcols(D)$type <- rep("D", length(D))
+    A <- unique(c(junctions_A, exons_A))
+    mcols(A)$type <- rep("A", length(A))
     splicesites <- c(D, A)
     other <- c(junctions, splicesites)
-    
+
     ## Disjoin exons into non-overlapping exon bins,
     ## merge adjacent exon bins that do not have a
     ## splice site at the shared boundary
@@ -437,12 +465,12 @@ processFeatures <- function(exons, junctions)
         suppressWarnings(flank(exons, 1, FALSE)), exons)))
     splice3p[setdiff(i_spliced, i_adjacent)] <- TRUE
     
-    mcols(exons)$type <- "E"
+    mcols(exons)$type <- rep("E", length(exons))
     mcols(exons)$splice5p <- splice5p
     mcols(exons)$splice3p <- splice3p
     
-    mcols(other)$splice5p <- NA
-    mcols(other)$splice3p <- NA
+    mcols(other)$splice5p <- rep(NA, length(other))
+    mcols(other)$splice3p <- rep(NA, length(other))
 
     ## combine exons and other features
     
