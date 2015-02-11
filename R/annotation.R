@@ -439,12 +439,30 @@ matchSplice <- function(query, subject, type = c("D", "A")) {
     type <- match.arg(type)
     
     i_q <- which(type(query) == type)    
-    i_s <- which(type(subject) == "J")
-    
-    q2 <- query[i_q]
-    s2 <- flank(subject[i_s], -1, switch(type, "D" = TRUE, "A" = FALSE))
+    q <- query[i_q]
 
-    hits <- findMatches(q2, s2)
+    if (type == "D") {
+
+        i_s_J <- which(type(subject) == "J")
+        s_J <- flank(subject[i_s_J], -1, TRUE)
+
+        i_s_E <- which(type(subject) %in% c("I", "F"))
+        s_E <- flank(subject[i_s_E], -1, FALSE)
+      
+    } else if (type == "A") {
+
+        i_s_J <- which(type(subject) == "J")
+        s_J <- flank(subject[i_s_J], -1, FALSE)
+
+        i_s_E <- which(type(subject) %in% c("I", "L"))
+        s_E <- flank(subject[i_s_E], -1, TRUE)
+
+    }
+
+    i_s <- c(i_s_J, i_s_E)
+    s <- c(s_J, s_E)
+    
+    hits <- findMatches(q, s)
 
     new2("Hits",
         queryHits = i_q[queryHits(hits)],

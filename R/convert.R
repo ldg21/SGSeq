@@ -368,7 +368,7 @@ convertToSGFeatures <- function(x, coerce = FALSE)
 
     } else {
 
-        features <- processFeatures(features)
+        features <- processFeatures(x)
 
     }
 
