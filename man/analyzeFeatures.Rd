@@ -7,7 +7,8 @@
 analyzeFeatures(sample_info, which = NULL, features = NULL,
   predict = is.null(features), alpha = 2, psi = 0.1, beta = 0.2,
   gamma = 0.2, min_n_sample = 1, min_overhang = NA, annotation = NULL,
-  cores_per_sample = 1, BPPARAM = MulticoreParam(1))
+  max_complexity = 20, verbose = FALSE, cores_per_sample = 1,
+  BPPARAM = MulticoreParam(1))
 }
 \arguments{
 \item{sample_info}{Data frame with sample information including
@@ -47,6 +48,16 @@ subsequently merged with other predictions and processing is
 postponed until after the merging step).}
 
 \item{annotation}{\code{TxFeatures} object used for annotation}
+
+\item{max_complexity}{Maximum allowed complexity. If a locus exceeds
+this threshold, it is skipped, resulting in a warning message.
+Here complexity is defined as the maximum number of unique filtered
+splice junctions overlapping a given position in a locus.
+High complexity regions are often due to spurious read alignments
+and can significantly slow down processing.
+To disable this filter, set to \code{NA}.}
+
+\item{verbose}{If \code{TRUE}, print messages indicating progress.}
 
 \item{cores_per_sample}{Number of cores per sample}
 

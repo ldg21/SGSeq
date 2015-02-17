@@ -44,7 +44,8 @@
 analyzeFeatures <- function(sample_info, which = NULL,
     features = NULL, predict = is.null(features), 
     alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
-    min_n_sample = 1, min_overhang = NA, annotation = NULL, 
+    min_n_sample = 1, min_overhang = NA, annotation = NULL,
+    max_complexity = 20, verbose = FALSE,
     cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
     
@@ -82,6 +83,8 @@ analyzeFeatures <- function(sample_info, which = NULL,
             gamma = gamma,
             min_n_sample = min_n_sample,
             min_overhang = min_overhang,
+            max_complexity = max_complexity,
+            verbose = verbose,
             cores_per_sample = cores_per_sample,
             BPPARAM = BPPARAM)
 
@@ -128,6 +131,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
     counts <- getSGFeatureCounts(
         sample_info = sample_info,
         features = features,
+        verbose = verbose,
         cores_per_sample = cores_per_sample,
         BPPARAM = BPPARAM)
     
@@ -222,7 +226,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
 
 predictTxFeatures <- function(sample_info, which = NULL,
     alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
-    min_junction_count = NULL, min_n_sample = 1, min_overhang = NA,
+    min_junction_count = NULL, max_complexity = 20,
+    min_n_sample = 1, min_overhang = NA, verbose = FALSE,
     cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
 
@@ -240,6 +245,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
         read_length = sample_info$read_length,
         frag_length = sample_info$frag_length,
         lib_size = sample_info$lib_size,
+        sample_name = sample_info$sample_name,
         MoreArgs = list(
             which = which,
             alpha = alpha,
@@ -249,6 +255,8 @@ predictTxFeatures <- function(sample_info, which = NULL,
             min_junction_count = min_junction_count,
             include_counts = FALSE,
             retain_coverage = FALSE,
+            max_complexity = max_complexity,
+            verbose = verbose,
             cores = cores_per_sample),
         USE.NAMES = FALSE,
         BPPARAM = BPPARAM
@@ -272,6 +280,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @title Compatible counts for splice graph features from BAM files
 ##' @inheritParams getSGFeatureCountsPerSample
 ##' @inheritParams predictTxFeatures
+##' @inheritParams predictTxFeaturesPerSample
 ##' @param counts_only Logical indicating only counts should be returned
 ##' @return An \code{SGFeatureCounts} object or integer matrix of counts
 ##'   if \code{counts_only = TRUE}
@@ -282,7 +291,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @author Leonard Goldstein
 
 getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
-    cores_per_sample = 1, BPPARAM = MulticoreParam(1))
+    cores_per_sample = 1, verbose = FALSE, BPPARAM = MulticoreParam(1))
 {
 
     if (!validSampleInfo(sample_info))
@@ -299,8 +308,10 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
         getSGFeatureCountsPerSample,
         file_bam = sample_info$file_bam,
         paired_end = sample_info$paired_end,
+        sample_name = sample_info$sample_name,
         MoreArgs = list(
             features = features,
+            verbose = verbose,
             cores = cores_per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
@@ -344,7 +355,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
         maxnvariant = maxnvariant,
         cores = cores)
 
-    counts <- getTxVariantCounts(object, variants)
+    counts <- getTxVariantCounts(object, variants, cores)
 
     return(counts)
 

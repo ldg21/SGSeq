@@ -5,7 +5,8 @@
 \title{\code{IRanges}-based identification of splice junctions and exons}
 \usage{
 predictSpliced(frag_exonic, frag_intron, min_junction_count, psi, beta, gamma,
-  include_counts, retain_coverage, junctions_only)
+  include_counts, retain_coverage, junctions_only, max_complexity, sample_name,
+  seqlevel, strand)
 }
 \arguments{
 \item{frag_exonic}{\code{IRangesList} with exonic regions from alignments}
@@ -36,6 +37,20 @@ using more stringent criteria after the initial prediction.}
 
 \item{junctions_only}{Logical indicating whether predictions
 should be limited to identification of splice junctions only}
+
+\item{max_complexity}{Maximum allowed complexity. If a locus exceeds
+this threshold, it is skipped, resulting in a warning message.
+Here complexity is defined as the maximum number of unique filtered
+splice junctions overlapping a given position in a locus.
+High complexity regions are often due to spurious read alignments
+and can significantly slow down processing.
+To disable this filter, set to \code{NA}.}
+
+\item{sample_name}{Optional sample name, used in messages.}
+
+\item{seqlevel}{\code{seqlevel} to be processed}
+
+\item{strand}{\code{strand} to be processed}
 }
 \value{
 \code{IRanges} with predicted features

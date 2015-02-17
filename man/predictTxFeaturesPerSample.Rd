@@ -8,7 +8,7 @@ predictTxFeaturesPerSample(file_bam, which = NULL, paired_end,
   read_length = NULL, frag_length = NULL, lib_size = NULL,
   min_junction_count = NULL, alpha = NULL, psi, beta, gamma,
   include_counts = TRUE, retain_coverage = FALSE, junctions_only = FALSE,
-  cores = 1)
+  max_complexity = 20, verbose = FALSE, sample_name = NULL, cores = 1)
 }
 \arguments{
 \item{file_bam}{BAM file with genomic RNA-seq read alignments}
@@ -56,6 +56,18 @@ using more stringent criteria after the initial prediction.}
 
 \item{junctions_only}{Logical indicating whether predictions
 should be limited to identification of splice junctions only}
+
+\item{max_complexity}{Maximum allowed complexity. If a locus exceeds
+this threshold, it is skipped, resulting in a warning message.
+Here complexity is defined as the maximum number of unique filtered
+splice junctions overlapping a given position in a locus.
+High complexity regions are often due to spurious read alignments
+and can significantly slow down processing.
+To disable this filter, set to \code{NA}.}
+
+\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+
+\item{sample_name}{Optional sample name, used in messages.}
 
 \item{cores}{Number of cores available for parallel processing}
 }

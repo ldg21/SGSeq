@@ -9,12 +9,11 @@ plotVariants(x, eventID = NULL, toscale = c("exon", "none", "gene"),
   color_labels = FALSE, border = "fill", cexLab = 1, cexExon = 1,
   score = NULL, score_color = "darkblue", score_ylim = NULL,
   score_ypos = c(0.2, 0.1), score_nbin = 400, main = NULL, cexMain = 1,
-  tx_view = FALSE, tx_dist = 0.1, tx_cex = 1, transform = function(x)
-  asin(sqrt(x)), Rowv = NULL, distfun = dist, hclustfun = hclust,
-  margin = 0.2, RowSideColors = NULL, square = FALSE, cexRow = 1,
-  cexCol = 1, labRow = colnames(x), col = colorRampPalette(c("black",
-  "gold"))(256), zlim = NULL, heightTopPanel = 0.3,
-  expand_variants = FALSE)
+  tx_view = FALSE, tx_dist = 0.1, tx_cex = 1, transform = function(x) { 
+     x }, Rowv = NULL, distfun = dist, hclustfun = hclust, margin = 0.2,
+  RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
+  labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
+  zlim = c(0, 1), heightTopPanel = 0.3, expand_variants = FALSE)
 }
 \arguments{
 \item{x}{\code{TxVariantCounts} object}

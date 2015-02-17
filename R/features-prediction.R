@@ -67,6 +67,15 @@
 ##'   using more stringent criteria after the initial prediction.
 ##' @param junctions_only Logical indicating whether predictions
 ##'   should be limited to identification of splice junctions only
+##' @param max_complexity Maximum allowed complexity. If a locus exceeds
+##'   this threshold, it is skipped, resulting in a warning message.
+##'   Here complexity is defined as the maximum number of unique filtered
+##'   splice junctions overlapping a given position in a locus.
+##'   High complexity regions are often due to spurious read alignments
+##'   and can significantly slow down processing. 
+##'   To disable this filter, set to \code{NA}.
+##' @param verbose If \code{TRUE}, print messages indicating progress.
+##' @param sample_name Optional sample name, used in messages.
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
 ##' @keywords internal
@@ -75,8 +84,8 @@
 predictTxFeaturesPerSample <- function(file_bam, which = NULL,
     paired_end, read_length = NULL, frag_length = NULL, lib_size = NULL,
     min_junction_count = NULL, alpha = NULL, psi, beta, gamma,
-    include_counts = TRUE, retain_coverage = FALSE,
-    junctions_only = FALSE, cores = 1)
+    include_counts = TRUE, retain_coverage = FALSE, junctions_only = FALSE,
+    max_complexity = 20, verbose = FALSE, sample_name = NULL, cores = 1)
 {
 
     if (is.null(min_junction_count) && is.null(alpha)) {
@@ -134,6 +143,9 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
         include_counts = include_counts,
         retain_coverage = retain_coverage,
         junctions_only = junctions_only,
+        max_complexity = max_complexity,
+        verbose = verbose,
+        sample_name = sample_name,
         mc.preschedule = FALSE,
         mc.cores = cores)
     
@@ -158,9 +170,12 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
 
 predictTxFeaturesRanges <- function(file_bam, paired_end, which,
     min_junction_count, psi, beta, gamma, include_counts, retain_coverage,
-    junctions_only)
+    junctions_only, max_complexity, verbose, sample_name)
 {
 
+    if (is.null(sample_name)) prefix <- ""
+    else prefix <- paste0(sample_name, ": ")
+    
     seqlevel <- as.character(seqnames(which))
     strand <- as.character(strand(which))
     
@@ -168,17 +183,31 @@ predictTxFeaturesRanges <- function(file_bam, paired_end, which,
     
     gap <- readGap(file_bam, paired_end, which)
     gap <- gap[strand(gap) %in% c(strand, "*")]
-    if (length(gap) == 0) { return() }
+    
+    if (length(gap) == 0) {
+
+        if (verbose) message(paste0(prefix, gr2co(which), " complete."))
+        return()
+
+    }
 
     frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
     frag_intron <- ranges(junctions(gap))
     
     ir <- predictSpliced(frag_exonic, frag_intron, min_junction_count,
-        psi, beta, gamma, include_counts, retain_coverage, junctions_only)
-    if (is.null(ir)) { return() }
+        psi, beta, gamma, include_counts, retain_coverage, junctions_only,
+        max_complexity, sample_name, seqlevel, strand)
+
+    if (is.null(ir)) {
+      
+        if (verbose) message(paste0(prefix, gr2co(which), " complete."))
+        return()
+
+    }
         
     gr <- constructGRangesFromRanges(ir, seqlevel, strand, si)
-    
+
+    if (verbose) message(paste0(prefix, gr2co(which), " complete."))    
     return(gr)
     
 }
@@ -188,25 +217,53 @@ predictTxFeaturesRanges <- function(file_bam, paired_end, which,
 ##' @param frag_exonic \code{IRangesList} with exonic regions from alignments
 ##' @param frag_intron \code{IRangesList} with introns implied by spliced
 ##'   alignments
+##' @param seqlevel \code{seqlevel} to be processed
+##' @param strand \code{strand} to be processed
 ##' @return \code{IRanges} with predicted features
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
-    psi, beta, gamma, include_counts, retain_coverage, junctions_only)
+    psi, beta, gamma, include_counts, retain_coverage, junctions_only,
+    max_complexity, sample_name, seqlevel, strand)
 {
-    
+
     junctions <- predictJunctions(frag_exonic, frag_intron, min_junction_count,
         psi, include_counts, retain_coverage)
     if (is.null(junctions)) { return() }
-
-    features <- junctions
 
     if (!junctions_only) {
     
         lower <- max(min_junction_count * beta, 1)
         islands <- slice(coverage(unlist(frag_exonic)), lower,
             rangesOnly = TRUE)
+
+        ## skip problematic regions
+
+        if (!is.na(max_complexity)) {
+          
+            ir <- as(slice(coverage(junctions), max_complexity), "IRanges")
+
+            if (length(ir) > 0) {
+
+                junctions_stripped <- junctions
+                mcols(junctions_stripped) <- NULL
+                loci <- reduce(c(junctions_stripped, islands))
+                excl <- loci[loci %over% ir]
+
+                junctions <- junctions[!junctions %over% excl]
+                islands <- islands[!islands %over% excl]
+
+                excl_str <- co2str(seqlevel, start(excl), end(excl), strand)
+                msg <- paste("Warning: skipping", excl_str)
+                if (!is.null(sample_name)) msg <- paste(msg, "in", sample_name)
+                message(paste(msg, collapse = "\n"))
+            
+            }
+
+        }
+        
+        features <- junctions
 
         candidates <- predictCandidatesInternal(junctions, islands)
         exons_I <- predictExonsInternal(candidates, frag_exonic,
@@ -222,6 +279,10 @@ predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
         exons_R <- predictExonsTerminal(candidates, frag_exonic, frag_intron,
             gamma, "exon_R", include_counts, retain_coverage)
         if (!is.null(exons_R)) { features <- c(features, exons_R) }
+
+    } else {
+
+        features <- junctions
 
     }
         
@@ -295,10 +356,10 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
     junctions <- unique(unlist(frag_intron)) + 1
     if (length(junctions) == 0) { return() }
     mcols(junctions) <- DataFrame("type" = rep("J", length(junctions)))
-    mcols(junctions)$N <- junctionCompatible(junctions, frag_intron)
 
     ## consider splice junctions with counts at least min_junction_count
 
+    mcols(junctions)$N <- junctionCompatible(junctions, frag_intron)
     junctions <- junctions[which(mcols(junctions)$N >= min_junction_count)]
     if (length(junctions) == 0) { return() }
         
@@ -309,12 +370,15 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
     ## the spliced boundary is situated on the right, for the RHS
     ## splice site, the spliced boundary is situated on the left
 
-    splicesite_N <- splicesiteCounts(junctions, frag_exonic, frag_intron,
-        "junction")
-    index <- which(mcols(junctions)$N >= psi * max(splicesite_N))
-    if (length(index) == 0) { return() }
+    if (psi > 0 || retain_coverage) {
+    
+        mcols(junctions)$N_splicesite <- splicesiteCounts(junctions,
+            frag_exonic, frag_intron, "junction")
+        junctions <- junctions[which(mcols(junctions)$N >=
+            psi * max(mcols(junctions)$N_splicesite))]
+        if (length(junctions) == 0) { return() }
 
-    junctions <- junctions[index]
+    }
 
     if (!include_counts) {
 
@@ -322,9 +386,9 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
 
     }
 
-    if (retain_coverage) {
+    if (!retain_coverage) {
 
-        mcols(junctions)$N_splicesite <- splicesite_N[index]
+        mcols(junctions)$N_splicesite <- NULL
 
     }
     

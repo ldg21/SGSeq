@@ -36,10 +36,17 @@ feature2name <- function(features, collapse_terminal = FALSE)
 
 }
 
+co2str <- function(seqlevel, start, end, strand)
+{
+
+    paste0(seqlevel, ":", start, "-", end, ":", strand)
+    
+}
+
 gr2co <- function(x)
 {
 
-    paste0(seqnames(x), ":", start(x), "-", end(x), ":", strand(x))
+    co2str(seqnames(x), start(x), end(x), strand(x))
     
 }
 
@@ -56,10 +63,17 @@ co2gr <- function(co)
     
 }
 
+pos2str <- function(seqlevel, position, strand)
+{
+
+    paste0(seqlevel, ":", position, ":", strand)
+
+}
+
 gr2pos <- function(x)
 {
 
-    paste0(seqnames(x), ":", start(x), ":", strand(x))
+    pos2str(seqnames(x), start(x), strand(x))
 
 }
 
@@ -88,9 +102,17 @@ readGap <- function(file, paired_end, which = NULL)
     }
 
     if (paired_end) {
+      
+        ## gap <- suppressWarnings(readGAlignmentPairs(file = file,
+        ##     param = param))
 
-        gap <- suppressWarnings(readGAlignmentPairs(file = file,
-            param = param))
+        ## scanBam bug workaround start
+        bamWhat(param) <- c("flag", "mrnm", "mpos")
+        ga <- readGAlignments(file = file, use.names = TRUE, param = param)
+        gap <- makeGAlignmentPairs(ga, use.names = TRUE, use.mcols = TRUE)
+        names(gap) <- NULL
+        ## scanBam bug workaround end
+      
         gap <- propagateXS(gap)
 
     } else {

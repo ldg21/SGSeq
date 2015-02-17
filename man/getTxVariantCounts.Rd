@@ -5,12 +5,14 @@
 \title{Representative counts and frequency estimates for
   transcript variants}
 \usage{
-getTxVariantCounts(object, variants)
+getTxVariantCounts(object, variants, cores = 1)
 }
 \arguments{
 \item{object}{\code{SGFeatureCounts} object}
 
 \item{variants}{\code{TxVariants} object}
+
+\item{cores}{Number of cores available for parallel processing}
 }
 \value{
 A \code{TxVariantCounts} object

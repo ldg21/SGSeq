@@ -5,8 +5,9 @@
 \title{Transcript feature prediction from BAM files}
 \usage{
 predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
-  beta = 0.2, gamma = 0.2, min_junction_count = NULL, min_n_sample = 1,
-  min_overhang = NA, cores_per_sample = 1, BPPARAM = MulticoreParam(1))
+  beta = 0.2, gamma = 0.2, min_junction_count = NULL,
+  max_complexity = 20, min_n_sample = 1, min_overhang = NA,
+  verbose = FALSE, cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 }
 \arguments{
 \item{sample_info}{Data frame with sample information.
@@ -36,6 +37,14 @@ to be included}
 \item{min_junction_count}{Minimum fragment count required for a splice
 junction to be included. If specified, argument \code{alpha} is ignored.}
 
+\item{max_complexity}{Maximum allowed complexity. If a locus exceeds
+this threshold, it is skipped, resulting in a warning message.
+Here complexity is defined as the maximum number of unique filtered
+splice junctions overlapping a given position in a locus.
+High complexity regions are often due to spurious read alignments
+and can significantly slow down processing.
+To disable this filter, set to \code{NA}.}
+
 \item{min_n_sample}{Minimum number of samples a feature must be
 observed in to be included}
 
@@ -49,6 +58,8 @@ remaining terminal exons overlapping other exons. Use \code{NULL}
 to disable processing (disabling processing is useful if results are
 subsequently merged with other predictions and processing is
 postponed until after the merging step).}
+
+\item{verbose}{If \code{TRUE}, print messages indicating progress.}
 
 \item{cores_per_sample}{Number of cores per sample}
 

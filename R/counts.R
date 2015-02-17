@@ -8,7 +8,7 @@
 ##' @author Leonard Goldstein
 
 getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
-    retain_coverage = FALSE, cores = 1)
+    retain_coverage = FALSE, verbose = FALSE, sample_name = NULL, cores = 1)
 {
 
     if (!is(features, "SGFeatures")) {
@@ -26,7 +26,9 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         getSGFeatureCountsRanges,
         file_bam = file_bam,
         paired_end = paired_end,
-        retain_coverage = retain_coverage, 
+        retain_coverage = retain_coverage,
+        verbose = verbose,
+        sample_name = sample_name,
         mc.preschedule = FALSE,
         mc.cores = cores)
 
@@ -47,8 +49,11 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
 }
 
 getSGFeatureCountsRanges <- function(features, file_bam, paired_end,
-    retain_coverage)
+    retain_coverage, verbose, sample_name)
 {
+
+    if (is.null(sample_name)) prefix <- ""
+    else prefix <- paste0(sample_name, ": ")
 
     which <- range(as(features, "GRanges"))
 
@@ -138,7 +143,9 @@ getSGFeatureCountsRanges <- function(features, file_bam, paired_end,
         counts <- N
 
     }
-    
+
+    if (verbose) message(paste0(prefix, gr2co(which), " complete."))
+
     return(counts)
     
 }
@@ -337,6 +344,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 ##'   transcript variants
 ##' @param object \code{SGFeatureCounts} object
 ##' @param variants \code{TxVariants} object
+##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxVariantCounts} object
 ##' @examples
 ##' txvc <- getTxVariantCounts(sgfc, txv)

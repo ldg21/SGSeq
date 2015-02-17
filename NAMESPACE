@@ -18,7 +18,7 @@ importFrom(igraph, clusters, degree, edge.connectivity, get.data.frame,
 importFrom(GenomicFeatures, exonsBy)
 importFrom(GenomeInfoDb, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply)
-importFrom(Rsamtools, BamFile, scanBam, ScanBamParam)
+importFrom(Rsamtools, BamFile, scanBam, ScanBamParam, 'bamWhat<-')
 importFrom(rtracklayer, export)
 
 ## EXPORT FUNCTIONS

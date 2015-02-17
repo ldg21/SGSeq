@@ -6,7 +6,8 @@
   chromosome and strand}
 \usage{
 predictTxFeaturesRanges(file_bam, paired_end, which, min_junction_count, psi,
-  beta, gamma, include_counts, retain_coverage, junctions_only)
+  beta, gamma, include_counts, retain_coverage, junctions_only, max_complexity,
+  verbose, sample_name)
 }
 \arguments{
 \item{file_bam}{BAM file with genomic RNA-seq read alignments}
@@ -40,6 +41,18 @@ using more stringent criteria after the initial prediction.}
 
 \item{junctions_only}{Logical indicating whether predictions
 should be limited to identification of splice junctions only}
+
+\item{max_complexity}{Maximum allowed complexity. If a locus exceeds
+this threshold, it is skipped, resulting in a warning message.
+Here complexity is defined as the maximum number of unique filtered
+splice junctions overlapping a given position in a locus.
+High complexity regions are often due to spurious read alignments
+and can significantly slow down processing.
+To disable this filter, set to \code{NA}.}
+
+\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+
+\item{sample_name}{Optional sample name, used in messages.}
 }
 \value{
 \code{GRanges} of predicted features
