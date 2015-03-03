@@ -351,7 +351,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
         stop("object must be an SGFeatureCounts object")
 
     variants <- findTxVariants(
-        features = rowData(object),
+        features = rowRanges(object),
         maxnvariant = maxnvariant,
         cores = cores)
 

@@ -748,7 +748,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 
     if (nrow(x) == 0) { return() }
 
-    features <- rowData(x)
+    features <- rowRanges(x)
     
     if (!is.null(RowSideColors) && !is.list(RowSideColors)) {
 
@@ -885,7 +885,7 @@ plotVariants <- function(x, eventID = NULL,
 
     par(mai = pars$mai)
     
-    df <- plotSpliceGraph(x = rowData(x), toscale = toscale,
+    df <- plotSpliceGraph(x = rowRanges(x), toscale = toscale,
         label = "label", color = color, color_novel = color_novel,
         color_alpha = color_alpha, color_labels = color_labels,
         border = border, cexLab = cexLab, cexExon = cexExon,
@@ -1113,7 +1113,7 @@ subsetFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 
     if (is(x, "Counts")) {
 
-        y <- rowData(x)
+        y <- rowRanges(x)
 
     } else {
 

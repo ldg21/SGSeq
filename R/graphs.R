@@ -1188,7 +1188,7 @@ unmaskEvents <- function(x)
 expandTxVariantCounts <- function(object, eventID = NULL, cores = 1)
 {
     
-    variants <- rowData(object)
+    variants <- rowRanges(object)
     features <- unlist(variants)
 
     if (is.null(eventID)) {

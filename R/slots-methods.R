@@ -10,7 +10,7 @@ setMethod("type", "Paths",
 
 ##' @rdname slots
 setMethod("type", "Counts",
-    function(object) { type(rowData(object)) })
+    function(object) { type(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("type", "Features",
@@ -22,7 +22,7 @@ setReplaceMethod("type", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("type", "Counts",
-    function(object, value) { type(rowData(object)) <- value; object })
+    function(object, value) { type(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("txName", "Features",
@@ -34,7 +34,7 @@ setMethod("txName", "Paths",
 
 ##' @rdname slots
 setMethod("txName", "Counts",
-    function(object) { txName(rowData(object)) })
+    function(object) { txName(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("txName", "Features",
@@ -46,7 +46,7 @@ setReplaceMethod("txName", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("txName", "Counts",
-    function(object, value) { txName(rowData(object)) <- value; object })
+    function(object, value) { txName(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("geneName", "Features",
@@ -58,7 +58,7 @@ setMethod("geneName", "Paths",
 
 ##' @rdname slots
 setMethod("geneName", "Counts",
-    function(object) { geneName(rowData(object)) })
+    function(object) { geneName(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("geneName", "Features",
@@ -70,7 +70,7 @@ setReplaceMethod("geneName", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("geneName", "Counts",
-    function(object, value) { geneName(rowData(object)) <- value; object })
+    function(object, value) { geneName(rowRanges(object)) <- value; object })
 
 ## SGFeatures, TxSegments, TxVariants
 
@@ -84,7 +84,7 @@ setMethod("featureID", "Paths",
 
 ##' @rdname slots
 setMethod("featureID", "Counts",
-    function(object) { featureID(rowData(object)) })
+    function(object) { featureID(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("featureID", "SGFeatures",
@@ -96,7 +96,7 @@ setReplaceMethod("featureID", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("featureID", "Counts",
-    function(object, value) { featureID(rowData(object)) <- value; object })
+    function(object, value) { featureID(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("geneID", "SGFeatures",
@@ -108,7 +108,7 @@ setMethod("geneID", "Paths",
 
 ##' @rdname slots
 setMethod("geneID", "Counts",
-    function(object) { geneID(rowData(object)) })
+    function(object) { geneID(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("geneID", "SGFeatures",
@@ -120,7 +120,7 @@ setReplaceMethod("geneID", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("geneID", "Counts",
-    function(object, value) { geneID(rowData(object)) <- value; object })
+    function(object, value) { geneID(rowRanges(object)) <- value; object })
 
 ## SGFeatures, TxSegments
 
@@ -134,7 +134,7 @@ setMethod("splice5p", "TxSegments",
 
 ##' @rdname slots
 setMethod("splice5p", "SGFeatureCounts",
-    function(object) { splice5p(rowData(object)) })
+    function(object) { splice5p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("splice5p", "SGFeatures",
@@ -146,7 +146,7 @@ setReplaceMethod("splice5p", "TxSegments",
 
 ##' @rdname slots
 setReplaceMethod("splice5p", "SGFeatureCounts",
-    function(object, value) { splice5p(rowData(object)) <- value; object })
+    function(object, value) { splice5p(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("splice3p", "SGFeatures",
@@ -158,7 +158,7 @@ setMethod("splice3p", "TxSegments",
 
 ##' @rdname slots
 setMethod("splice3p", "SGFeatureCounts",
-    function(object) { splice3p(rowData(object)) })
+    function(object) { splice3p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("splice3p", "SGFeatures",
@@ -170,7 +170,7 @@ setReplaceMethod("splice3p", "TxSegments",
 
 ##' @rdname slots
 setReplaceMethod("splice3p", "SGFeatureCounts",
-    function(object, value) { splice3p(rowData(object)) <- value; object })
+    function(object, value) { splice3p(rowRanges(object)) <- value; object })
 
 ## TxSegments, TxVariants
 
@@ -180,7 +180,7 @@ setMethod("segmentID", "Paths",
 
 ##' @rdname slots
 setMethod("segmentID", "TxVariantCounts",
-    function(object) { segmentID(rowData(object)) })
+    function(object) { segmentID(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("segmentID", "Paths",
@@ -188,7 +188,7 @@ setReplaceMethod("segmentID", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("segmentID", "TxVariantCounts",
-    function(object, value) { segmentID(rowData(object)) <- value; object })
+    function(object, value) { segmentID(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("from", "Paths",
@@ -196,7 +196,7 @@ setMethod("from", "Paths",
 
 ##' @rdname slots
 setMethod("from", "TxVariantCounts",
-    function(object) { from(rowData(object)) })
+    function(object) { from(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("from", "Paths",
@@ -204,7 +204,7 @@ setReplaceMethod("from", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("from", "TxVariantCounts",
-    function(object, value) { from(rowData(object)) <- value; object })
+    function(object, value) { from(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("to", "Paths",
@@ -212,7 +212,7 @@ setMethod("to", "Paths",
 
 ##' @rdname slots
 setMethod("to", "TxVariantCounts",
-    function(object) { to(rowData(object)) })
+    function(object) { to(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("to", "Paths",
@@ -220,7 +220,7 @@ setReplaceMethod("to", "Paths",
 
 ##' @rdname slots
 setReplaceMethod("to", "TxVariantCounts",
-    function(object, value) { to(rowData(object)) <- value; object })
+    function(object, value) { to(rowRanges(object)) <- value; object })
 
 ## TxVariants
 
@@ -230,7 +230,7 @@ setMethod("eventID", "TxVariants",
 
 ##' @rdname slots
 setMethod("eventID", "TxVariantCounts",
-    function(object) { eventID(rowData(object)) })
+    function(object) { eventID(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("eventID", "TxVariants",
@@ -238,7 +238,7 @@ setReplaceMethod("eventID", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("eventID", "TxVariantCounts",
-    function(object, value) { eventID(rowData(object)) <- value; object })
+    function(object, value) { eventID(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("variantID", "TxVariants",
@@ -246,7 +246,7 @@ setMethod("variantID", "TxVariants",
 
 ##' @rdname slots
 setMethod("variantID", "TxVariantCounts",
-    function(object) { variantID(rowData(object)) })
+    function(object) { variantID(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("variantID", "TxVariants",
@@ -254,7 +254,7 @@ setReplaceMethod("variantID", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("variantID", "TxVariantCounts",
-    function(object, value) { variantID(rowData(object)) <- value; object })
+    function(object, value) { variantID(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("closed5p", "TxVariants",
@@ -262,7 +262,7 @@ setMethod("closed5p", "TxVariants",
 
 ##' @rdname slots
 setMethod("closed5p", "TxVariantCounts",
-    function(object) { closed5p(rowData(object)) })
+    function(object) { closed5p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("closed5p", "TxVariants",
@@ -270,7 +270,7 @@ setReplaceMethod("closed5p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("closed5p", "TxVariantCounts",
-    function(object, value) { closed5p(rowData(object)) <- value; object })
+    function(object, value) { closed5p(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("closed3p", "TxVariants",
@@ -278,7 +278,7 @@ setMethod("closed3p", "TxVariants",
 
 ##' @rdname slots
 setMethod("closed3p", "TxVariantCounts",
-    function(object) { closed3p(rowData(object)) })
+    function(object) { closed3p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("closed3p", "TxVariants",
@@ -286,7 +286,7 @@ setReplaceMethod("closed3p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("closed3p", "TxVariantCounts",
-    function(object, value) { closed3p(rowData(object)) <- value; object })
+    function(object, value) { closed3p(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("variantName", "TxVariants",
@@ -294,7 +294,7 @@ setMethod("variantName", "TxVariants",
 
 ##' @rdname slots
 setMethod("variantName", "TxVariantCounts",
-    function(object) { variantName(rowData(object)) })
+    function(object) { variantName(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("variantName", "TxVariants",
@@ -302,7 +302,7 @@ setReplaceMethod("variantName", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("variantName", "TxVariantCounts",
-    function(object, value) { variantName(rowData(object)) <- value; object })
+    function(object, value) { variantName(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("variantType", "TxVariants",
@@ -310,7 +310,7 @@ setMethod("variantType", "TxVariants",
 
 ##' @rdname slots
 setMethod("variantType", "TxVariantCounts",
-    function(object) { variantType(rowData(object)) })
+    function(object) { variantType(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("variantType", "TxVariants",
@@ -318,7 +318,7 @@ setReplaceMethod("variantType", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("variantType", "TxVariantCounts",
-    function(object, value) { variantType(rowData(object)) <- value; object })
+    function(object, value) { variantType(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("featureID5p", "TxVariants",
@@ -326,7 +326,7 @@ setMethod("featureID5p", "TxVariants",
 
 ##' @rdname slots
 setMethod("featureID5p", "TxVariantCounts",
-    function(object) { featureID5p(rowData(object)) })
+    function(object) { featureID5p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("featureID5p", "TxVariants",
@@ -334,7 +334,7 @@ setReplaceMethod("featureID5p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("featureID5p", "TxVariantCounts",
-    function(object, value) { featureID5p(rowData(object)) <- value; object })
+    function(object, value) { featureID5p(rowRanges(object)) <- value; object })
 
 ##' @rdname slots
 setMethod("featureID3p", "TxVariants",
@@ -342,7 +342,7 @@ setMethod("featureID3p", "TxVariants",
 
 ##' @rdname slots
 setMethod("featureID3p", "TxVariantCounts",
-    function(object) { featureID3p(rowData(object)) })
+    function(object) { featureID3p(rowRanges(object)) })
 
 ##' @rdname slots
 setReplaceMethod("featureID3p", "TxVariants",
@@ -350,7 +350,7 @@ setReplaceMethod("featureID3p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("featureID3p", "TxVariantCounts",
-    function(object, value) { featureID3p(rowData(object)) <- value; object })
+    function(object, value) { featureID3p(rowRanges(object)) <- value; object })
 
 ## SGFeatureCounts
 

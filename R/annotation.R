@@ -53,9 +53,9 @@ annotate <- function(query, subject)
         
     } else if (is(query, "Counts")) {
 
-        rd <- rowData(query)
+        rd <- rowRanges(query)
         rd <- annotate(rd, subject)
-        rowData(query) <- rd
+        rowRanges(query) <- rd
 
     }
         

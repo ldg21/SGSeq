@@ -225,7 +225,7 @@ getScaledCounts <- function(SE,
     lib_size = colData(SE)$lib_size)
 {
 
-    E <- getEffectiveLengths(rowData(SE),
+    E <- getEffectiveLengths(rowRanges(SE),
         paired_end, read_length, frag_length)    
 
     X <- assay(SE, "counts")
@@ -355,7 +355,7 @@ getTxVariantCounts <- function(object, variants, cores = 1)
     
     n_variants <- length(variants)
     n_samples <- ncol(object)
-    features <- rowData(object)
+    features <- rowRanges(object)
 
     if (n_variants == 0) {
 
@@ -442,7 +442,7 @@ getVariantFreq <- function(SE)
     U_end <- assay(SE, "countsVariant3p")
     V_end <- assay(SE, "countsTotal3p")
 
-    variants <- rowData(SE)
+    variants <- rowRanges(SE)
 
     informative_start <- elementLengths(featureID5p(variants)) > 0
     informative_end <- elementLengths(featureID3p(variants)) > 0

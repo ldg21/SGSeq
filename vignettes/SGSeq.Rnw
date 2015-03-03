@@ -144,7 +144,7 @@ sample information as \Rcode{colData}, splice graph features as
 \Rcode{rowData} and assays \Rcode{counts} and \Rcode{FPKM}, 
 which store compatible counts and FPKMs for each splice graph feature 
 and sample, respectively. Accessor functions \Rfunction{colData},
-\Rfunction{rowData}, \Rfunction{counts} and \Rfunction{FPKM} can be used
+\Rfunction{rowRanges}, \Rfunction{counts} and \Rfunction{FPKM} can be used
 to access the data.
 
 Compatible FPKMs for splice graph features can be visualized with function
@@ -201,7 +201,7 @@ package. \Rclass{TxVariantCounts} contains sample information as
 \Rcode{colData} and transcript variants as \Rcode{rowData}. 
 Assay \Rcode{variantFreq} stores frequency estimates
 for each transcript variant and sample. Accessor functions 
-\Rfunction{colData}, \Rfunction{rowData} and \Rfunction{variantFreq} 
+\Rfunction{colData}, \Rfunction{rowRanges} and \Rfunction{variantFreq} 
 can be used to access the data. 
 
 Each transcript variant consists of one or more splice graph features.
