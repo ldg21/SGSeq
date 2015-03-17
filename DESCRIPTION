@@ -1,7 +1,7 @@
 Package: SGSeq
 Type: Package
-Title: Prediction, quantification and visualization of alternative
-       transcript events from RNA-seq data
+Title: Prediction, quantification and visualization of splice events
+       from RNA-seq data
 Version: 1.1.19
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
@@ -9,10 +9,9 @@ Description: RNA-seq data are informative for the analysis of known and
              novel transcript isoforms. While the short length of RNA-seq
              reads limits the ability to predict and quantify full-length
              transcripts, short read data are well suited for the analysis
-             of individual alternative transcripts events (e.g. inclusion
-             or skipping of a cassette exon). The SGSeq package enables the
-             prediction, quantification and visualization of alternative
-             transcript events from BAM files.
+             of individual splice events (e.g. inclusion or skipping of a
+             cassette exon). The SGSeq package enables the prediction, 
+             quantification and visualization of splice events from BAM files.
 License: Artistic-2.0
 LazyData: yes
 Depends: BiocParallel, GenomicRanges, IRanges, methods

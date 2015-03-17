@@ -302,7 +302,10 @@ setReplaceMethod("variantName", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("variantName", "TxVariantCounts",
-    function(object, value) { variantName(rowRanges(object)) <- value; object })
+    function(object, value) {
+        variantName(rowRanges(object)) <- value
+        object
+    })
 
 ##' @rdname slots
 setMethod("variantType", "TxVariants",
@@ -318,7 +321,10 @@ setReplaceMethod("variantType", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("variantType", "TxVariantCounts",
-    function(object, value) { variantType(rowRanges(object)) <- value; object })
+    function(object, value) {
+        variantType(rowRanges(object)) <- value
+        object
+    })
 
 ##' @rdname slots
 setMethod("featureID5p", "TxVariants",
@@ -334,7 +340,10 @@ setReplaceMethod("featureID5p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("featureID5p", "TxVariantCounts",
-    function(object, value) { featureID5p(rowRanges(object)) <- value; object })
+    function(object, value) {
+        featureID5p(rowRanges(object)) <- value
+        object
+    })
 
 ##' @rdname slots
 setMethod("featureID3p", "TxVariants",
@@ -350,7 +359,10 @@ setReplaceMethod("featureID3p", "TxVariants",
 
 ##' @rdname slots
 setReplaceMethod("featureID3p", "TxVariantCounts",
-    function(object, value) { featureID3p(rowRanges(object)) <- value; object })
+    function(object, value) {
+        featureID3p(rowRanges(object)) <- value
+        object
+    })
 
 ## SGFeatureCounts
 

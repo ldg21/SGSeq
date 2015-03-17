@@ -8,10 +8,10 @@ plotSpliceGraph(x, geneID = NULL, geneName = NULL, eventID = NULL,
   which = NULL, toscale = c("exon", "none", "gene"), label = c("id",
   "name", "label", "none"), color = "grey", color_novel = "red",
   color_alpha = 0.8, color_labels = FALSE, border = "fill", cexLab = 1,
-  cexExon = 1, score = NULL, score_color = "darkblue",
-  score_ylim = NULL, score_ypos = c(0.2, 0.1), score_nbin = 400,
-  main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.2,
-  tx_cex = 1, asp = 1)
+  cexExon = 1, track = NULL, track_color = "darkblue",
+  track_ylim = NULL, track_ypos = c(0.2, 0.1), track_nbin = 400,
+  track_summary = mean, main = NULL, cexMain = 1, tx_view = FALSE,
+  tx_dist = 0.2, tx_cex = 1, asp = 1)
 }
 \arguments{
 \item{x}{\code{SGFeatures} or \code{TxVariants} object}
@@ -54,18 +54,20 @@ be the same as feature colors}
 
 \item{cexExon}{Scale factor for exon height}
 
-\item{score}{\code{RLeList} containing nucleotide-level scores to be
-plotted with the splice graph}
+\item{track}{\code{RLeList} containing nucleotide-level scores or a
+\code{GRangesList} to be plotted with the splice graph}
 
-\item{score_color}{Color used for plotting scores}
+\item{track_color}{Color used for plotting tracks}
 
-\item{score_ylim}{y-axis range used for plotting scores}
+\item{track_ylim}{y-axis range used for plotting scores}
 
-\item{score_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the score panel, specificed as fractions of the
+\item{track_ypos}{Numeric vector of length two, indicating the vertical
+position and height of the track panel, specificed as fractions of the
 height of the plotting region}
 
-\item{score_nbin}{Number of bins for plotting scores}
+\item{track_nbin}{Number of bins for plotting scores}
+
+\item{track_summary}{Function used to calculate per-bin score summaries}
 
 \item{main}{Plot title}
 

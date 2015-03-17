@@ -6,7 +6,8 @@ validTxFeatures <- function(object)
     slot_values <- list(
         strand = c("+", "-"),
         type = typeLevels("TxFeatures"))
-    validSlotValues(object, slot_values)
+    c(validExtraColumnSlotLengths(object),
+        validExtraColumnSlotValues(object, slot_values))
 
 }
 
@@ -16,7 +17,8 @@ validSGFeatures <- function(object)
     slot_values <- list(
         strand = c("+", "-"),
         type = typeLevels("SGFeatures"))
-    validSlotValues(object, slot_values)
+    c(validExtraColumnSlotLengths(object),
+        validExtraColumnSlotValues(object, slot_values))
 
 }
 
@@ -87,7 +89,23 @@ validTxVariantCounts <- function(object)
 
 ## Validity checks - helper functions
 
-validSlotValues <- function(object, slot_values)
+validExtraColumnSlotLengths <- function(object)
+{
+
+    l <- length(object)
+    slots <- GenomicRanges:::extraColumnSlotNames(object)
+    i <- which(elementLengths(lapply(slots, slot, object = object)) != l)
+
+    if (length(i) > 0) {
+
+        return(paste("invalid length for slot(s)",
+            paste(dQuote(slots[i]), collapse = ",")))
+      
+    }
+  
+}
+
+validExtraColumnSlotValues <- function(object, slot_values)
 {
 
     specified <- names(slot_values)
@@ -100,8 +118,6 @@ validSlotValues <- function(object, slot_values)
             paste(dQuote(specified[i]), collapse = ",")))
 
     }
-    
-    return(TRUE)
 
 }
 
@@ -142,8 +158,6 @@ validMcols <- function(object, mcol_type)
         
     }
 
-    return(TRUE)
-
 }
 
 validAssays <- function(object, assay_type)
@@ -167,8 +181,6 @@ validAssays <- function(object, assay_type)
             paste(dQuote(names(assay_type)[i]), collapse = ",")))
         
     }
-
-    return(TRUE)
 
 }
 

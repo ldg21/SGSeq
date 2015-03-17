@@ -352,7 +352,15 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 
 getTxVariantCounts <- function(object, variants, cores = 1)
 {
-    
+
+    if (any(table(eventID(variants)) == 1)) {
+
+        warning("Detected events with a single variant. 'variants' must
+            include all variants for a given event to obtain accurate
+            countsTotal5p, countsTotal3p and variantFreq.", call. = FALSE)
+
+      }
+
     n_variants <- length(variants)
     n_samples <- ncol(object)
     features <- rowRanges(object)
@@ -372,7 +380,7 @@ getTxVariantCounts <- function(object, variants, cores = 1)
         eventID(variants)[togroup(variant_i_start)], unique)
     event_i_end <- tapply(unlist(variant_i_end),
         eventID(variants)[togroup(variant_i_end)], unique)
-
+    
     x <- assay(object, "counts")
 
     variant_x_start <- collapseRows(x, variant_i_start, cores = cores)

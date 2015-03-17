@@ -4,6 +4,8 @@ exonGraph <- function(features, tx_view)
     if (tx_view) {
 
         tx_name <- txName(features)
+        i <- which(elementLengths(tx_name) == 0)
+        tx_name[i] <- as(feature2name(features[i]), "CompressedCharacterList") 
         features <- features[togroup(tx_name)]
         mcols(features)$tx_name <- unlist(tx_name)
 
@@ -213,14 +215,15 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   (same as exon color), \dQuote{none} (no border) or a valid color name
 ##' @param cexLab Scale factor for feature labels
 ##' @param cexExon Scale factor for exon height
-##' @param score \code{RLeList} containing nucleotide-level scores to be
-##'   plotted with the splice graph
-##' @param score_color Color used for plotting scores
-##' @param score_ylim y-axis range used for plotting scores
-##' @param score_ypos Numeric vector of length two, indicating the vertical
-##'   position and height of the score panel, specificed as fractions of the
+##' @param track \code{RLeList} containing nucleotide-level scores or a
+##'   \code{GRangesList} to be plotted with the splice graph
+##' @param track_color Color used for plotting tracks
+##' @param track_ylim y-axis range used for plotting scores
+##' @param track_ypos Numeric vector of length two, indicating the vertical
+##'   position and height of the track panel, specificed as fractions of the
 ##'   height of the plotting region
-##' @param score_nbin Number of bins for plotting scores
+##' @param track_nbin Number of bins for plotting scores
+##' @param track_summary Function used to calculate per-bin score summaries
 ##' @param main Plot title
 ##' @param cexMain Scale factor for plot title
 ##' @param tx_view Plot transcripts instead of splice graph (experimental)
@@ -245,10 +248,10 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     eventID = NULL, which = NULL, toscale = c("exon", "none", "gene"),
     label = c("id", "name", "label", "none"), color = "grey",
     color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", cexLab = 1, cexExon = 1, score = NULL,
-    score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.2, 0.1),
-    score_nbin = 400, main = NULL, cexMain = 1, tx_view = FALSE,
-    tx_dist = 0.2, tx_cex = 1, asp = 1)
+    border = "fill", cexLab = 1, cexExon = 1, track = NULL,
+    track_color = "darkblue", track_ylim = NULL, track_ypos = c(0.2, 0.1),
+    track_nbin = 400, track_summary = mean, main = NULL, cexMain = 1,
+    tx_view = FALSE, tx_dist = 0.2, tx_cex = 1, asp = 1)
 {
 
     toscale <- match.arg(toscale)
@@ -258,6 +261,13 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
 
         stop("x must be an SGFeatures or TxVariants object")
 
+    }
+
+    if (!is.null(track) && !is(track, "RleList") &&
+        !is(track, "GRangesList")) {
+  
+        stop("track must be an RleList or GRangesList")
+      
     }
     
     x <- subsetFeatures(x, geneID, eventID, which, geneName)
@@ -295,10 +305,15 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
         edge.arrow.mode = pars$edge_arrow_mode,
         asp = asp)
 
-    if (!is.null(score)) {
+    if (is(track, "RleList")) {
 
-        plotScore(pars, score, score_color, score_ylim, score_ypos, score_nbin)
+        plotTrackScore(pars, track, track_color, track_ylim, track_ypos,
+            track_nbin, track_summary)
 
+    } else if (is(track, "GRangesList")) {
+
+        plotTrackRanges(pars, toscale, track, track_color, track_ypos)
+      
     }
     
     text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2,
@@ -347,7 +362,7 @@ getPlottingParameters <- function(g, toscale, border, asp, tx_view, tx_dist)
     }
     
     ## exon coordinates relative to gene locus
-    ir_exon <- ranges(mapCoords(gr_exon, split(gr_gene, 1),
+    ir_exon <- ranges(mapToTranscripts(gr_exon, split(gr_gene, 1),
         ignore.strand = FALSE))
 
     ## exonic regions
@@ -410,7 +425,7 @@ getPlottingParameters <- function(g, toscale, border, asp, tx_view, tx_dist)
 
 }
 
-plotScore <- function(pars, score, color, ylim, ypos, nbin)
+plotTrackScore <- function(pars, score, color, ylim, ypos, nbin, summary)
 {
 
     n_exon <- length(pars$vertex_x)    
@@ -420,6 +435,16 @@ plotScore <- function(pars, score, color, ylim, ypos, nbin)
     bp_x_start <- do.call(c, lapply(tmp, "[[", "x_start"))
     bp_x_end <- do.call(c, lapply(tmp, "[[", "x_end"))
     bp_y <- do.call(c, lapply(tmp, "[[", "y"))
+
+    excl <- which(bp_x_start == bp_x_end)
+
+    if (length(excl) > 0) {
+
+        bp_x_start <- bp_x_start[-excl]
+        bp_x_end <- bp_x_end[-excl]
+        bp_y <- bp_y[-excl]
+
+    }
     
     bin_size <- 2 / nbin
     bin_breaks <- seq(-1, 1, length.out = nbin + 1)
@@ -429,7 +454,7 @@ plotScore <- function(pars, score, color, ylim, ypos, nbin)
         as.integer(cut(bp_x_end, bin_breaks, right = TRUE)))
 
     bin_y <- tapply(bp_y[rep(seq_along(bp_bin), width(bp_bin))],
-        as.integer(bp_bin), mean)
+        as.integer(bp_bin), summary)
     
     if (is.null(ylim)) { ylim <- range(bin_y, na.rm = TRUE, finite = TRUE) }
 
@@ -520,6 +545,60 @@ scorePerExon <- function(i, pars, score)
     
 }
 
+plotTrackRanges <- function(pars, toscale, score, color, ypos)
+{
+
+    gr_exon <- GRanges(pars$gene_chrom, IRanges(pars$exon_start,
+        pars$exon_end), pars$gene_strand)
+    gr_gene <- range(gr_exon)
+    
+    score <- score[which(unlist(range(score)) %over% gr_gene)]
+    score <- endoapply(score, restrict, start(gr_gene), end(gr_gene))
+    
+    ypos_2 <- c(-1 + ypos[1] * 2, ypos[2] * 2)
+
+    n <- length(score)
+    h <- ypos_2[2] / (2 * n - 1)
+    y <- seq(ypos_2[1] + ypos_2[2] - 0.5 * h, ypos_2[1] + 0.5 * h,
+        length.out = n)
+    
+    x <- mapply(plotRanges, score, y,
+        MoreArgs = list(pars = pars, toscale = toscale, h = h, color = color))
+
+    if (!is.null(names(score))) text(x, y, names(score), pos = 1)
+
+}
+
+plotRanges <- function(pars, toscale, score, color, y, h)
+{
+
+    gr_exon <- GRanges(pars$gene_chrom, IRanges(pars$exon_start,
+        pars$exon_end), pars$gene_strand)
+    gr_gene <- range(gr_exon)
+
+    ir_score <- ranges(mapToTranscripts(score, split(gr_gene, 1),
+        ignore.strand = FALSE))
+    ir_exon <- ranges(mapToTranscripts(gr_exon, split(gr_gene, 1),
+        ignore.strand = FALSE))
+    ir_exonic <- reduce(ir_exon)
+
+    coords <- xcoordinates(ir_score, ir_exonic, toscale)
+
+    xleft <- coords$x - 0.5 * coords$w
+    xright <- coords$x + 0.5 * coords$w
+    ybottom <- y - 0.5 * h
+    ytop <- y + 0.5 * h
+    
+    mapply(rect, xleft = xleft, xright = xright,
+        MoreArgs = list(ybottom = ybottom, ytop = ytop,
+            col = color, border = NA))
+
+    x <- 0.5 * (min(xleft) + max(xright))
+
+    return(x)
+      
+}
+
 getGraphInfo <- function(g, pars, color_labels, tx_view)
 {
 
@@ -590,7 +669,8 @@ xcoordinates <- function(ir, ir_exonic, toscale)
     n_exonic <- length(ir_exonic)
 
     ## intronic regions
-    ir_intronic <- IRanges(end(ir_exonic)[-n_exonic], start(ir_exonic)[-1]) - 1 
+    ir_intronic <- IRanges(end(ir_exonic)[-n_exonic],
+        start(ir_exonic)[-1]) - 1 
     n_intronic <- length(ir_intronic)
     
     ## set widths for exonic/intronic regions
@@ -620,22 +700,22 @@ xcoordinates <- function(ir, ir_exonic, toscale)
         w_exonic <- 2
 
     }
-    
-    ## x-coordinates for start of exonic regions
-    x_exonic <- c(0, cumsum(w_exonic[-n_exonic] + w_intronic)) - 1
-    
-    ## map to exonic regions 
-    ol <- unlist(as.list(findOverlaps(ir, ir_exonic)))
-    
-    ## width
-    rel_width <- width(ir) / width(ir_exonic)[ol]
-    w <- rel_width * w_exonic[ol]
-    
-    ## x-coordinates (center)
-    rel_offset <- (start(ir) - start(ir_exonic)[ol]) / width(ir_exonic)[ol]
-    x <- x_exonic[ol] + rel_offset * w_exonic[ol] + 0.5 * w
 
-    out <- list("x" = x, "w" = w)
+    o <- order(c(ir_exonic, ir_intronic))
+    ir_block <- c(ir_exonic, ir_intronic)[o]
+    w_block <- c(w_exonic, w_intronic)[o]
+    x_block <- c(0, cumsum(w_block[-length(w_block)])) - 1
+
+    ol <- findOverlaps(ir, ir_block)
+    ol_min <- as.integer(tapply(subjectHits(ol), queryHits(ol), min))
+    ol_max <- as.integer(tapply(subjectHits(ol), queryHits(ol), max))
+    
+    x_1 <- x_block[ol_min] + (start(ir) - start(ir_block)[ol_min]) /
+        width(ir_block)[ol_min] * w_block[ol_min]
+    x_2 <- x_block[ol_max] + (end(ir) - start(ir_block)[ol_max]) /
+        width(ir_block)[ol_max] * w_block[ol_max]
+    
+    out <- list("x" = x_1 + 0.5 * (x_2 - x_1), "w" = x_2 - x_1)
     
     return(out)
     
@@ -722,10 +802,10 @@ addAlpha <- function(col, alpha)
 plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     which = NULL, toscale = c("exon", "none", "gene"), color = "grey",
     color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", cexLab = 1, cexExon = 1, score = NULL,
-    score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.2, 0.1),
-    score_nbin = 400, main = NULL, cexMain = 1, tx_view = FALSE,
-    tx_dist = 0.1, tx_cex = 1, assay = "FPKM",
+    border = "fill", cexLab = 1, cexExon = 1, track = NULL,
+    track_color = "darkblue", track_ylim = NULL, track_ypos = c(0.2, 0.1),
+    track_nbin = 400, track_summary = mean, main = NULL, cexMain = 1,
+    tx_view = FALSE, tx_dist = 0.1, tx_cex = 1, assay = "FPKM",
     include = c("junctions", "exons", "both"),
     transform = function(x) { log2(x + 1) }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
@@ -772,9 +852,10 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
         label = "id", color = color, color_novel = color_novel,
         color_alpha = color_alpha, color_labels = color_labels,
         border = border, cexLab = cexLab, cexExon = cexExon,
-        score = score, score_color = score_color,
-        score_ylim = score_ylim, score_ypos = score_ypos,
-        score_nbin = score_nbin, main = main, cexMain = cexMain,
+        track = track, track_color = track_color,
+        track_ylim = track_ylim, track_ypos = track_ypos,
+        track_nbin = track_nbin, track_summary = track_summary,
+        main = main, cexMain = cexMain,
         tx_view = tx_view, tx_dist = tx_dist, tx_cex = tx_cex,
         asp = pars$asp)
 
@@ -816,8 +897,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 plotVariants <- function(x, eventID = NULL,
     toscale = c("exon", "none", "gene"), color = "grey", color_novel = "red", 
     color_alpha = 0.8, color_labels = FALSE, border = "fill", 
-    cexLab = 1, cexExon = 1, score = NULL, score_color = "darkblue",
-    score_ylim = NULL, score_ypos = c(0.2, 0.1), score_nbin = 400,
+    cexLab = 1, cexExon = 1, track = NULL, track_color = "darkblue",
+    track_ylim = NULL, track_ypos = c(0.2, 0.1), track_nbin = 400,
     main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.1, tx_cex = 1,
     transform = function(x) { x }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
@@ -889,9 +970,9 @@ plotVariants <- function(x, eventID = NULL,
         label = "label", color = color, color_novel = color_novel,
         color_alpha = color_alpha, color_labels = color_labels,
         border = border, cexLab = cexLab, cexExon = cexExon,
-        score = score, score_color = score_color,
-        score_ylim = score_ylim, score_nbin = score_nbin,
-        score_ypos = score_ypos, main = main, cexMain = cexMain,
+        track = track, track_color = track_color,
+        track_ylim = track_ylim, track_nbin = track_nbin,
+        track_ypos = track_ypos, main = main, cexMain = cexMain,
         tx_view = tx_view, tx_dist = tx_dist, tx_cex = tx_cex,
         asp = pars$asp)
     
