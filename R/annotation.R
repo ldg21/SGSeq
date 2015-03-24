@@ -17,14 +17,14 @@
 ##' extend across spliced subject exon boundaries.
 ##' 
 ##' @title Annotation with respect to transcript features
-##' @param query \code{SGFeatures}, \code{TxVariants},
-##'   \code{SGFeatureCounts} or \code{TxVariantCounts} object
+##' @param query \code{SGFeatures}, \code{SGVariants},
+##'   \code{SGFeatureCounts} or \code{SGVariantCounts} object
 ##' @param subject \code{TxFeatures} object
 ##' @return \code{query} with updated \code{txName}, \code{geneName}
 ##'   column slots
 ##' @examples
 ##' sgf_annotated <- annotate(sgf, txf)
-##' txv_annotated <- annotate(txv, txf)
+##' sgv_annotated <- annotate(sgv, txf)
 ##' @author Leonard Goldstein
 
 annotate <- function(query, subject)
@@ -40,7 +40,7 @@ annotate <- function(query, subject)
 
         query <- annotateFeatures(query, subject)
         
-    } else if (is(query, "TxVariants")) {
+    } else if (is(query, "SGVariants")) {
 
         query_class <- class(query)
         query_mcols <- mcols(query)

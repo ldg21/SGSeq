@@ -191,13 +191,13 @@ representative counts for each transcript variant. Estimates for variant
 frequencies are obtained based on representative counts.
 
 <<>>=
-txvc <- analyzeVariants(sgfc)
+sgvc <- analyzeVariants(sgfc)
 @ 
 
-\Rfunction{analyzeVariants} returns a \Rclass{TxVariantCounts} object.
-Similar to \Rclass{SGFeatureCounts}, \Rclass{TxVariantCounts} extends
+\Rfunction{analyzeVariants} returns a \Rclass{SGVariantCounts} object.
+Similar to \Rclass{SGFeatureCounts}, \Rclass{SGVariantCounts} extends
 the \Rclass{SummarizedExperiment} class from the \Biocpkg{GenomicRanges} 
-package. \Rclass{TxVariantCounts} contains sample information as
+package. \Rclass{SGVariantCounts} contains sample information as
 \Rcode{colData} and transcript variants as \Rcode{rowData}. 
 Assay \Rcode{variantFreq} stores frequency estimates
 for each transcript variant and sample. Accessor functions 
@@ -206,18 +206,18 @@ can be used to access the data.
 
 Each transcript variant consists of one or more splice graph features.
 Information on transcript variants is stored as \Rcode{elementMetadata}
-(or \Rcode{mcols}) in the \Rclass{TxVariants} object and can be accessed
+(or \Rcode{mcols}) in the \Rclass{SGVariants} object and can be accessed
 as follows.
 
 <<>>=
-mcols(txvc)
+mcols(sgvc)
 @ 
 
 Transcript variants and estimates of variant frequencies can be visualized
 with function \Rfunction{plotVariants}.
 
 <<figure-3, fig.width=1.5, fig.height=4.5>>=
-plotVariants(txvc, eventID = 1)
+plotVariants(sgvc, eventID = 1)
 @ 
 
 \section{Advanced use}
@@ -233,8 +233,8 @@ txf <- predictTxFeatures(si, gr)
 sgf <- convertToSGFeatures(txf)
 sgf <- annotate(sgf, txf_annotated)
 sgfc <- getSGFeatureCounts(si, sgf)
-txv <- findTxVariants(sgf)
-txvc <- getTxVariantCounts(sgfc, txv)
+sgv <- findSGVariants(sgf)
+sgvc <- getSGVariantCounts(sgfc, sgv)
 @ 
 
 \sloppy Feature prediction and counting (with \Rfunction{predictTxFeatures} 
@@ -274,7 +274,7 @@ coverage (e.g. the mitochondrial chromosome).
 Identification of transcript variants from the splice graph is
 performed on a per-gene basis and can be parallelized by setting argument
 \Robject{cores} when using \Rfunction{analyzeVariants} or 
-\Rfunction{findTxVariants}.
+\Rfunction{findSGVariants}.
 
 \section{Session information}
 

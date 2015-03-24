@@ -30,10 +30,10 @@ export(
  convertToSGFeatures,
  convertToTxFeatures,
  exportFeatures,
- findTxVariants,
+ findSGVariants,
  getBamInfo,
  getSGFeatureCounts,
- getTxVariantCounts,
+ getSGVariantCounts,
  makeSGFeatureCounts,
  makeVariantNames,
  mergeTxFeatures,
@@ -49,9 +49,9 @@ export(
 export(
  TxFeatures,
  SGFeatures,
- TxVariants,
+ SGVariants,
  SGFeatureCounts,
- TxVariantCounts
+ SGVariantCounts
 )
 
 ## EXPORT ACCESSORS

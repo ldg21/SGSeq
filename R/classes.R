@@ -22,7 +22,7 @@ validSGFeatures <- function(object)
 
 }
 
-validTxSegments <- function(object)
+validSGSegments <- function(object)
 {
 
     mcol_type <- c(
@@ -40,7 +40,7 @@ validTxSegments <- function(object)
     
 }
 
-validTxVariants <- function(object)
+validSGVariants <- function(object)
 {
 
     mcol_type <- c(
@@ -74,7 +74,7 @@ validSGFeatureCounts <- function(object)
     
 }
 
-validTxVariantCounts <- function(object)
+validSGVariantCounts <- function(object)
 {
 
     assay_type <- c(
@@ -211,17 +211,17 @@ setClass(
 )
 
 setClass(
-     Class = "TxSegments",
+     Class = "SGSegments",
      slots = c(unlistData = "SGFeatures"),
      contains = "GRangesList",
-     validity = validTxSegments
+     validity = validSGSegments
 )
 
 setClass(
-    Class = "TxVariants",
+    Class = "SGVariants",
     slots = c(unlistData = "SGFeatures"),
     contains = "GRangesList",
-    validity = validTxVariants
+    validity = validSGVariants
 )
 
 setClass(
@@ -232,17 +232,27 @@ setClass(
 )
 
 setClass(
-    Class = "TxVariantCounts",
-    slots = c(rowData = "TxVariants"),
+    Class = "SGVariantCounts",
+    slots = c(rowData = "SGVariants"),
     contains = "SummarizedExperiment",
-    validity = validTxVariantCounts
+    validity = validSGVariantCounts
 )
 
 setClassUnion("Features", c("TxFeatures", "SGFeatures"))
 
-setClassUnion("Paths", c("TxSegments", "TxVariants"))
+setClassUnion("Paths", c("SGSegments", "SGVariants"))
 
-setClassUnion("Counts", c("SGFeatureCounts", "TxVariantCounts"))
+setClassUnion("Counts", c("SGFeatureCounts", "SGVariantCounts"))
+
+setClass(
+    Class = "TxVariants",
+    contains = "SGVariants"
+)
+
+setClass(
+    Class = "TxVariantCounts",
+    contains = "SGVariantCounts"
+)
 
 ## Methods for extraColumnSlotNames
 
@@ -383,17 +393,17 @@ SGFeatures <- function(x, type = mcols(x)$type,
         
 }
 
-##' Creates an instance of S4 class \code{TxSegments} for storing
+##' Creates an instance of S4 class \code{SGSegments} for storing
 ##' transcript segments. 
 ##' 
-##' @title Constructor function for S4 class \code{TxSegments}
+##' @title Constructor function for S4 class \code{SGSegments}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer elementMetadata columns
-##' @return A \code{TxSegments} object
+##' @return A \code{SGSegments} object
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-TxSegments <- function(x)
+SGSegments <- function(x)
 {
 
     if (missing(x)) {
@@ -424,22 +434,22 @@ TxSegments <- function(x)
 
     }
     
-    new("TxSegments", x)
+    new("SGSegments", x)
 
 }
 
-##' Creates an instance of S4 class \code{TxVariants} for storing
+##' Creates an instance of S4 class \code{SGVariants} for storing
 ##' transcript variants. 
 ##' 
-##' @title Constructor function for S4 class \code{TxVariants}
+##' @title Constructor function for S4 class \code{SGVariants}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer elementMetadata columns
-##' @return A \code{TxVariants} object
+##' @return A \code{SGVariants} object
 ##' @examples
-##' txv <- TxVariants()
+##' sgv <- SGVariants()
 ##' @author Leonard Goldstein
 
-TxVariants <- function(x)
+SGVariants <- function(x)
 {
 
     if (missing(x)) {
@@ -482,7 +492,7 @@ TxVariants <- function(x)
 
     }
 
-    new("TxVariants", x)
+    new("SGVariants", x)
 
 }
 
@@ -514,18 +524,18 @@ SGFeatureCounts <- function(x)
 
 }
 
-##' Creates an instance of S4 class \code{TxVariantCounts} for storing
+##' Creates an instance of S4 class \code{SGVariantCounts} for storing
 ##' representative transcript variant counts.
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
-##' @param x \code{SummarizedExperiment} with \code{TxVariants}
+##' @param x \code{SummarizedExperiment} with \code{SGVariants}
 ##'   as \code{rowData} and appropriate assays
-##' @return A \code{TxVariantCounts} object
+##' @return A \code{SGVariantCounts} object
 ##' @examples
-##' txvc <- TxVariantCounts()
+##' sgvc <- SGVariantCounts()
 ##' @author Leonard Goldstein
 
-TxVariantCounts <- function(x)
+SGVariantCounts <- function(x)
 {
 
     if (missing(x)) {
@@ -537,10 +547,10 @@ TxVariantCounts <- function(x)
             countsTotal3p = matrix(integer(), 0, 0),
             variantFreq = matrix(numeric(), 0, 0))
 
-        x <- SummarizedExperiment(assays, rowData = TxVariants())
+        x <- SummarizedExperiment(assays, rowData = SGVariants())
 
     }
     
-    new("TxVariantCounts", x)
+    new("SGVariantCounts", x)
 
 }

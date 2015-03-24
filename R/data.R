@@ -56,10 +56,10 @@ NULL
 ##' Transcript variants for FBXO31, based on splice graph features predicted
 ##' from example BAM files.
 ##'
-##' @format A \code{TxVariants} object.
+##' @format A \code{SGVariants} object.
 ##' @keywords internal
 ##' @author Leonard Goldstein
-##' @name txv
+##' @name sgv
 NULL
 
 ##' Example transcript variant counts
@@ -67,8 +67,8 @@ NULL
 ##' Transcript variant counts and frequencies for FBXO31. Splice graph
 ##' features were predicted and counts obtained from example BAM files.
 ##'
-##' @format A \code{TxVariantCounts} object.
+##' @format A \code{SGVariantCounts} object.
 ##' @keywords internal
 ##' @author Leonard Goldstein
-##' @name txvc
+##' @name sgvc
 NULL

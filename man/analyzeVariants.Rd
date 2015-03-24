@@ -16,16 +16,16 @@ Set to \code{NA} to include all genes.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{TxVariantCounts} object
+A \code{SGVariantCounts} object
 }
 \description{
 High-level function for the analysis of transcript variants from
 splice graph features. Transcript variants are identified with
-\code{\link{findTxVariants}}. Representative counts and estimated
-variant frequencies are obtained with \code{\link{getTxVariantCounts}}.
+\code{\link{findSGVariants}}. Representative counts and estimated
+variant frequencies are obtained with \code{\link{getSGVariantCounts}}.
 }
 \examples{
-txvc <- analyzeVariants(sgfc)
+sgvc <- analyzeVariants(sgfc)
 }
 \author{
 Leonard Goldstein

@@ -5,7 +5,7 @@ spliceGraph <- function(features)
         
         features <- asGRanges(features)
 
-    } else if (is(features, "TxSegments")) {
+    } else if (is(features, "SGSegments")) {
         
         features <- asGRangesList(features)
 
@@ -360,14 +360,14 @@ findSegmentsPerGene <- function(g, geneID)
 ##'   Set to \code{NA} to include all genes.
 ##' @param annotate_events Logical indicating whether identified
 ##'   transcript variants should be annotated in terms of canonical events.
-##'   For details see help page for \code{\link{annotateTxVariants}}.
+##'   For details see help page for \code{\link{annotateSGVariants}}.
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{TxVariants} object
+##' @return A \code{SGVariants} object
 ##' @examples
-##' txv <- findTxVariants(sgf)
+##' sgv <- findSGVariants(sgf)
 ##' @author Leonard Goldstein
 
-findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
+findSGVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
     cores = 1)
 {
 
@@ -377,7 +377,7 @@ findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
 
     } 
 
-    variants <- findTxVariantsFromSGFeatures(features, maxnvariant, cores)
+    variants <- findSGVariantsFromSGFeatures(features, maxnvariant, cores)
 
     if (length(variants) == 0) {
 
@@ -390,7 +390,7 @@ findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
     if (annotate_events) {
 
         message("Annotate variants...")
-        variants <- annotateTxVariants(variants)
+        variants <- annotateSGVariants(variants)
 
     }
     
@@ -400,11 +400,11 @@ findTxVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
 
 }
 
-findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
+findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 {
 
     message("Find segments...")
-    segments <- convertToTxSegments(features, cores)
+    segments <- convertToSGSegments(features, cores)
 
     message("Find variants...")
     g <- spliceGraph(segments)
@@ -413,17 +413,17 @@ findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 
     if (length(geneIDs) == 0) {
 
-        return(TxVariants())
+        return(SGVariants())
 
     }
     
-    list_variant_info <- mclapply(geneIDs, findTxVariantsPerGene,
+    list_variant_info <- mclapply(geneIDs, findSGVariantsPerGene,
         g = g, maxnvariant = maxnvariant, mc.cores = cores)
     variant_info <- rbindListOfDFs(list_variant_info, cores)
 
     if (!is.na(maxnvariant) && nrow(variant_info) == 0) {
 
-        return(TxVariants())
+        return(SGVariants())
 
     }
 
@@ -444,7 +444,7 @@ findTxVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     variants <- split(features[match(unlist(variant_featureID),
         featureID(features))], togroup(variant_featureID))
     mcols(variants) <- variant_info
-    variants <- TxVariants(variants)
+    variants <- SGVariants(variants)
     variants <- annotatePaths(variants)
 
     return(variants)
@@ -531,7 +531,7 @@ getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
     
 }
 
-findTxVariantsPerGene <- function(g, geneID, maxnvariant)
+findSGVariantsPerGene <- function(g, geneID, maxnvariant)
 {
 
     ## Extract subgraph corresponding to geneID
@@ -833,13 +833,13 @@ findAllPaths <- function(from, to, path, ref, nodes)
 ##' canonical event.
 ##'
 ##' @title Annotate transcript variants in terms of canonical events
-##' @param variants \code{TxVariants} object
+##' @param variants \code{SGVariants} object
 ##' @return \code{variants} with added elementMetadata column
 ##'   \dQuote{variantType} indicating canonical event(s)
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-annotateTxVariants <- function(variants)
+annotateSGVariants <- function(variants)
 {
 
     ## asymmetric events
@@ -1185,7 +1185,7 @@ unmaskEvents <- function(x)
   
 }
 
-expandTxVariantCounts <- function(object, eventID = NULL, cores = 1)
+expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
 {
     
     variants <- rowRanges(object)
@@ -1219,7 +1219,7 @@ expandTxVariantCounts <- function(object, eventID = NULL, cores = 1)
 
     rd <- split(features[unlist(expanded_i)], togroup(expanded_i))
     mcols(rd) <- mcols(paths_expanded)
-    rd <- TxVariants(rd)
+    rd <- SGVariants(rd)
     
     object_expanded <- SummarizedExperiment(assays = list("variantFreq" = X),
         rowData = rd, colData = colData(object))
@@ -1239,10 +1239,10 @@ expandTxVariantCounts <- function(object, eventID = NULL, cores = 1)
 ##' variants in the same event (e.g. 1/2 refers to the first out of two
 ##' transcript variants in the event). TYPE is based on variantType.
 ##' @title Create interpretable transcript variant names 
-##' @param variants \code{TxVariants} object
+##' @param variants \code{SGVariants} object
 ##' @return Character vector with transcript variant names
 ##' @examples
-##' makeVariantNames(txv)
+##' makeVariantNames(sgv)
 ##' @author Leonard Goldstein
 
 makeVariantNames <- function(variants)

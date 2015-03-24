@@ -333,15 +333,15 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 
 ##' High-level function for the analysis of transcript variants from 
 ##' splice graph features. Transcript variants are identified with
-##' \code{\link{findTxVariants}}. Representative counts and estimated
-##' variant frequencies are obtained with \code{\link{getTxVariantCounts}}.
+##' \code{\link{findSGVariants}}. Representative counts and estimated
+##' variant frequencies are obtained with \code{\link{getSGVariantCounts}}.
 ##' 
 ##' @title Analysis of transcript variants
-##' @inheritParams findTxVariants
+##' @inheritParams findSGVariants
 ##' @param object \code{SGFeatureCounts} object
-##' @return A \code{TxVariantCounts} object
+##' @return A \code{SGVariantCounts} object
 ##' @examples
-##' txvc <- analyzeVariants(sgfc)
+##' sgvc <- analyzeVariants(sgfc)
 ##' @author Leonard Goldstein
 
 analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
@@ -350,12 +350,12 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
     if (!is(object, "SGFeatureCounts")) 
         stop("object must be an SGFeatureCounts object")
 
-    variants <- findTxVariants(
+    variants <- findSGVariants(
         features = rowRanges(object),
         maxnvariant = maxnvariant,
         cores = cores)
 
-    counts <- getTxVariantCounts(object, variants, cores)
+    counts <- getSGVariantCounts(object, variants, cores)
 
     return(counts)
 

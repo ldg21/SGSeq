@@ -3,49 +3,49 @@
 \docType{methods}
 \name{slots}
 \alias{closed3p}
-\alias{closed3p,TxVariantCounts-method}
-\alias{closed3p,TxVariants-method}
+\alias{closed3p,SGVariantCounts-method}
+\alias{closed3p,SGVariants-method}
 \alias{closed3p<-}
-\alias{closed3p<-,TxVariantCounts-method}
-\alias{closed3p<-,TxVariants-method}
+\alias{closed3p<-,SGVariantCounts-method}
+\alias{closed3p<-,SGVariants-method}
 \alias{closed5p}
-\alias{closed5p,TxVariantCounts-method}
-\alias{closed5p,TxVariants-method}
+\alias{closed5p,SGVariantCounts-method}
+\alias{closed5p,SGVariants-method}
 \alias{closed5p<-}
-\alias{closed5p<-,TxVariantCounts-method}
-\alias{closed5p<-,TxVariants-method}
+\alias{closed5p<-,SGVariantCounts-method}
+\alias{closed5p<-,SGVariants-method}
 \alias{eventID}
-\alias{eventID,TxVariantCounts-method}
-\alias{eventID,TxVariants-method}
+\alias{eventID,SGVariantCounts-method}
+\alias{eventID,SGVariants-method}
 \alias{eventID<-}
-\alias{eventID<-,TxVariantCounts-method}
-\alias{eventID<-,TxVariants-method}
+\alias{eventID<-,SGVariantCounts-method}
+\alias{eventID<-,SGVariants-method}
 \alias{featureID}
 \alias{featureID,Counts-method}
 \alias{featureID,Paths-method}
 \alias{featureID,SGFeatures-method}
 \alias{featureID3p}
-\alias{featureID3p,TxVariantCounts-method}
-\alias{featureID3p,TxVariants-method}
+\alias{featureID3p,SGVariantCounts-method}
+\alias{featureID3p,SGVariants-method}
 \alias{featureID3p<-}
-\alias{featureID3p<-,TxVariantCounts-method}
-\alias{featureID3p<-,TxVariants-method}
+\alias{featureID3p<-,SGVariantCounts-method}
+\alias{featureID3p<-,SGVariants-method}
 \alias{featureID5p}
-\alias{featureID5p,TxVariantCounts-method}
-\alias{featureID5p,TxVariants-method}
+\alias{featureID5p,SGVariantCounts-method}
+\alias{featureID5p,SGVariants-method}
 \alias{featureID5p<-}
-\alias{featureID5p<-,TxVariantCounts-method}
-\alias{featureID5p<-,TxVariants-method}
+\alias{featureID5p<-,SGVariantCounts-method}
+\alias{featureID5p<-,SGVariants-method}
 \alias{featureID<-}
 \alias{featureID<-,Counts-method}
 \alias{featureID<-,Paths-method}
 \alias{featureID<-,SGFeatures-method}
 \alias{from}
 \alias{from,Paths-method}
-\alias{from,TxVariantCounts-method}
+\alias{from,SGVariantCounts-method}
 \alias{from<-}
 \alias{from<-,Paths-method}
-\alias{from<-,TxVariantCounts-method}
+\alias{from<-,SGVariantCounts-method}
 \alias{geneID}
 \alias{geneID,Counts-method}
 \alias{geneID,Paths-method}
@@ -64,33 +64,33 @@
 \alias{geneName<-,Paths-method}
 \alias{segmentID}
 \alias{segmentID,Paths-method}
-\alias{segmentID,TxVariantCounts-method}
+\alias{segmentID,SGVariantCounts-method}
 \alias{segmentID<-}
 \alias{segmentID<-,Paths-method}
-\alias{segmentID<-,TxVariantCounts-method}
+\alias{segmentID<-,SGVariantCounts-method}
 \alias{slots}
 \alias{splice3p}
 \alias{splice3p,SGFeatureCounts-method}
 \alias{splice3p,SGFeatures-method}
-\alias{splice3p,TxSegments-method}
+\alias{splice3p,SGSegments-method}
 \alias{splice3p<-}
 \alias{splice3p<-,SGFeatureCounts-method}
 \alias{splice3p<-,SGFeatures-method}
-\alias{splice3p<-,TxSegments-method}
+\alias{splice3p<-,SGSegments-method}
 \alias{splice5p}
 \alias{splice5p,SGFeatureCounts-method}
 \alias{splice5p,SGFeatures-method}
-\alias{splice5p,TxSegments-method}
+\alias{splice5p,SGSegments-method}
 \alias{splice5p<-}
 \alias{splice5p<-,SGFeatureCounts-method}
 \alias{splice5p<-,SGFeatures-method}
-\alias{splice5p<-,TxSegments-method}
+\alias{splice5p<-,SGSegments-method}
 \alias{to}
 \alias{to,Paths-method}
-\alias{to,TxVariantCounts-method}
+\alias{to,SGVariantCounts-method}
 \alias{to<-}
 \alias{to<-,Paths-method}
-\alias{to<-,TxVariantCounts-method}
+\alias{to<-,SGVariantCounts-method}
 \alias{txName}
 \alias{txName,Counts-method}
 \alias{txName,Features-method}
@@ -108,23 +108,23 @@
 \alias{type<-,Features-method}
 \alias{type<-,Paths-method}
 \alias{variantID}
-\alias{variantID,TxVariantCounts-method}
-\alias{variantID,TxVariants-method}
+\alias{variantID,SGVariantCounts-method}
+\alias{variantID,SGVariants-method}
 \alias{variantID<-}
-\alias{variantID<-,TxVariantCounts-method}
-\alias{variantID<-,TxVariants-method}
+\alias{variantID<-,SGVariantCounts-method}
+\alias{variantID<-,SGVariants-method}
 \alias{variantName}
-\alias{variantName,TxVariantCounts-method}
-\alias{variantName,TxVariants-method}
+\alias{variantName,SGVariantCounts-method}
+\alias{variantName,SGVariants-method}
 \alias{variantName<-}
-\alias{variantName<-,TxVariantCounts-method}
-\alias{variantName<-,TxVariants-method}
+\alias{variantName<-,SGVariantCounts-method}
+\alias{variantName<-,SGVariants-method}
 \alias{variantType}
-\alias{variantType,TxVariantCounts-method}
-\alias{variantType,TxVariants-method}
+\alias{variantType,SGVariantCounts-method}
+\alias{variantType,SGVariants-method}
 \alias{variantType<-}
-\alias{variantType<-,TxVariantCounts-method}
-\alias{variantType<-,TxVariants-method}
+\alias{variantType<-,SGVariantCounts-method}
+\alias{variantType<-,SGVariants-method}
 \title{Accessing and replacing column slots}
 \usage{
 type(object)
@@ -261,115 +261,115 @@ featureID3p(object) <- value
 
 \S4method{splice5p}{SGFeatures}(object)
 
-\S4method{splice5p}{TxSegments}(object)
+\S4method{splice5p}{SGSegments}(object)
 
 \S4method{splice5p}{SGFeatureCounts}(object)
 
 \S4method{splice5p}{SGFeatures}(object) <- value
 
-\S4method{splice5p}{TxSegments}(object) <- value
+\S4method{splice5p}{SGSegments}(object) <- value
 
 \S4method{splice5p}{SGFeatureCounts}(object) <- value
 
 \S4method{splice3p}{SGFeatures}(object)
 
-\S4method{splice3p}{TxSegments}(object)
+\S4method{splice3p}{SGSegments}(object)
 
 \S4method{splice3p}{SGFeatureCounts}(object)
 
 \S4method{splice3p}{SGFeatures}(object) <- value
 
-\S4method{splice3p}{TxSegments}(object) <- value
+\S4method{splice3p}{SGSegments}(object) <- value
 
 \S4method{splice3p}{SGFeatureCounts}(object) <- value
 
 \S4method{segmentID}{Paths}(object)
 
-\S4method{segmentID}{TxVariantCounts}(object)
+\S4method{segmentID}{SGVariantCounts}(object)
 
 \S4method{segmentID}{Paths}(object) <- value
 
-\S4method{segmentID}{TxVariantCounts}(object) <- value
+\S4method{segmentID}{SGVariantCounts}(object) <- value
 
 \S4method{from}{Paths}(object)
 
-\S4method{from}{TxVariantCounts}(object)
+\S4method{from}{SGVariantCounts}(object)
 
 \S4method{from}{Paths}(object) <- value
 
-\S4method{from}{TxVariantCounts}(object) <- value
+\S4method{from}{SGVariantCounts}(object) <- value
 
 \S4method{to}{Paths}(object)
 
-\S4method{to}{TxVariantCounts}(object)
+\S4method{to}{SGVariantCounts}(object)
 
 \S4method{to}{Paths}(object) <- value
 
-\S4method{to}{TxVariantCounts}(object) <- value
+\S4method{to}{SGVariantCounts}(object) <- value
 
-\S4method{eventID}{TxVariants}(object)
+\S4method{eventID}{SGVariants}(object)
 
-\S4method{eventID}{TxVariantCounts}(object)
+\S4method{eventID}{SGVariantCounts}(object)
 
-\S4method{eventID}{TxVariants}(object) <- value
+\S4method{eventID}{SGVariants}(object) <- value
 
-\S4method{eventID}{TxVariantCounts}(object) <- value
+\S4method{eventID}{SGVariantCounts}(object) <- value
 
-\S4method{variantID}{TxVariants}(object)
+\S4method{variantID}{SGVariants}(object)
 
-\S4method{variantID}{TxVariantCounts}(object)
+\S4method{variantID}{SGVariantCounts}(object)
 
-\S4method{variantID}{TxVariants}(object) <- value
+\S4method{variantID}{SGVariants}(object) <- value
 
-\S4method{variantID}{TxVariantCounts}(object) <- value
+\S4method{variantID}{SGVariantCounts}(object) <- value
 
-\S4method{closed5p}{TxVariants}(object)
+\S4method{closed5p}{SGVariants}(object)
 
-\S4method{closed5p}{TxVariantCounts}(object)
+\S4method{closed5p}{SGVariantCounts}(object)
 
-\S4method{closed5p}{TxVariants}(object) <- value
+\S4method{closed5p}{SGVariants}(object) <- value
 
-\S4method{closed5p}{TxVariantCounts}(object) <- value
+\S4method{closed5p}{SGVariantCounts}(object) <- value
 
-\S4method{closed3p}{TxVariants}(object)
+\S4method{closed3p}{SGVariants}(object)
 
-\S4method{closed3p}{TxVariantCounts}(object)
+\S4method{closed3p}{SGVariantCounts}(object)
 
-\S4method{closed3p}{TxVariants}(object) <- value
+\S4method{closed3p}{SGVariants}(object) <- value
 
-\S4method{closed3p}{TxVariantCounts}(object) <- value
+\S4method{closed3p}{SGVariantCounts}(object) <- value
 
-\S4method{variantName}{TxVariants}(object)
+\S4method{variantName}{SGVariants}(object)
 
-\S4method{variantName}{TxVariantCounts}(object)
+\S4method{variantName}{SGVariantCounts}(object)
 
-\S4method{variantName}{TxVariants}(object) <- value
+\S4method{variantName}{SGVariants}(object) <- value
 
-\S4method{variantName}{TxVariantCounts}(object) <- value
+\S4method{variantName}{SGVariantCounts}(object) <- value
 
-\S4method{variantType}{TxVariants}(object)
+\S4method{variantType}{SGVariants}(object)
 
-\S4method{variantType}{TxVariantCounts}(object)
+\S4method{variantType}{SGVariantCounts}(object)
 
-\S4method{variantType}{TxVariants}(object) <- value
+\S4method{variantType}{SGVariants}(object) <- value
 
-\S4method{variantType}{TxVariantCounts}(object) <- value
+\S4method{variantType}{SGVariantCounts}(object) <- value
 
-\S4method{featureID5p}{TxVariants}(object)
+\S4method{featureID5p}{SGVariants}(object)
 
-\S4method{featureID5p}{TxVariantCounts}(object)
+\S4method{featureID5p}{SGVariantCounts}(object)
 
-\S4method{featureID5p}{TxVariants}(object) <- value
+\S4method{featureID5p}{SGVariants}(object) <- value
 
-\S4method{featureID5p}{TxVariantCounts}(object) <- value
+\S4method{featureID5p}{SGVariantCounts}(object) <- value
 
-\S4method{featureID3p}{TxVariants}(object)
+\S4method{featureID3p}{SGVariants}(object)
 
-\S4method{featureID3p}{TxVariantCounts}(object)
+\S4method{featureID3p}{SGVariantCounts}(object)
 
-\S4method{featureID3p}{TxVariants}(object) <- value
+\S4method{featureID3p}{SGVariants}(object) <- value
 
-\S4method{featureID3p}{TxVariantCounts}(object) <- value
+\S4method{featureID3p}{SGVariantCounts}(object) <- value
 }
 \arguments{
 \item{object}{Object containing column slot}

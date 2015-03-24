@@ -7,7 +7,7 @@
 makeVariantNames(variants)
 }
 \arguments{
-\item{variants}{\code{TxVariants} object}
+\item{variants}{\code{SGVariants} object}
 }
 \value{
 Character vector with transcript variant names
@@ -22,7 +22,7 @@ variants in the same event (e.g. 1/2 refers to the first out of two
 transcript variants in the event). TYPE is based on variantType.
 }
 \examples{
-makeVariantNames(txv)
+makeVariantNames(sgv)
 }
 \author{
 Leonard Goldstein

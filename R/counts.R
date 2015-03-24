@@ -343,14 +343,14 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 ##' @title Representative counts and frequency estimates for
 ##'   transcript variants
 ##' @param object \code{SGFeatureCounts} object
-##' @param variants \code{TxVariants} object
+##' @param variants \code{SGVariants} object
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{TxVariantCounts} object
+##' @return A \code{SGVariantCounts} object
 ##' @examples
-##' txvc <- getTxVariantCounts(sgfc, txv)
+##' sgvc <- getSGVariantCounts(sgfc, sgv)
 ##' @author Leonard Goldstein
 
-getTxVariantCounts <- function(object, variants, cores = 1)
+getSGVariantCounts <- function(object, variants, cores = 1)
 {
 
     if (any(table(eventID(variants)) == 1)) {
@@ -367,7 +367,7 @@ getTxVariantCounts <- function(object, variants, cores = 1)
 
     if (n_variants == 0) {
 
-        return(TxVariantCounts())
+        return(SGVariantCounts())
 
     }
     
@@ -404,7 +404,7 @@ getTxVariantCounts <- function(object, variants, cores = 1)
         colData = colData(object))
     colnames(SE) <- colnames(object)
     SE <- getVariantFreq(SE)
-    SE <- TxVariantCounts(SE)
+    SE <- SGVariantCounts(SE)
     
     return(SE)
     

@@ -189,7 +189,7 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' columns \dQuote{color} and \dQuote{label}, respectively.
 ##'
 ##' @title Plot splice graph
-##' @param x \code{SGFeatures} or \code{TxVariants} object
+##' @param x \code{SGFeatures} or \code{SGVariants} object
 ##' @param geneID Single gene identifier used to subset \code{x}
 ##' @param geneName Single gene name used to subset \code{x}
 ##' @param eventID Single event identifier used to subset \code{x}
@@ -239,8 +239,8 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   plotSpliceGraph(sgf_annotated)
 ##' }
 ##' \dontrun{
-##'   txv_annotated <- annotate(txv, txf)
-##'   plotSpliceGraph(txv_annotated)
+##'   sgv_annotated <- annotate(sgv, txf)
+##'   plotSpliceGraph(sgv_annotated)
 ##' }
 ##' @author Leonard Goldstein
 
@@ -257,9 +257,9 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     toscale <- match.arg(toscale)
     label <- match.arg(label)
 
-    if (!is(x, "SGFeatures") && !is(x, "TxVariants")) {
+    if (!is(x, "SGFeatures") && !is(x, "SGVariants")) {
 
-        stop("x must be an SGFeatures or TxVariants object")
+        stop("x must be an SGFeatures or SGVariants object")
 
     }
 
@@ -274,7 +274,7 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
 
     if (length(x) == 0) { return() }
 
-    if (is(x, "TxVariants")) {
+    if (is(x, "SGVariants")) {
         
         x <- extractFeaturesFromVariants(x)
 
@@ -883,14 +883,14 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' @title Plot splice graph and heatmap of variant frequencies
 ##' @inheritParams plotSpliceGraph
 ##' @inheritParams plotFeatures
-##' @param x \code{TxVariantCounts} object 
+##' @param x \code{SGVariantCounts} object 
 ##' @param transform Transformation applied to variant frequencies
 ##' @param expand_variants Experimental option - leave set to \code{FALSE}
 ##' @return Return value of \code{plotSpliceGraph}
 ##' @examples
 ##' \dontrun{
-##'   txvc_annotated <- annotate(txvc, txf)
-##'   plotVariants(txvc_annotated)
+##'   sgvc_annotated <- annotate(sgvc, txf)
+##'   plotVariants(sgvc_annotated)
 ##' }
 ##' @author Leonard Goldstein
 
@@ -909,12 +909,12 @@ plotVariants <- function(x, eventID = NULL,
 
     toscale <- match.arg(toscale)
 
-    if (!is(x, "TxVariantCounts")) {
+    if (!is(x, "SGVariantCounts")) {
 
-        stop("x must be a TxVariantCounts object")
+        stop("x must be an SGVariantCounts object")
 
     }
-    
+
     x <- subsetFeatures(x, eventID = eventID,
         expand_variants = expand_variants)
 
@@ -922,7 +922,7 @@ plotVariants <- function(x, eventID = NULL,
 
     if (expand_variants) {
     
-        x <- expandTxVariantCounts(x, eventID)
+        x <- expandSGVariantCounts(x, eventID)
 
     }
 

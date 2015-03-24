@@ -35,7 +35,7 @@ getContextSeq <- function(query = NULL, features, genome, translate = FALSE)
 
     ## obtain nucleotide sequence context
 
-    segments <- convertToTxSegments(features)
+    segments <- convertToSGSegments(features)
     context <- getContextFeatures(query, segments)
     exons_us <- getExons(context$upstream, features)
     exons_qu <- getExons(context$query, features)

@@ -54,11 +54,18 @@ convertToTxFeatures <- function(x)
     
     ## reduce ranges to ensure there are no adjacent exons
 
+    tx_unlisted <- unlist(tx)
+    mcols(tx_unlisted) <- NULL
+    tx <- relist(tx_unlisted, tx)   
     tx_reduced <- reduce(tx)
 
-    if (!identical(tx, tx_reduced)) {
+    if (sum(sum(width(tx))) != sum(sum(width(tx_reduced)))) {
 
-      warning("Merged adjacent or overlapping exons")
+        stop("x includes transcripts with overlapping exons")
+
+    } else if (!identical(tx, tx_reduced)) {
+
+        warning("Merged adjacent exons")
       
     }
 
@@ -507,7 +514,7 @@ addGeneID <- function(features)
 
 }
     
-convertToTxSegments <- function(x, cores = 1)
+convertToSGSegments <- function(x, cores = 1)
 {
 
     x_segmentID <- findSegments(x, cores)
@@ -536,7 +543,7 @@ convertToTxSegments <- function(x, cores = 1)
         segmentID = seq_along(segments),
         geneID = gd$geneID[i_first])
 
-    segments <- TxSegments(segments)
+    segments <- SGSegments(segments)
     segments <- annotatePaths(segments)
     
     return(segments)

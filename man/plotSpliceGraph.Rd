@@ -14,7 +14,7 @@ plotSpliceGraph(x, geneID = NULL, geneName = NULL, eventID = NULL,
   tx_dist = 0.2, tx_cex = 1, asp = 1)
 }
 \arguments{
-\item{x}{\code{SGFeatures} or \code{TxVariants} object}
+\item{x}{\code{SGFeatures} or \code{SGVariants} object}
 
 \item{geneID}{Single gene identifier used to subset \code{x}}
 
@@ -103,8 +103,8 @@ columns \dQuote{color} and \dQuote{label}, respectively.
   plotSpliceGraph(sgf_annotated)
 }
 \dontrun{
-  txv_annotated <- annotate(txv, txf)
-  plotSpliceGraph(txv_annotated)
+  sgv_annotated <- annotate(sgv, txf)
+  plotSpliceGraph(sgv_annotated)
 }
 }
 \author{

@@ -7,8 +7,8 @@
 annotate(query, subject)
 }
 \arguments{
-\item{query}{\code{SGFeatures}, \code{TxVariants},
-\code{SGFeatureCounts} or \code{TxVariantCounts} object}
+\item{query}{\code{SGFeatures}, \code{SGVariants},
+\code{SGFeatureCounts} or \code{SGVariantCounts} object}
 
 \item{subject}{\code{TxFeatures} object}
 }
@@ -38,7 +38,7 @@ extend across spliced subject exon boundaries.
 }
 \examples{
 sgf_annotated <- annotate(sgf, txf)
-txv_annotated <- annotate(txv, txf)
+sgv_annotated <- annotate(sgv, txf)
 }
 \author{
 Leonard Goldstein

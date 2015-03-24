@@ -16,7 +16,7 @@ plotVariants(x, eventID = NULL, toscale = c("exon", "none", "gene"),
   zlim = c(0, 1), heightTopPanel = 0.3, expand_variants = FALSE)
 }
 \arguments{
-\item{x}{\code{TxVariantCounts} object}
+\item{x}{\code{SGVariantCounts} object}
 
 \item{eventID}{Single event identifier used to subset \code{x}}
 
@@ -114,8 +114,8 @@ Plot splice graph and heatmap of variant frequencies
 }
 \examples{
 \dontrun{
-  txvc_annotated <- annotate(txvc, txf)
-  plotVariants(txvc_annotated)
+  sgvc_annotated <- annotate(sgvc, txf)
+  plotVariants(sgvc_annotated)
 }
 }
 \author{

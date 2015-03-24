@@ -69,7 +69,7 @@ setGeneric("geneName",
 setGeneric("geneName<-",
     function(object, value) standardGeneric("geneName<-"))
 
-## SGFeatures, TxSegments, TxVariants
+## SGFeatures, SGSegments, SGVariants
 
 ##' @rdname slots
 setGeneric("featureID",
@@ -87,7 +87,7 @@ setGeneric("geneID",
 setGeneric("geneID<-",
     function(object, value) standardGeneric("geneID<-"))
 
-## SGFeatures, TxSegments
+## SGFeatures, SGSegments
 
 ##' @rdname slots
 setGeneric("splice5p",
@@ -105,7 +105,7 @@ setGeneric("splice3p",
 setGeneric("splice3p<-",
     function(object, value) standardGeneric("splice3p<-"))
 
-## TxSegments, TxVariants
+## SGSegments, SGVariants
 
 ##' @rdname slots
 setGeneric("from",
@@ -131,7 +131,7 @@ setGeneric("segmentID",
 setGeneric("segmentID<-",
     function(object, value) standardGeneric("segmentID<-"))
 
-## TxVariants
+## SGVariants
 
 ##' @rdname slots
 setGeneric("variantID",
@@ -207,7 +207,7 @@ setGeneric("FPKM",
 setGeneric("FPKM<-",
     function(object, value) standardGeneric("FPKM<-"))
 
-## TxVariantCounts
+## SGVariantCounts
 
 ##' @rdname assays
 setGeneric("countsVariant5p",

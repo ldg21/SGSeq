@@ -10,25 +10,25 @@
 \alias{counts,SGFeatureCounts-method}
 \alias{counts<-,SGFeatureCounts-method}
 \alias{countsTotal3p}
-\alias{countsTotal3p,TxVariantCounts-method}
+\alias{countsTotal3p,SGVariantCounts-method}
 \alias{countsTotal3p<-}
-\alias{countsTotal3p<-,TxVariantCounts-method}
+\alias{countsTotal3p<-,SGVariantCounts-method}
 \alias{countsTotal5p}
-\alias{countsTotal5p,TxVariantCounts-method}
+\alias{countsTotal5p,SGVariantCounts-method}
 \alias{countsTotal5p<-}
-\alias{countsTotal5p<-,TxVariantCounts-method}
+\alias{countsTotal5p<-,SGVariantCounts-method}
 \alias{countsVariant3p}
-\alias{countsVariant3p,TxVariantCounts-method}
+\alias{countsVariant3p,SGVariantCounts-method}
 \alias{countsVariant3p<-}
-\alias{countsVariant3p<-,TxVariantCounts-method}
+\alias{countsVariant3p<-,SGVariantCounts-method}
 \alias{countsVariant5p}
-\alias{countsVariant5p,TxVariantCounts-method}
+\alias{countsVariant5p,SGVariantCounts-method}
 \alias{countsVariant5p<-}
-\alias{countsVariant5p<-,TxVariantCounts-method}
+\alias{countsVariant5p<-,SGVariantCounts-method}
 \alias{variantFreq}
-\alias{variantFreq,TxVariantCounts-method}
+\alias{variantFreq,SGVariantCounts-method}
 \alias{variantFreq<-}
-\alias{variantFreq<-,TxVariantCounts-method}
+\alias{variantFreq<-,SGVariantCounts-method}
 \title{Accessing and replacing assay data}
 \usage{
 FPKM(object)
@@ -63,25 +63,25 @@ variantFreq(object) <- value
 
 \S4method{FPKM}{SGFeatureCounts}(object) <- value
 
-\S4method{countsVariant5p}{TxVariantCounts}(object)
+\S4method{countsVariant5p}{SGVariantCounts}(object)
 
-\S4method{countsVariant5p}{TxVariantCounts}(object) <- value
+\S4method{countsVariant5p}{SGVariantCounts}(object) <- value
 
-\S4method{countsVariant3p}{TxVariantCounts}(object)
+\S4method{countsVariant3p}{SGVariantCounts}(object)
 
-\S4method{countsVariant3p}{TxVariantCounts}(object) <- value
+\S4method{countsVariant3p}{SGVariantCounts}(object) <- value
 
-\S4method{countsTotal5p}{TxVariantCounts}(object)
+\S4method{countsTotal5p}{SGVariantCounts}(object)
 
-\S4method{countsTotal5p}{TxVariantCounts}(object) <- value
+\S4method{countsTotal5p}{SGVariantCounts}(object) <- value
 
-\S4method{countsTotal3p}{TxVariantCounts}(object)
+\S4method{countsTotal3p}{SGVariantCounts}(object)
 
-\S4method{countsTotal3p}{TxVariantCounts}(object) <- value
+\S4method{countsTotal3p}{SGVariantCounts}(object) <- value
 
-\S4method{variantFreq}{TxVariantCounts}(object)
+\S4method{variantFreq}{SGVariantCounts}(object)
 
-\S4method{variantFreq}{TxVariantCounts}(object) <- value
+\S4method{variantFreq}{SGVariantCounts}(object) <- value
 }
 \arguments{
 \item{object}{Object containing assay data}
