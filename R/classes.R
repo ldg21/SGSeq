@@ -226,14 +226,14 @@ setClass(
 
 setClass(
     Class = "SGFeatureCounts",
-    slots = c(rowData = "SGFeatures"),
+    slots = c(rowRanges = "SGFeatures"),
     contains = "SummarizedExperiment",
     validity = validSGFeatureCounts
 )
 
 setClass(
     Class = "SGVariantCounts",
-    slots = c(rowData = "SGVariants"),
+    slots = c(rowRanges = "SGVariants"),
     contains = "SummarizedExperiment",
     validity = validSGVariantCounts
 )
@@ -501,7 +501,7 @@ SGVariants <- function(x)
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{SummarizedExperiment} with \code{SGFeatures}
-##'   as \code{rowData} and assays \dQuote{counts}, \dQuote{FPKM}
+##'   as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}
 ##' @return An \code{SGFeatureCounts} object
 ##' @examples
 ##' sgfc <- SGFeatureCounts()
@@ -516,7 +516,7 @@ SGFeatureCounts <- function(x)
             counts = matrix(integer(), 0, 0),
             FPKM = matrix(numeric(), 0, 0))
 
-        x <- SummarizedExperiment(assays, rowData = SGFeatures())
+        x <- SummarizedExperiment(assays, rowRanges = SGFeatures())
         
     }
 
@@ -529,7 +529,7 @@ SGFeatureCounts <- function(x)
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{SummarizedExperiment} with \code{SGVariants}
-##'   as \code{rowData} and appropriate assays
+##'   as \code{rowRanges} and appropriate assays
 ##' @return A \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- SGVariantCounts()
@@ -547,7 +547,7 @@ SGVariantCounts <- function(x)
             countsTotal3p = matrix(integer(), 0, 0),
             variantFreq = matrix(numeric(), 0, 0))
 
-        x <- SummarizedExperiment(assays, rowData = SGVariants())
+        x <- SummarizedExperiment(assays, rowRanges = SGVariants())
 
     }
     

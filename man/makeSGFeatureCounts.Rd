@@ -4,10 +4,10 @@
 \alias{makeSGFeatureCounts}
 \title{Create \code{SGFeatureCounts} object}
 \usage{
-makeSGFeatureCounts(rowData, colData, counts)
+makeSGFeatureCounts(rowRanges, colData, counts)
 }
 \arguments{
-\item{rowData}{An \code{SGFeatures} object}
+\item{rowRanges}{An \code{SGFeatures} object}
 
 \item{colData}{Data frame with sample information}
 
@@ -17,7 +17,7 @@ makeSGFeatureCounts(rowData, colData, counts)
 An \code{SGFeatureCounts} object
 }
 \description{
-Create \code{SGFeatureCounts} object from rowData, colData and counts.
+Create \code{SGFeatureCounts} object from rowRanges, colData and counts.
 }
 \examples{
 sgfc <- makeSGFeatureCounts(sgf, si, matrix(0L, length(sgf), nrow(si)))

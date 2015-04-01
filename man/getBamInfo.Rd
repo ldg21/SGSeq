@@ -4,7 +4,8 @@
 \alias{getBamInfo}
 \title{Obtain alignment information from BAM files}
 \usage{
-getBamInfo(sample_info, yieldSize = NULL, BPPARAM = MulticoreParam(1))
+getBamInfo(sample_info, yieldSize = NULL, verbose = FALSE,
+  BPPARAM = MulticoreParam(1))
 }
 \arguments{
 \item{sample_info}{Data frame with sample information including
@@ -12,6 +13,8 @@ mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 
 \item{yieldSize}{Number of records used for obtaining alignment
 information, or \code{NULL} for all records}
+
+\item{verbose}{If \code{TRUE}, print messages indicating progress.}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in
 parallel, defaults to \code{MulticoreParam(1)}}

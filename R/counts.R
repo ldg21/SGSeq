@@ -194,9 +194,9 @@ convertSlots <- function(x)
     
 }
 
-##' Create \code{SGFeatureCounts} object from rowData, colData and counts.
+##' Create \code{SGFeatureCounts} object from rowRanges, colData and counts.
 ##' @title Create \code{SGFeatureCounts} object
-##' @param rowData An \code{SGFeatures} object
+##' @param rowRanges An \code{SGFeatures} object
 ##' @param colData Data frame with sample information 
 ##' @param counts Integer matrix of counts
 ##' @return An \code{SGFeatureCounts} object
@@ -204,12 +204,12 @@ convertSlots <- function(x)
 ##' sgfc <- makeSGFeatureCounts(sgf, si, matrix(0L, length(sgf), nrow(si)))
 ##' @author Leonard Goldstein
 
-makeSGFeatureCounts <- function(rowData, colData, counts)
+makeSGFeatureCounts <- function(rowRanges, colData, counts)
 {
 
     colnames(counts) <- colData$sample_name    
     x <- SummarizedExperiment(assays = list(counts = counts),
-        rowData = rowData, colData = DataFrame(colData))
+        rowRanges = rowRanges, colData = DataFrame(colData))
     colnames(x) <- colData$sample_name
     x <- getScaledCounts(x)
     x <- SGFeatureCounts(x)
@@ -400,7 +400,7 @@ getSGVariantCounts <- function(object, variants, cores = 1)
         "countsVariant3p" = variant_x_end,
         "countsTotal3p" = variant_x_end_total)
 
-    SE <- SummarizedExperiment(assays = assays, rowData = variants,
+    SE <- SummarizedExperiment(assays = assays, rowRanges = variants,
         colData = colData(object))
     colnames(SE) <- colnames(object)
     SE <- getVariantFreq(SE)

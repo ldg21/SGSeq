@@ -6,6 +6,7 @@ import(IRanges)
 import(GenomicAlignments)
 import(GenomicRanges)
 import(methods)
+import(Rsamtools)
 import(S4Vectors)
 
 ## IMPORT FUNCTIONS
@@ -18,7 +19,6 @@ importFrom(igraph, clusters, degree, edge.connectivity, get.data.frame,
 importFrom(GenomicFeatures, exonsBy, mapToTranscripts)
 importFrom(GenomeInfoDb, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply)
-importFrom(Rsamtools, BamFile, scanBam, ScanBamParam, 'bamWhat<-')
 importFrom(rtracklayer, export)
 
 ## IMPORT CLASSES

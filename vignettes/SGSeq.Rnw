@@ -74,8 +74,8 @@ from the original BAM files using function \Rfunction{getBamInfo}.
 We set the correct BAM file paths in the sample information.
 
 <<>>=
-dir <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(dir, "bams", si$file_bam)
+path <- system.file("extdata", package = "SGSeq")
+si$file_bam <- file.path(path, "bams", si$file_bam)
 @ 
 
 We obtain transcript annotation from the UCSC knownGene table, 
@@ -141,7 +141,7 @@ sgfc <- analyzeFeatures(si, features = txf_annotated)
 object, which extends the \Rclass{SummarizedExperiment} class from the 
 \Biocpkg{GenomicRanges} package. \Rclass{SGFeatureCounts} contains
 sample information as \Rcode{colData}, splice graph features as
-\Rcode{rowData} and assays \Rcode{counts} and \Rcode{FPKM}, 
+\Rcode{rowRanges} and assays \Rcode{counts} and \Rcode{FPKM}, 
 which store compatible counts and FPKMs for each splice graph feature 
 and sample, respectively. Accessor functions \Rfunction{colData},
 \Rfunction{rowRanges}, \Rfunction{counts} and \Rfunction{FPKM} can be used
@@ -198,7 +198,7 @@ sgvc <- analyzeVariants(sgfc)
 Similar to \Rclass{SGFeatureCounts}, \Rclass{SGVariantCounts} extends
 the \Rclass{SummarizedExperiment} class from the \Biocpkg{GenomicRanges} 
 package. \Rclass{SGVariantCounts} contains sample information as
-\Rcode{colData} and transcript variants as \Rcode{rowData}. 
+\Rcode{colData} and transcript variants as \Rcode{rowRanges}. 
 Assay \Rcode{variantFreq} stores frequency estimates
 for each transcript variant and sample. Accessor functions 
 \Rfunction{colData}, \Rfunction{rowRanges} and \Rfunction{variantFreq} 

@@ -8,7 +8,7 @@ SGVariantCounts(x)
 }
 \arguments{
 \item{x}{\code{SummarizedExperiment} with \code{SGVariants}
-as \code{rowData} and appropriate assays}
+as \code{rowRanges} and appropriate assays}
 }
 \value{
 A \code{SGVariantCounts} object

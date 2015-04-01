@@ -8,7 +8,7 @@ SGFeatureCounts(x)
 }
 \arguments{
 \item{x}{\code{SummarizedExperiment} with \code{SGFeatures}
-as \code{rowData} and assays \dQuote{counts}, \dQuote{FPKM}}
+as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}}
 }
 \value{
 An \code{SGFeatureCounts} object

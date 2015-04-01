@@ -91,40 +91,45 @@ pos2gr <- function(x)
 readGap <- function(file, paired_end, which = NULL)
 {
 
-    if (is.null(which)) {
+    ## the following flags are set by functions
+    ## readGAlignments and readGAlignmentPairs
+    ## - isUnmappedQuery
+    ## - isPaired
+    ## - hasUnmappedMate
 
-        param <- ScanBamParam(tag = "XS")
-        
-    } else {
+    flag <- scanBamFlag(isSecondaryAlignment = FALSE)
+    param <- ScanBamParam(flag = flag, tag = "XS")
+    
+    if (!is.null(which)) {
 
-        param <- ScanBamParam(tag = "XS", which = reduce(which))
+        bamWhich(param) <- reduce(which)
 
     }
 
     if (paired_end) {
       
-        ## gap <- suppressWarnings(readGAlignmentPairs(file = file,
-        ##     param = param))
+        gap <- suppressWarnings(readGAlignmentPairs(file = file,
+            param = param))
 
-        ## scanBam bug workaround start
-        bamWhat(param) <- c("flag", "mrnm", "mpos")
-        ga <- readGAlignments(file = file, use.names = TRUE, param = param)
-        gap <- makeGAlignmentPairs(ga, use.names = TRUE, use.mcols = TRUE)
-        names(gap) <- NULL
-        ## scanBam bug workaround end
+        ## scanBam workaround start
+        ## bamWhat(param) <- c("flag", "mrnm", "mpos")
+        ## ga <- readGAlignments(file = file, use.names = TRUE, param = param)
+        ## gap <- makeGAlignmentPairs(ga, use.names = TRUE, use.mcols = TRUE)
+        ## names(gap) <- NULL
+        ## scanBam workaround end
       
         gap <- propagateXS(gap)
 
     } else {
 
         gap <- suppressWarnings(readGAlignments(file = file, param = param))
-
+        
     }
 
     gap <- filterGap(gap)
     
     strand(gap) <- XS2strand(mcols(gap)$XS)
-    
+
     return(gap)
 
 }
@@ -226,7 +231,7 @@ completeMcols <- function(x, include_counts, retain_coverage)
 
 }
 
-getBamInfoPerSample <- function(file_bam, yieldSize = NULL)
+getBamInfoPerSample <- function(file_bam, yieldSize, verbose, sample_name)
 {
 
     if (is.null(yieldSize)) {
@@ -239,10 +244,20 @@ getBamInfoPerSample <- function(file_bam, yieldSize = NULL)
 
     }
 
-    param <- ScanBamParam(what = c("qname", "qwidth", "mrnm", "isize"))
-    
+    flag <- scanBamFlag(isUnmappedQuery = FALSE, isSecondaryAlignment = FALSE)
+    what <- c("qname", "flag", "qwidth", "isize")
+    param <- ScanBamParam(flag = flag, what = what, tag = "XS")
     bam <- scanBam(file = file, param = param)[[1]]
-    paired_end <- !all(is.na(bam$mrnm))
+
+    if (is.null(bam$tag$XS)) {
+
+        msg <- "Warning: no XS tag detected"
+        if (!is.null(sample_name)) msg <- paste(msg, "in", sample_name)
+        message(msg)
+
+    }
+      
+    paired_end <- any(bamFlagTest(bam$flag, "isPaired"))
     read_length <- median(bam$qwidth, na.rm = TRUE)
 
     if (paired_end) {
@@ -267,6 +282,12 @@ getBamInfoPerSample <- function(file_bam, yieldSize = NULL)
         
     } 
 
+    if (verbose && !is.null(sample_name)) {
+
+        message(paste(sample_name, "complete."))
+
+    }
+    
     return(x)
     
 }

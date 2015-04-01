@@ -147,6 +147,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' Note that library size can only be obtained if \code{yieldSize} is {NULL}.
 ##' 
 ##' @title Obtain alignment information from BAM files
+##' @inheritParams predictTxFeaturesPerSample
 ##' @param sample_info Data frame with sample information including
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
 ##' @param yieldSize Number of records used for obtaining alignment
@@ -163,7 +164,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' si_complete <- getBamInfo(si)
 ##' @author Leonard Goldstein
 
-getBamInfo <- function(sample_info, yieldSize = NULL,
+getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
     BPPARAM = MulticoreParam(1))
 {
 
@@ -171,10 +172,11 @@ getBamInfo <- function(sample_info, yieldSize = NULL,
         stop("sample_info must be a data frame including
             character columns sample_name, file_bam")
 
-    list_bamInfo <- bplapply(
-        sample_info$file_bam,
+    list_bamInfo <- bpmapply(
         getBamInfoPerSample,
-        yieldSize = yieldSize,
+        file_bam = sample_info$file_bam,
+        sample_name = sample_info$sample_name,
+        MoreArgs = list(yieldSize = yieldSize, verbose = verbose),
         BPPARAM = BPPARAM
     )
     
@@ -323,7 +325,7 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
     if (counts_only) return(counts)
     
     sgfc <- makeSGFeatureCounts(
-        rowData = features,
+        rowRanges = features,
         colData = sample_info,
         counts = counts)
     
