@@ -21,6 +21,10 @@ importFrom(parallel, mclapply)
 importFrom(Rsamtools, BamFile, scanBam, ScanBamParam, 'bamWhat<-')
 importFrom(rtracklayer, export)
 
+## IMPORT CLASSES
+
+importClassesFrom(rtracklayer, GenomicRangesORGenomicRangesList)
+
 ## EXPORT FUNCTIONS
 
 export(

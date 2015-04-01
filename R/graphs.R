@@ -520,6 +520,7 @@ getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
     variant_rep_id <- IntegerList(variant_rep_id)
     
     ## exclude variants due to open events or ambiguous features
+
     event_dup <- tapply(unlist(variant_rep_id),
         variant_info$eventID[togroup(variant_rep_id)],
         function(x) { any(duplicated(x)) })
