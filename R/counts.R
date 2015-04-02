@@ -472,6 +472,12 @@ getVariantFreq <- function(SE)
     X <- U/V
     X[is.na(X)] <- NA_real_
 
+    ## now need replacement value for
+    ## SummarizedExperiment assays
+    ## to have dimnames identical to
+    ## SummarizedExperiment dimnames
+    dimnames(X) <- dimnames(SE)
+    
     assay(SE, "variantFreq") <- X
         
     return(SE)

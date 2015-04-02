@@ -372,7 +372,11 @@ setMethod("counts", "SGFeatureCounts",
 
 ##' @rdname assays
 setReplaceMethod("counts", "SGFeatureCounts",
-    function(object, value) { assay(object, "counts") <- value; object })
+    function(object, value) {
+        dimnames(value) <- dimnames(object)
+        assay(object, "counts") <- value
+        object
+    })
 
 ##' @rdname assays
 setMethod("FPKM", "SGFeatureCounts",
@@ -380,7 +384,11 @@ setMethod("FPKM", "SGFeatureCounts",
 
 ##' @rdname assays
 setReplaceMethod("FPKM", "SGFeatureCounts",
-    function(object, value) { assay(object, "FPKM") <- value; object })
+    function(object, value) {
+        dimnames(value) <- dimnames(object)
+        assay(object, "FPKM") <- value
+        object
+    })
 
 ## TransriptVariantCounts
 
@@ -391,7 +399,10 @@ setMethod("countsVariant5p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsVariant5p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsVariant5p") <- value; object })
+        dimnames(value) <- dimnames(object)
+        assay(object, "countsVariant5p") <- value
+        object
+    })
 
 ##' @rdname assays
 setMethod("countsVariant3p", "SGVariantCounts",
@@ -400,7 +411,10 @@ setMethod("countsVariant3p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsVariant3p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsVariant3p") <- value; object })
+        dimnames(value) <- dimnames(object)
+        assay(object, "countsVariant3p") <- value
+        object
+    })
 
 ##' @rdname assays
 setMethod("countsTotal5p", "SGVariantCounts",
@@ -409,7 +423,10 @@ setMethod("countsTotal5p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsTotal5p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsTotal5p") <- value; object })
+        dimnames(value) <- dimnames(object)
+        assay(object, "countsTotal5p") <- value
+        object
+    })
 
 ##' @rdname assays
 setMethod("countsTotal3p", "SGVariantCounts",
@@ -418,7 +435,10 @@ setMethod("countsTotal3p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsTotal3p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsTotal3p") <- value; object })
+        dimnames(value) <- dimnames(object)
+        assay(object, "countsTotal3p") <- value
+        object
+    })
 
 ##' @rdname assays
 setMethod("variantFreq", "SGVariantCounts",
@@ -426,4 +446,8 @@ setMethod("variantFreq", "SGVariantCounts",
 
 ##' @rdname assays
 setReplaceMethod("variantFreq", "SGVariantCounts",
-    function(object, value) { assay(object, "variantFreq") <- value; object })
+    function(object, value) {
+        dimnames(value) <- dimnames(object)
+        assay(object, "variantFreq") <- value
+        object
+    })
