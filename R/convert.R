@@ -358,6 +358,12 @@ convertToSGFeatures <- function(x, coerce = FALSE)
 
     }
 
+    if (length(x) == 0) {
+
+        return(SGFeatures())
+
+    }
+    
     if (coerce) {
 
         features <- granges(x)
@@ -517,7 +523,7 @@ addGeneID <- function(features)
 convertToSGSegments <- function(x, cores = 1)
 {
 
-    x_segmentID <- findSegments(x, cores)
+    x_segmentID <- findSGSegments(x, cores)
 
     i <- which(!is.na(x_segmentID))
     segments <- split(x[i], x_segmentID[i])

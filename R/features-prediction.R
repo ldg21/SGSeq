@@ -74,18 +74,17 @@
 ##'   High complexity regions are often due to spurious read alignments
 ##'   and can significantly slow down processing. 
 ##'   To disable this filter, set to \code{NA}.
-##' @param verbose If \code{TRUE}, print messages indicating progress.
-##' @param sample_name Optional sample name, used in messages.
+##' @param verbose If \code{TRUE}, generate messages indicating progress
+##' @param sample_name Sample name used in messages
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-predictTxFeaturesPerSample <- function(file_bam, which = NULL,
-    paired_end, read_length = NULL, frag_length = NULL, lib_size = NULL,
-    min_junction_count = NULL, alpha = NULL, psi, beta, gamma,
-    include_counts = TRUE, retain_coverage = FALSE, junctions_only = FALSE,
-    max_complexity = 20, verbose = FALSE, sample_name = NULL, cores = 1)
+predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
+    read_length, frag_length, lib_size, min_junction_count,
+    alpha, psi, beta, gamma, include_counts, retain_coverage,
+    junctions_only, max_complexity, verbose, sample_name, cores)
 {
 
     if (is.null(min_junction_count) && is.null(alpha)) {
@@ -130,10 +129,10 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
     }
 
     list_which <- split(which, seq_along(which))
-    
+
     list_features <- mclapply(
         list_which,
-        predictTxFeaturesRanges,
+        predictTxFeaturesPerStrand,
         file_bam = file_bam,
         paired_end = paired_end,
         min_junction_count = min_junction_count,
@@ -144,18 +143,31 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
         retain_coverage = retain_coverage,
         junctions_only = junctions_only,
         max_complexity = max_complexity,
-        verbose = verbose,
         sample_name = sample_name,
+        verbose = verbose,
         mc.preschedule = FALSE,
         mc.cores = cores)
-    
+
+    checkApplyResultsForErrors(
+        list_features,
+        "predictTxFeaturesPerStrand",
+        gr2co(unlist(range(list_which))))
+
     list_features <- list_features[!sapply(list_features, is.null)]
 
-    if (length(list_features) == 0) { return(TxFeatures()) }
+    if (length(list_features) == 0) {
+
+        features <- TxFeatures()
+
+    } else {
     
-    features <- do.call(c, setNames(list_features, NULL))
-    features <- sort(features)
-    features <- TxFeatures(features)
+        features <- do.call(c, setNames(list_features, NULL))
+        features <- sort(features)
+        features <- TxFeatures(features)
+
+    }
+    
+    if (verbose) generateCompleteMessage(sample_name)
     
     return(features)
     
@@ -168,14 +180,11 @@ predictTxFeaturesPerSample <- function(file_bam, which = NULL,
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-predictTxFeaturesRanges <- function(file_bam, paired_end, which,
+predictTxFeaturesPerStrand <- function(file_bam, paired_end, which,
     min_junction_count, psi, beta, gamma, include_counts, retain_coverage,
-    junctions_only, max_complexity, verbose, sample_name)
+    junctions_only, max_complexity, sample_name, verbose)
 {
 
-    if (is.null(sample_name)) prefix <- ""
-    else prefix <- paste0(sample_name, ": ")
-    
     seqlevel <- as.character(seqnames(which))
     strand <- as.character(strand(which))
     
@@ -186,28 +195,31 @@ predictTxFeaturesRanges <- function(file_bam, paired_end, which,
     
     if (length(gap) == 0) {
 
-        if (verbose) message(paste0(prefix, gr2co(which), " complete."))
-        return()
+        gr <- NULL
 
-    }
+    } else {
 
-    frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
-    frag_intron <- ranges(junctions(gap))
+        frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
+        frag_intron <- ranges(junctions(gap))
     
-    ir <- predictSpliced(frag_exonic, frag_intron, min_junction_count,
-        psi, beta, gamma, include_counts, retain_coverage, junctions_only,
-        max_complexity, sample_name, seqlevel, strand)
+        ir <- predictSpliced(frag_exonic, frag_intron, min_junction_count,
+            psi, beta, gamma, include_counts, retain_coverage, junctions_only,
+            max_complexity, sample_name, seqlevel, strand)
 
-    if (is.null(ir)) {
-      
-        if (verbose) message(paste0(prefix, gr2co(which), " complete."))
-        return()
+        if (is.null(ir)) {
+
+            gr <- NULL
+
+        } else {
+
+            gr <- constructGRangesFromRanges(ir, seqlevel, strand, si)
+
+        }
 
     }
         
-    gr <- constructGRangesFromRanges(ir, seqlevel, strand, si)
-
-    if (verbose) message(paste0(prefix, gr2co(which), " complete."))    
+    if (verbose) generateCompleteMessage(paste(sample_name, gr2co(which)))
+    
     return(gr)
     
 }
@@ -255,9 +267,11 @@ predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
                 islands <- islands[!islands %over% excl]
 
                 excl_str <- co2str(seqlevel, start(excl), end(excl), strand)
-                msg <- paste("Warning: skipping", excl_str)
-                if (!is.null(sample_name)) msg <- paste(msg, "in", sample_name)
-                message(paste(msg, collapse = "\n"))
+
+                generateWarningMessage(
+                    "predictSpliced",
+                    sample_name, 
+                    paste("skipping", excl_str))
             
             }
 

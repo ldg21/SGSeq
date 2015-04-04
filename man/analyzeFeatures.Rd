@@ -57,7 +57,7 @@ High complexity regions are often due to spurious read alignments
 and can significantly slow down processing.
 To disable this filter, set to \code{NA}.}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{cores_per_sample}{Number of cores per sample}
 
@@ -95,8 +95,8 @@ Finally, compatible fragment counts for splice graph features are
 obtained from BAM files with \code{\link{getSGFeatureCounts}}.
 }
 \examples{
-dir <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(dir, "bams", si$file_bam)
+path <- system.file("extdata", package = "SGSeq")
+si$file_bam <- file.path(path, "bams", si$file_bam)
 sgfc <- analyzeFeatures(si, gr)
 }
 \author{

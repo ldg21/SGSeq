@@ -4,11 +4,10 @@
 \alias{predictTxFeaturesPerSample}
 \title{Identification of splice junctions and exons from BAM file}
 \usage{
-predictTxFeaturesPerSample(file_bam, which = NULL, paired_end,
-  read_length = NULL, frag_length = NULL, lib_size = NULL,
-  min_junction_count = NULL, alpha = NULL, psi, beta, gamma,
-  include_counts = TRUE, retain_coverage = FALSE, junctions_only = FALSE,
-  max_complexity = 20, verbose = FALSE, sample_name = NULL, cores = 1)
+predictTxFeaturesPerSample(file_bam, which, paired_end, read_length,
+  frag_length, lib_size, min_junction_count, alpha, psi, beta, gamma,
+  include_counts, retain_coverage, junctions_only, max_complexity, verbose,
+  sample_name, cores)
 }
 \arguments{
 \item{file_bam}{BAM file with genomic RNA-seq read alignments}
@@ -65,9 +64,9 @@ High complexity regions are often due to spurious read alignments
 and can significantly slow down processing.
 To disable this filter, set to \code{NA}.}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
-\item{sample_name}{Optional sample name, used in messages.}
+\item{sample_name}{Sample name used in messages}
 
 \item{cores}{Number of cores available for parallel processing}
 }

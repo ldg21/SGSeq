@@ -36,8 +36,8 @@
 ##' @param annotation \code{TxFeatures} object used for annotation
 ##' @return \code{SGFeatureCounts} object
 ##' @examples
-##' dir <- system.file("extdata", package = "SGSeq")
-##' si$file_bam <- file.path(dir, "bams", si$file_bam)
+##' path <- system.file("extdata", package = "SGSeq")
+##' si$file_bam <- file.path(path, "bams", si$file_bam)
 ##' sgfc <- analyzeFeatures(si, gr)
 ##' @author Leonard Goldstein
 
@@ -48,10 +48,8 @@ analyzeFeatures <- function(sample_info, which = NULL,
     max_complexity = 20, verbose = FALSE,
     cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
-    
-    if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data frame including
-            character columns sample_name, file_bam")
+
+    checkSampleInfo(sample_info)
     
     if (is.null(features) && !predict)
         stop("cannot have features NULL and predict FALSE")
@@ -62,15 +60,6 @@ analyzeFeatures <- function(sample_info, which = NULL,
     if (!is.null(annotation) && !is(annotation, "TxFeatures"))
         stop("annotation must be a TxFeatures object")
     
-    if (!validBamInfo(sample_info)) {
-
-        message("Obtain BAM info...")        
-        sample_info <- getBamInfo(
-            sample_info = sample_info,
-            BPPARAM = BPPARAM)
-
-    }
-
     if (predict) {
 
         message("Predict features...")
@@ -158,8 +147,8 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##'   \dQuote{read_length}, \dQuote{frag_length}, and \dQuote{lib_size}
 ##'   if \code{yieldSize} is \code{NULL}
 ##' @examples 
-##' dir <- system.file("extdata", package = "SGSeq")
-##' si$file_bam <- file.path(dir, "bams", si$file_bam)
+##' path <- system.file("extdata", package = "SGSeq")
+##' si$file_bam <- file.path(path, "bams", si$file_bam)
 ##' si <- si[, c("sample_name", "file_bam")]
 ##' si_complete <- getBamInfo(si)
 ##' @author Leonard Goldstein
@@ -168,21 +157,32 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
     BPPARAM = MulticoreParam(1))
 {
 
-    if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data frame including
-            character columns sample_name, file_bam")
+    checkSampleInfo(sample_info, FALSE)
 
     list_bamInfo <- bpmapply(
         getBamInfoPerSample,
         file_bam = sample_info$file_bam,
         sample_name = sample_info$sample_name,
-        MoreArgs = list(yieldSize = yieldSize, verbose = verbose),
+        MoreArgs = list(
+            yieldSize = yieldSize,
+            verbose = verbose),
+        SIMPLIFY = FALSE,
         BPPARAM = BPPARAM
     )
-    
+
+    checkApplyResultsForErrors(
+        list_bamInfo,
+        "getBamInfoPerSample",
+        sample_info$sample_name)
+
     bamInfo <- do.call(rbind, list_bamInfo)
 
-    for (col in names(bamInfo)) {
+    checkBamInfo(bamInfo)
+
+    cols <- c("paired_end", "read_length", "frag_length", "lib_size")
+    cols <- cols[cols %in% names(bamInfo)]
+    
+    for (col in cols) {
         
         sample_info[[col]] <- bamInfo[[col]]
         
@@ -221,8 +221,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
 ##'   defaults to \code{MulticoreParam(1)}
 ##' @return A \code{TxFeatures} object
 ##' @examples
-##' dir <- system.file("extdata", package = "SGSeq")
-##' si$file_bam <- file.path(dir, "bams", si$file_bam)
+##' path <- system.file("extdata", package = "SGSeq")
+##' si$file_bam <- file.path(path, "bams", si$file_bam)
 ##' txf <- predictTxFeatures(si, gr)
 ##' @author Leonard Goldstein
 
@@ -233,12 +233,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
     cores_per_sample = 1, BPPARAM = MulticoreParam(1))
 {
 
-    if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data frame including
-            character columns sample_name, file_bam")
-
-    if (!validBamInfo(sample_info))
-        stop("Incomplete sample_info")
+    checkSampleInfo(sample_info)
     
     list_features <- bpmapply(
         predictTxFeaturesPerSample,
@@ -257,13 +252,20 @@ predictTxFeatures <- function(sample_info, which = NULL,
             min_junction_count = min_junction_count,
             include_counts = FALSE,
             retain_coverage = FALSE,
+            junctions_only = FALSE,
             max_complexity = max_complexity,
             verbose = verbose,
             cores = cores_per_sample),
+        SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
         BPPARAM = BPPARAM
     )
-    
+
+    checkApplyResultsForErrors(
+        list_features,
+        "predictTxFeaturesPerSample",
+        sample_info$sample_name)
+
     features <- mergeTxFeatures(list_features, min_n_sample = min_n_sample)
 
     if (!is.null(min_overhang)) {
@@ -287,8 +289,8 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @return An \code{SGFeatureCounts} object or integer matrix of counts
 ##'   if \code{counts_only = TRUE}
 ##' @examples
-##' dir <- system.file("extdata", package = "SGSeq")
-##' si$file_bam <- file.path(dir, "bams", si$file_bam)
+##' path <- system.file("extdata", package = "SGSeq")
+##' si$file_bam <- file.path(path, "bams", si$file_bam)
 ##' sgfc <- getSGFeatureCounts(si, sgf)
 ##' @author Leonard Goldstein
 
@@ -296,16 +298,11 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
     cores_per_sample = 1, verbose = FALSE, BPPARAM = MulticoreParam(1))
 {
 
-    if (!validSampleInfo(sample_info))
-        stop("sample_info must be a data frame including
-            character columns sample_name, file_bam")
+    checkSampleInfo(sample_info)
 
-    if (!validBamInfo(sample_info))
-        stop("Incomplete sample_info")
-    
     if (!is(features, "SGFeatures"))        
         stop("features must be an SGFeatures object")
-    
+
     list_counts <- bpmapply(
         getSGFeatureCountsPerSample,
         file_bam = sample_info$file_bam,
@@ -313,12 +310,18 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
         sample_name = sample_info$sample_name,
         MoreArgs = list(
             features = features,
+            retain_coverage = FALSE,
             verbose = verbose,
             cores = cores_per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
         BPPARAM = BPPARAM
     )
+
+    checkApplyResultsForErrors(
+        list_counts,
+        "getSGFeatureCountsPerSample",
+        sample_info$sample_name)
 
     counts <- do.call(cbind, list_counts)
 
@@ -363,44 +366,67 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 
 }
 
-validSampleInfo <- function(object)
+checkSampleInfo <- function(sample_info, complete = TRUE)
 {
 
-    if (!is(object, "data.frame") && !is(object, "DataFrame")) {
+    col_type <- c(
+         sample_name = "character",
+         file_bam = "character",
+         paired_end = "logical",
+         read_length = "numeric",
+         frag_length = "numeric",
+         lib_size = "numeric")
+
+    if (!complete) col_type <- col_type[1:2]
+
+    if (!is(sample_info, "data.frame") && !is(sample_info, "DataFrame")) {
+
+        err <- paste("sample_info must be a data frame with columns",
+            paste(names(col_type), collapse = ", "))
+        stop(err, call. = FALSE)
       
-        return(FALSE)
-
     }
+
+    missing <- !names(col_type) %in% names(sample_info)
+
+    if (any(missing)) {
       
-    col_type <- c("sample_name" = "character", "file_bam" = "character")
-
-    if (!all(names(col_type) %in% names(object))) {
-
-        return(FALSE)
+        err <- paste("sample_info is missing column(s)",
+            paste(names(col_type)[missing], collapse = ", "))
+        stop(err, call. = FALSE)
 
     }
 
-    if (!all(mapply(is, object[names(col_type)], col_type))) {
+    invalid <- !mapply(is, sample_info[names(col_type)], col_type)
 
-        return(FALSE)
-
-    }
-
-    return(TRUE)
-
-}
+    if (any(invalid)) {
     
-validBamInfo <- function(object)
+        err <- paste("sample_info column(s)",
+            paste(names(col_type)[invalid], collapse = ", "), "\n",
+            "must be of type", paste(col_type[invalid], collapse = ", "))
+        stop(err, call. = FALSE)
+        
+    }
+
+}    
+
+checkBamInfo <- function(bam_info)
 {
 
-    required_cols <- c("paired_end", "read_length", "frag_length", "lib_size")
-    
-    if (!all(required_cols %in% names(object))) {
+    if (!all(bam_info$XS)) {
+      
+        files <- bam_info$file_bam[!bam_info$XS]
+        files <- paste0("'", files, "'")
 
-        return(FALSE)
+        msg <- paste("Custom tag 'XS' not found in BAM file:\n  ", files)
+        msg <- paste(msg, collapse = "\n")
+        msg <- paste0(msg, "\n\n",
+            "Spliced alignments must include a custom tag 'XS'.\n",
+            "Compatible BAM files can be obtained with an alignment\n",
+            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")
+        
+        warning(msg, call. = FALSE)
 
     }
-
-    return(TRUE)
-
+  
 }

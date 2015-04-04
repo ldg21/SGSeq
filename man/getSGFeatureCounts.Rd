@@ -20,7 +20,7 @@ function \code{getBamInfo}.}
 
 \item{cores_per_sample}{Number of cores per sample}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in parallel,
 defaults to \code{MulticoreParam(1)}}
@@ -34,8 +34,8 @@ Compatible counts are obtained for each sample and combined into
 an \code{SGFeatureCounts} object.
 }
 \examples{
-dir <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(dir, "bams", si$file_bam)
+path <- system.file("extdata", package = "SGSeq")
+si$file_bam <- file.path(path, "bams", si$file_bam)
 sgfc <- getSGFeatureCounts(si, sgf)
 }
 \author{

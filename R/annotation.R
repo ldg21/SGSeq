@@ -109,7 +109,7 @@ annotateFeatures <- function(query, subject)
     
 }
 
-annotateSegments <- function(ids, features)
+annotateSGSegments <- function(ids, features)
 {
 
     ## ids is a character vector with comma-separatated lists of
@@ -197,7 +197,7 @@ annotatePaths <- function(paths)
         list_ids <- strsplit(b, "|", fixed = TRUE)
         ids <- unlist(list_ids)
         ids_path <- i[togroup(list_ids)]
-        ids_ann <- annotateSegments(ids, features)
+        ids_ann <- annotateSGSegments(ids, features)
         ann <- unlist(ids_ann)
         ann_id <- togroup(ids_ann)
         ann_path <- ids_path[ann_id]
@@ -218,7 +218,7 @@ annotatePaths <- function(paths)
 
     }
 
-    out <- annotateSegments(x, features)
+    out <- annotateSGSegments(x, features)
     out <- as(out, "CompressedCharacterList")
     txName(paths) <- out
     geneName(paths) <- geneName(features)[match(seq_along(paths),

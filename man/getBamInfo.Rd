@@ -14,7 +14,7 @@ mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 \item{yieldSize}{Number of records used for obtaining alignment
 information, or \code{NULL} for all records}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in
 parallel, defaults to \code{MulticoreParam(1)}}
@@ -34,8 +34,8 @@ by setting the number of records via argument \code{yieldSize}.
 Note that library size can only be obtained if \code{yieldSize} is {NULL}.
 }
 \examples{
-dir <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(dir, "bams", si$file_bam)
+path <- system.file("extdata", package = "SGSeq")
+si$file_bam <- file.path(path, "bams", si$file_bam)
 si <- si[, c("sample_name", "file_bam")]
 si_complete <- getBamInfo(si)
 }

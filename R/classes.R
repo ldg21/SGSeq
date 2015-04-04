@@ -99,7 +99,7 @@ validExtraColumnSlotLengths <- function(object)
     if (length(i) > 0) {
 
         return(paste("invalid length for slot(s)",
-            paste(dQuote(slots[i]), collapse = ",")))
+            paste(dQuote(slots[i]), collapse = ", ")))
       
     }
   
@@ -115,7 +115,7 @@ validExtraColumnSlotValues <- function(object, slot_values)
     if (length(i) > 0) {
 
         return(paste("invalid values for slot(s)",
-            paste(dQuote(specified[i]), collapse = ",")))
+            paste(dQuote(specified[i]), collapse = ", ")))
 
     }
 
@@ -145,7 +145,7 @@ validMcols <- function(object, mcol_type)
     if (length(i) > 0) {
 
         return(paste("missing elementMetadata column(s)",
-            paste(dQuote(names(mcol_type)[i]), collapse = ",")))
+            paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
         
     }
     
@@ -154,7 +154,7 @@ validMcols <- function(object, mcol_type)
     if (length(i) > 0) {
 
         return(paste("invalid type for elementMetadata column(s)",
-            paste(dQuote(names(mcol_type)[i]), collapse = ",")))
+            paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
         
     }
 
@@ -168,7 +168,7 @@ validAssays <- function(object, assay_type)
     if (length(i) > 0) {
 
         return(paste("missing assay(s)",
-            paste(dQuote(names(assay_type)[i]), collapse = ",")))
+            paste(dQuote(names(assay_type)[i]), collapse = ", ")))
         
     }
     
@@ -178,7 +178,7 @@ validAssays <- function(object, assay_type)
     if (length(i) > 0) {
 
         return(paste("invalid type for assay(s)",
-            paste(dQuote(names(assay_type)[i]), collapse = ",")))
+            paste(dQuote(names(assay_type)[i]), collapse = ", ")))
         
     }
 

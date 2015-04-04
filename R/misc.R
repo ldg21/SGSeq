@@ -231,32 +231,18 @@ completeMcols <- function(x, include_counts, retain_coverage)
 
 }
 
-getBamInfoPerSample <- function(file_bam, yieldSize, verbose, sample_name)
+getBamInfoPerSample <- function(file_bam, yieldSize, sample_name, verbose)
 {
 
-    if (is.null(yieldSize)) {
-
-        file <- BamFile(file_bam)
-        
-    } else {
-
-        file <- BamFile(file_bam, yieldSize = yieldSize)
-
-    }
+    if (is.null(yieldSize)) file <- BamFile(file_bam)
+    else file <- BamFile(file_bam, yieldSize = yieldSize)
 
     flag <- scanBamFlag(isUnmappedQuery = FALSE, isSecondaryAlignment = FALSE)
     what <- c("qname", "flag", "qwidth", "isize")
     param <- ScanBamParam(flag = flag, what = what, tag = "XS")
     bam <- scanBam(file = file, param = param)[[1]]
 
-    if (is.null(bam$tag$XS)) {
-
-        msg <- "Warning: no XS tag detected"
-        if (!is.null(sample_name)) msg <- paste(msg, "in", sample_name)
-        message(msg)
-
-    }
-      
+    XS <- !is.null(bam$tag$XS)
     paired_end <- any(bamFlagTest(bam$flag, "isPaired"))
     read_length <- median(bam$qwidth, na.rm = TRUE)
 
@@ -272,6 +258,9 @@ getBamInfoPerSample <- function(file_bam, yieldSize, verbose, sample_name)
     }
 
     x <- data.frame(
+       sample_name = sample_name,
+       file_bam = file_bam,
+       XS = XS,
        paired_end = paired_end,
        read_length = read_length,
        frag_length = frag_length)
@@ -282,11 +271,7 @@ getBamInfoPerSample <- function(file_bam, yieldSize, verbose, sample_name)
         
     } 
 
-    if (verbose && !is.null(sample_name)) {
-
-        message(paste(sample_name, "complete."))
-
-    }
+    if (verbose) generateCompleteMessage(sample_name)
     
     return(x)
     
@@ -507,4 +492,60 @@ rbindListOfDFs <- function(x, cores)
 
     return(df)
   
+}
+
+checkApplyResultsForErrors <- function(out, fun_name, items)
+{
+  
+    failed <- sapply(out, is, "try-error")
+
+    if (any(failed)) {
+  
+        i <- which(failed)
+        err <- makeErrorMessage(fun_name, items[i], out[i])
+        err <- paste0("\n", err)
+        stop(err, call. = FALSE)
+        
+    }
+
+}
+
+makeErrorMessage <- function(fun_name, items, msgs)
+{
+
+    msg <- paste0("Error in ", fun_name, " for ", items, ":", "\n", msgs)
+    msg <- paste(msg, collapse = "\n")
+
+    return(msg)
+ 
+}
+
+makeWarningMessage <- function(fun_name, items, msgs)
+{
+
+    msg <- paste0("Warning in ", fun_name, " for ", items, ":", "\n", msgs)
+    msg <- paste(msg, collapse = "\n")
+
+    return(msg)
+ 
+}
+
+makeCompleteMessage <- function(item) {
+
+    paste(item, "complete.")
+
+}
+
+generateWarningMessage <- function(fun_name, item, msg)
+{
+
+    message(makeWarningMessage(fun_name, item, msg))
+
+}
+
+generateCompleteMessage <- function(item)
+{
+
+    message(makeCompleteMessage(item))
+
 }

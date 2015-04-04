@@ -46,7 +46,7 @@ High complexity regions are often due to spurious read alignments
 and can significantly slow down processing.
 To disable this filter, set to \code{NA}.}
 
-\item{sample_name}{Optional sample name, used in messages.}
+\item{sample_name}{Sample name used in messages}
 
 \item{seqlevel}{\code{seqlevel} to be processed}
 

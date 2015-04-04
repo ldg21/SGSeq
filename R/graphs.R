@@ -245,7 +245,7 @@ subgraph <- function(g, geneIDs)
     
 }
 
-findSegments <- function(features, cores = 1)
+findSGSegments <- function(features, cores = 1)
 {
 
     g <- spliceGraph(features)
@@ -268,8 +268,18 @@ findSegments <- function(features, cores = 1)
     ## NOTE nodes must be ordered in 5' to 3' direction
 
     geneIDs_2 <- as.integer(names(which(geneID_n_branch > 2)))
-    list_segments_2 <- mclapply(geneIDs_2, findSegmentsPerGene, g = g,
+    
+    list_segments_2 <- mclapply(
+        geneIDs_2,
+        findSGSegmentsPerGene,
+        g = g,
         mc.cores = cores)
+
+    checkApplyResultsForErrors(
+        list_segments_2,
+        "findSGSegmentsPerGene",
+        geneIDs_2)
+
     segments_2 <- IntegerList(do.call(c, list_segments_2))
 
     segments <- c(segments_1, segments_2) 
@@ -281,7 +291,7 @@ findSegments <- function(features, cores = 1)
 
 }
 
-findSegmentsPerGene <- function(g, geneID)
+findSGSegmentsPerGene <- function(g, geneID)
 {
 
     h <- subgraph(g, geneID)
@@ -417,8 +427,18 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 
     }
     
-    list_variant_info <- mclapply(geneIDs, findSGVariantsPerGene,
-        g = g, maxnvariant = maxnvariant, mc.cores = cores)
+    list_variant_info <- mclapply(
+        geneIDs,
+        findSGVariantsPerGene,
+        g = g,
+        maxnvariant = maxnvariant,
+        mc.cores = cores)
+
+    checkApplyResultsForErrors(
+        list_variant_info,
+        "findSGVariantsPerGene",
+        geneIDs)
+
     variant_info <- rbindListOfDFs(list_variant_info, cores)
 
     if (!is.na(maxnvariant) && nrow(variant_info) == 0) {

@@ -8,22 +8,16 @@
 ##' @author Leonard Goldstein
 
 getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
-    retain_coverage = FALSE, verbose = FALSE, sample_name = NULL, cores = 1)
+    retain_coverage, verbose, sample_name, cores)
 {
 
-    if (!is(features, "SGFeatures")) {
-
-        stop("argument features must be an SGFeatures object")
-
-    }
-    
     hits <- findOverlaps(features, range(features))
     list_index <- split(queryHits(hits), subjectHits(hits))
     list_features <- split(features[queryHits(hits)], subjectHits(hits))
-            
+    
     list_counts <- mclapply(
         list_features,
-        getSGFeatureCountsRanges,
+        getSGFeatureCountsPerStrand,
         file_bam = file_bam,
         paired_end = paired_end,
         retain_coverage = retain_coverage,
@@ -31,6 +25,11 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         sample_name = sample_name,
         mc.preschedule = FALSE,
         mc.cores = cores)
+
+    checkApplyResultsForErrors(
+        list_counts,
+        "getSGFeatureCountsPerStrand",
+        gr2co(unlist(range(list_features))))
 
     if (retain_coverage) {
 
@@ -44,16 +43,15 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         
     }    
 
+    if (verbose) generateCompleteMessage(sample_name)
+    
     return(counts)
     
 }
 
-getSGFeatureCountsRanges <- function(features, file_bam, paired_end,
+getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
     retain_coverage, verbose, sample_name)
 {
-
-    if (is.null(sample_name)) prefix <- ""
-    else prefix <- paste0(sample_name, ": ")
 
     which <- range(as(features, "GRanges"))
 
@@ -143,9 +141,9 @@ getSGFeatureCountsRanges <- function(features, file_bam, paired_end,
         counts <- N
 
     }
-
-    if (verbose) message(paste0(prefix, gr2co(which), " complete."))
-
+    
+    if (verbose) generateCompleteMessage(paste(sample_name, gr2co(which)))
+    
     return(counts)
     
 }
@@ -291,7 +289,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
         if (length(i) > 0) { L[i] <- width(features[i]) }
 
     }
-    if (is(features, "TxSegments")) {
+    if (is(features, "SGSegments")) {
 
         features_unlisted <- unlist(features)
         i <- which(type(features_unlisted) == "E")
@@ -472,12 +470,6 @@ getVariantFreq <- function(SE)
     X <- U/V
     X[is.na(X)] <- NA_real_
 
-    ## now need replacement value for
-    ## SummarizedExperiment assays
-    ## to have dimnames identical to
-    ## SummarizedExperiment dimnames
-    dimnames(X) <- dimnames(SE)
-    
     assay(SE, "variantFreq") <- X
         
     return(SE)

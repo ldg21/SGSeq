@@ -59,7 +59,7 @@ to disable processing (disabling processing is useful if results are
 subsequently merged with other predictions and processing is
 postponed until after the merging step).}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{cores_per_sample}{Number of cores per sample}
 
@@ -77,8 +77,8 @@ samples. Subsequently, terminal exons are filtered and trimmed
 and \code{\link{processTerminalExons}}.
 }
 \examples{
-dir <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(dir, "bams", si$file_bam)
+path <- system.file("extdata", package = "SGSeq")
+si$file_bam <- file.path(path, "bams", si$file_bam)
 txf <- predictTxFeatures(si, gr)
 }
 \author{

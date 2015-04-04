@@ -4,9 +4,8 @@
 \alias{getSGFeatureCountsPerSample}
 \title{Compatible fragment counts for splice graph features}
 \usage{
-getSGFeatureCountsPerSample(features, file_bam, paired_end,
-  retain_coverage = FALSE, verbose = FALSE, sample_name = NULL,
-  cores = 1)
+getSGFeatureCountsPerSample(features, file_bam, paired_end, retain_coverage,
+  verbose, sample_name, cores)
 }
 \arguments{
 \item{features}{\code{SGFeatures} object}
@@ -21,9 +20,9 @@ exon should be retained as an \code{IntegerList} in elementMetadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 
-\item{verbose}{If \code{TRUE}, print messages indicating progress.}
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
-\item{sample_name}{Optional sample name, used in messages.}
+\item{sample_name}{Sample name used in messages}
 
 \item{cores}{Number of cores available for parallel processing}
 }
