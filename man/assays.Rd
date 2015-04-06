@@ -9,6 +9,8 @@
 \alias{assays}
 \alias{counts,SGFeatureCounts-method}
 \alias{counts<-,SGFeatureCounts-method}
+\alias{countsTotal}
+\alias{countsTotal,SGVariantCounts-method}
 \alias{countsTotal3p}
 \alias{countsTotal3p,SGVariantCounts-method}
 \alias{countsTotal3p<-}
@@ -17,6 +19,10 @@
 \alias{countsTotal5p,SGVariantCounts-method}
 \alias{countsTotal5p<-}
 \alias{countsTotal5p<-,SGVariantCounts-method}
+\alias{countsTotal<-}
+\alias{countsTotal<-,SGVariantCounts-method}
+\alias{countsVariant}
+\alias{countsVariant,SGVariantCounts-method}
 \alias{countsVariant3p}
 \alias{countsVariant3p,SGVariantCounts-method}
 \alias{countsVariant3p<-}
@@ -25,6 +31,8 @@
 \alias{countsVariant5p,SGVariantCounts-method}
 \alias{countsVariant5p<-}
 \alias{countsVariant5p<-,SGVariantCounts-method}
+\alias{countsVariant<-}
+\alias{countsVariant<-,SGVariantCounts-method}
 \alias{variantFreq}
 \alias{variantFreq,SGVariantCounts-method}
 \alias{variantFreq<-}
@@ -50,6 +58,14 @@ countsTotal5p(object) <- value
 countsTotal3p(object)
 
 countsTotal3p(object) <- value
+
+countsVariant(object)
+
+countsVariant(object) <- value
+
+countsTotal(object)
+
+countsTotal(object) <- value
 
 variantFreq(object)
 
@@ -82,6 +98,14 @@ variantFreq(object) <- value
 \S4method{variantFreq}{SGVariantCounts}(object)
 
 \S4method{variantFreq}{SGVariantCounts}(object) <- value
+
+\S4method{countsVariant}{SGVariantCounts}(object)
+
+\S4method{countsVariant}{SGVariantCounts}(object) <- value
+
+\S4method{countsTotal}{SGVariantCounts}(object)
+
+\S4method{countsTotal}{SGVariantCounts}(object) <- value
 }
 \arguments{
 \item{object}{Object containing assay data}

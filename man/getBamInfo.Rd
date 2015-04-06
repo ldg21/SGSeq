@@ -5,7 +5,7 @@
 \title{Obtain alignment information from BAM files}
 \usage{
 getBamInfo(sample_info, yieldSize = NULL, verbose = FALSE,
-  BPPARAM = MulticoreParam(1))
+  BPPARAM = SerialParam())
 }
 \arguments{
 \item{sample_info}{Data frame with sample information including
@@ -17,7 +17,7 @@ information, or \code{NULL} for all records}
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in
-parallel, defaults to \code{MulticoreParam(1)}}
+parallel, defaults to \code{SerialParam()}}
 }
 \value{
 \code{sample_info} with additional columns \dQuote{paired_end},

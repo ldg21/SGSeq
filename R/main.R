@@ -46,7 +46,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
     alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
     min_n_sample = 1, min_overhang = NA, annotation = NULL,
     max_complexity = 20, verbose = FALSE,
-    cores_per_sample = 1, BPPARAM = MulticoreParam(1))
+    cores_per_sample = 1, BPPARAM = SerialParam())
 {
 
     checkSampleInfo(sample_info)
@@ -142,7 +142,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' @param yieldSize Number of records used for obtaining alignment
 ##'   information, or \code{NULL} for all records
 ##' @param BPPARAM \code{BiocParallelParam} for processing samples in
-##'   parallel, defaults to \code{MulticoreParam(1)}
+##'   parallel, defaults to \code{SerialParam()}
 ##' @return \code{sample_info} with additional columns \dQuote{paired_end},
 ##'   \dQuote{read_length}, \dQuote{frag_length}, and \dQuote{lib_size}
 ##'   if \code{yieldSize} is \code{NULL}
@@ -154,7 +154,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' @author Leonard Goldstein
 
 getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
-    BPPARAM = MulticoreParam(1))
+    BPPARAM = SerialParam())
 {
 
     checkSampleInfo(sample_info, FALSE)
@@ -218,7 +218,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
 ##'   postponed until after the merging step).
 ##' @param cores_per_sample Number of cores per sample
 ##' @param BPPARAM \code{BiocParallelParam} for processing samples in parallel,
-##'   defaults to \code{MulticoreParam(1)}
+##'   defaults to \code{SerialParam()}
 ##' @return A \code{TxFeatures} object
 ##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
@@ -230,7 +230,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
     alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
     min_junction_count = NULL, max_complexity = 20,
     min_n_sample = 1, min_overhang = NA, verbose = FALSE,
-    cores_per_sample = 1, BPPARAM = MulticoreParam(1))
+    cores_per_sample = 1, BPPARAM = SerialParam())
 {
 
     checkSampleInfo(sample_info)
@@ -295,7 +295,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @author Leonard Goldstein
 
 getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
-    cores_per_sample = 1, verbose = FALSE, BPPARAM = MulticoreParam(1))
+    verbose = FALSE, cores_per_sample = 1, BPPARAM = SerialParam())
 {
 
     checkSampleInfo(sample_info)
@@ -360,10 +360,94 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
         maxnvariant = maxnvariant,
         cores = cores)
 
-    counts <- getSGVariantCounts(object, variants, cores)
+    counts <- getSGVariantCounts(variants, object, cores = cores)
 
     return(counts)
 
+}
+
+##' For transcript variants, obtain counts of compatible fragments
+##' extending across the start and/or end of each variant.
+##' Variant frequencies are estimated based on representive counts.
+##' 
+##' @title Representative counts and frequency estimates for
+##'   transcript variants
+##' @inheritParams predictTxFeatures
+##' @inheritParams predictTxFeaturesPerSample
+##' @param variants \code{SGVariants} object
+##' @param features \code{SGFeatures} object that must include all features
+##'   included in featureID5p(variants) and featureID3p(variants)
+##' @param object \code{SGFeatureCounts} object
+##' @param cores Number of cores available for parallel processing
+##'   when obtaining counts from an \code{SGFeatureCounts} object
+##' @return An \code{SGVariantCounts} object
+##' @examples
+##' sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)
+##' path <- system.file("extdata", package = "SGSeq")
+##' si$file_bam <- file.path(path, "bams", si$file_bam)
+##' sgvc_from_bam <- getSGVariantCounts(sgv, features = sgf, sample_info = si)
+##' @author Leonard Goldstein
+
+getSGVariantCounts <- function(variants, object = NULL,
+    features = rowRanges(object), cores = 1,
+    sample_info = NULL, verbose = FALSE,
+    cores_per_sample = 1, BPPARAM = SerialParam())
+{
+
+    if (!is(variants, "SGVariants")) {
+      
+        stop("'variants' must be an SGVariants object")
+
+    }
+
+    if ((is.null(object) && is.null(sample_info)) ||
+        (!is.null(object) && !is.null(sample_info))) {
+
+        stop("Either 'object' or 'sample_info' must not be NULL")
+
+    }
+
+    if (!is.null(sample_info) && is.null(features)) {
+
+        stop("For use with 'sample_info', 'features' must be provided.")
+
+    }
+
+    if (!all(unlist(featureID5p(variants)) %in% featureID(features)) ||
+        !all(unlist(featureID3p(variants)) %in% featureID(features))) {
+
+        msg <- paste0(c(
+            "'features' is missing features with IDs included in",
+            "featureID5p(variants) or featureID3p(variants)"),
+            collapse = "\n")
+        stop(msg)    
+      
+    }
+    
+    if (any(table(eventID(variants)) == 1)) {
+
+        msg <- paste(c(
+            "Detected events with a single variant.",
+            "'variants' must include all variants for a given event to obtain",
+            "accurate countsTotal5p, countsTotal3p and variantFreq."),
+            collapse = "\n")              
+        warning(msg, call. = FALSE)
+
+    }
+
+    if (!is.null(object)) {
+    
+        sgvc <- getSGVariantCountsFromSGFeatureCounts(variants, object, cores)
+
+    } else {
+
+        sgvc <- getSGVariantCountsFromBamFiles(variants, features,
+            sample_info, FALSE, verbose, cores_per_sample, BPPARAM)
+
+    }
+
+    return(sgvc)
+    
 }
 
 checkSampleInfo <- function(sample_info, complete = TRUE)
@@ -417,14 +501,12 @@ checkBamInfo <- function(bam_info)
       
         files <- bam_info$file_bam[!bam_info$XS]
         files <- paste0("'", files, "'")
-
         msg <- paste("Custom tag 'XS' not found in BAM file:\n  ", files)
         msg <- paste(msg, collapse = "\n")
         msg <- paste0(msg, "\n\n",
             "Spliced alignments must include a custom tag 'XS'.\n",
             "Compatible BAM files can be obtained with an alignment\n",
-            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")
-        
+            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")        
         warning(msg, call. = FALSE)
 
     }

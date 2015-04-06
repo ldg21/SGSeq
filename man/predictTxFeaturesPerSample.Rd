@@ -6,8 +6,8 @@
 \usage{
 predictTxFeaturesPerSample(file_bam, which, paired_end, read_length,
   frag_length, lib_size, min_junction_count, alpha, psi, beta, gamma,
-  include_counts, retain_coverage, junctions_only, max_complexity, verbose,
-  sample_name, cores)
+  include_counts, retain_coverage, junctions_only, max_complexity, sample_name,
+  verbose, cores)
 }
 \arguments{
 \item{file_bam}{BAM file with genomic RNA-seq read alignments}
@@ -64,9 +64,9 @@ High complexity regions are often due to spurious read alignments
 and can significantly slow down processing.
 To disable this filter, set to \code{NA}.}
 
-\item{verbose}{If \code{TRUE}, generate messages indicating progress}
-
 \item{sample_name}{Sample name used in messages}
+
+\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{cores}{Number of cores available for parallel processing}
 }

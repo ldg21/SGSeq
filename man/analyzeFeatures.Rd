@@ -8,7 +8,7 @@ analyzeFeatures(sample_info, which = NULL, features = NULL,
   predict = is.null(features), alpha = 2, psi = 0.1, beta = 0.2,
   gamma = 0.2, min_n_sample = 1, min_overhang = NA, annotation = NULL,
   max_complexity = 20, verbose = FALSE, cores_per_sample = 1,
-  BPPARAM = MulticoreParam(1))
+  BPPARAM = SerialParam())
 }
 \arguments{
 \item{sample_info}{Data frame with sample information including
@@ -62,7 +62,7 @@ To disable this filter, set to \code{NA}.}
 \item{cores_per_sample}{Number of cores per sample}
 
 \item{BPPARAM}{\code{BiocParallelParam} for processing samples in
-parallel, defaults to \code{MulticoreParam(1)}}
+parallel, defaults to \code{SerialParam()}}
 }
 \value{
 \code{SGFeatureCounts} object

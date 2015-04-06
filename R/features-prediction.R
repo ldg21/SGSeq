@@ -74,8 +74,8 @@
 ##'   High complexity regions are often due to spurious read alignments
 ##'   and can significantly slow down processing. 
 ##'   To disable this filter, set to \code{NA}.
-##' @param verbose If \code{TRUE}, generate messages indicating progress
 ##' @param sample_name Sample name used in messages
+##' @param verbose If \code{TRUE}, generate messages indicating progress
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
 ##' @keywords internal
@@ -84,7 +84,7 @@
 predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
     read_length, frag_length, lib_size, min_junction_count,
     alpha, psi, beta, gamma, include_counts, retain_coverage,
-    junctions_only, max_complexity, verbose, sample_name, cores)
+    junctions_only, max_complexity, sample_name, verbose, cores)
 {
 
     if (is.null(min_junction_count) && is.null(alpha)) {

@@ -242,6 +242,22 @@ setGeneric("countsTotal3p<-",
     function(object, value) standardGeneric("countsTotal3p<-"))
 
 ##' @rdname assays
+setGeneric("countsVariant",
+    function(object) standardGeneric("countsVariant"))
+
+##' @rdname assays
+setGeneric("countsVariant<-",
+    function(object, value) standardGeneric("countsVariant<-"))
+
+##' @rdname assays
+setGeneric("countsTotal",
+    function(object) standardGeneric("countsTotal"))
+
+##' @rdname assays
+setGeneric("countsTotal<-",
+    function(object, value) standardGeneric("countsTotal<-"))
+
+##' @rdname assays
 setGeneric("variantFreq",
     function(object) standardGeneric("variantFreq"))
 

@@ -82,9 +82,11 @@ exportMethods(
  counts,
  FPKM,
  countsVariant5p,
- countsVariant3p,
  countsTotal5p,
+ countsVariant3p,
  countsTotal3p,
+ countsVariant,
+ countsTotal,
  variantFreq
 )
 
@@ -110,8 +112,10 @@ exportMethods(
  'counts<-',
  'FPKM<-',
  'countsVariant5p<-',
- 'countsVariant3p<-',
  'countsTotal5p<-',
+ 'countsVariant3p<-',
  'countsTotal3p<-',
+ 'countsVariant<-',
+ 'countsTotal<-',
  'variantFreq<-'
 )

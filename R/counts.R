@@ -8,10 +8,11 @@
 ##' @author Leonard Goldstein
 
 getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
-    retain_coverage, verbose, sample_name, cores)
+    retain_coverage, sample_name, verbose, cores)
 {
 
-    hits <- findOverlaps(features, range(features))
+    list_range <- range(features)
+    hits <- findOverlaps(features, list_range)
     list_index <- split(queryHits(hits), subjectHits(hits))
     list_features <- split(features[queryHits(hits)], subjectHits(hits))
     
@@ -21,15 +22,15 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         file_bam = file_bam,
         paired_end = paired_end,
         retain_coverage = retain_coverage,
-        verbose = verbose,
         sample_name = sample_name,
+        verbose = verbose,
         mc.preschedule = FALSE,
         mc.cores = cores)
 
     checkApplyResultsForErrors(
         list_counts,
         "getSGFeatureCountsPerStrand",
-        gr2co(unlist(range(list_features))))
+        gr2co(list_range))
 
     if (retain_coverage) {
 
@@ -50,10 +51,10 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
 }
 
 getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
-    retain_coverage, verbose, sample_name)
+    retain_coverage, sample_name, verbose)
 {
 
-    which <- range(as(features, "GRanges"))
+    which <- range(features)
 
     if (length(which) > 1) {
 
@@ -82,7 +83,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
     i_J <- which(type == "J")
     i_E <- which(type == "E")
     i_S <- which(type %in% c("spliceL", "spliceR"))
-    
+
     N <- rep(NA_integer_, length(ir))
     
     if (length(i_J) > 0) {
@@ -334,30 +335,8 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 
 }
 
-##' For transcript variants, obtain counts of compatible fragments
-##' extending across the start and/or end of each variant.
-##' Variant frequencies are estimated based on representive counts.
-##' 
-##' @title Representative counts and frequency estimates for
-##'   transcript variants
-##' @param object \code{SGFeatureCounts} object
-##' @param variants \code{SGVariants} object
-##' @param cores Number of cores available for parallel processing
-##' @return A \code{SGVariantCounts} object
-##' @examples
-##' sgvc <- getSGVariantCounts(sgfc, sgv)
-##' @author Leonard Goldstein
-
-getSGVariantCounts <- function(object, variants, cores = 1)
+getSGVariantCountsFromSGFeatureCounts <- function(variants, object, cores)
 {
-
-    if (any(table(eventID(variants)) == 1)) {
-
-        warning("Detected events with a single variant. 'variants' must
-            include all variants for a given event to obtain accurate
-            countsTotal5p, countsTotal3p and variantFreq.", call. = FALSE)
-
-      }
 
     n_variants <- length(variants)
     n_samples <- ncol(object)
@@ -473,5 +452,192 @@ getVariantFreq <- function(SE)
     assay(SE, "variantFreq") <- X
         
     return(SE)
+    
+}
+
+getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
+    counts_only = FALSE, verbose, cores_per_sample, BPPARAM)
+{
+
+    checkSampleInfo(sample_info)
+
+    list_counts <- bpmapply(
+        getSGVariantCountsPerSample,
+        file_bam = sample_info$file_bam,
+        paired_end = sample_info$paired_end,
+        sample_name = sample_info$sample_name,
+        MoreArgs = list(
+            variants = variants,
+            features = features,
+            verbose = verbose,
+            cores = cores_per_sample),
+        SIMPLIFY = FALSE,
+        USE.NAMES = FALSE,
+        BPPARAM = BPPARAM
+    )
+
+    checkApplyResultsForErrors(
+        list_counts,
+        "getSGVariantCountsPerSample",
+        sample_info$sample_name)
+
+    if (counts_only) return(list_counts)
+
+    assays <- list()
+
+    for (k in colnames(list_counts[[1]])) {
+
+        assays[[k]] <- do.call(cbind,
+            lapply(list_counts, function(x) { x[, k] }))
+      
+    }
+        
+    SE <- SummarizedExperiment(assays = assays, rowRanges = variants,
+        colData = DataFrame(sample_info))
+    colnames(SE) <- sample_info$sample_name
+    SE <- getVariantFreq(SE)
+    SE <- SGVariantCounts(SE)
+    
+    return(SE)
+        
+}
+
+getSGVariantCountsPerSample <- function(variants, features,
+    file_bam, paired_end, sample_name, verbose, cores)
+{
+
+    variants_range <- unlist(range(variants))
+    list_range <- range(variants_range)
+    hits <- findOverlaps(variants_range, list_range)
+    list_index <- split(queryHits(hits), subjectHits(hits))
+    list_variants <- split(variants[queryHits(hits)], subjectHits(hits))
+    
+    list_counts <- mclapply(
+        list_variants,
+        getSGVariantCountsPerStrand,
+        features = features,
+        file_bam = file_bam,
+        paired_end = paired_end,
+        sample_name = sample_name,
+        verbose = verbose,
+        mc.preschedule = FALSE,
+        mc.cores = cores)
+
+    checkApplyResultsForErrors(
+        list_counts,
+        "getSGVariantCountsPerStrand",
+        gr2co(list_range))
+
+    counts <- do.call(rbind, list_counts)
+    counts <- counts[order(unlist(list_index)), ]
+      
+    if (verbose) generateCompleteMessage(sample_name)
+    
+    return(counts)
+    
+}
+
+getSGVariantCountsPerStrand <- function(variants, features,
+    file_bam, paired_end, sample_name, verbose)
+{
+
+    which <- range(unlist(variants))
+
+    if (length(which) > 1) {
+
+        stop("variants must be on the same seqlevel and strand")
+
+    }
+
+    seqlevel <- as.character(seqnames(which))
+    strand <- as.character(strand(which))
+    
+    f5p <- featureID5p(variants)
+    f3p <- featureID3p(variants)
+    
+    vid <- factor(variantID(variants))
+    eid <- factor(eventID(variants))
+
+    all <- unique(pc(f5p, f3p))
+
+    ## in case of nested variants with representative features
+    ## at both 5' and 3' end, consider features at 3' end only
+    i <- which(elementLengths(f5p) > 0 & elementLengths(f3p) > 0 &
+        grep("(", featureID(variants), fixed = TRUE))
+    if (length(i) > 0) all[i] <- f3p[i]
+
+    ## extract ranges for relevant features
+    fid <- sort(unique(c(unlist(f5p), unlist(f3p))))
+    features <- features[match(fid, featureID(features))]
+    ir <- extractRangesFromFeatures(features)
+    
+    ## obtain GAlignmentPairs
+    gap <- readGap(file_bam, paired_end, which)
+    gap <- gap[strand(gap) %in% c(strand, "*")]
+    
+    ## get exons and introns
+    frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
+    frag_intron <- ranges(junctions(gap))
+    
+    ## extract feature type and spliced boundaries
+    type <- mcols(ir)$type
+    spliceL <- mcols(ir)$spliceL
+    spliceR <- mcols(ir)$spliceR
+
+    i_J <- which(type == "J")
+    i_S <- which(type %in% c("spliceL", "spliceR"))
+
+    index <- as(vector("list", length(ir)), "CompressedIntegerList")
+    
+    if (length(i_J) > 0) {
+
+        index[i_J] <- junctionCompatible(ir[i_J], frag_intron, FALSE)
+
+    }
+    
+    if (length(i_S) > 0) {
+        
+        index[i_S] <- splicesiteOverlap(ir[i_S],
+            sub("splice", "", type[i_S], fixed = TRUE),
+            frag_exonic, frag_intron, "unspliced", FALSE)
+
+    }
+
+    assay_names <- c(
+        "countsVariant5p",
+        "countsTotal5p",
+        "countsVariant3p",
+        "countsTotal3p",
+        "countsVariant",
+        "countsTotal")
+    
+    counts <- matrix(NA_integer_, nrow = length(vid), ncol = 6)
+    colnames(counts) <- assay_names
+    
+    for (opt in c("5p", "3p", "all")) {
+
+        f <- switch(opt, "5p" = f5p, "3p" = f3p, "all" = all)
+        s <- switch(opt, "5p" = "5p", "3p" = "3p", "all" = "")
+        
+        i <- match(unlist(f), featureID(features))
+        g <- togroup(f)
+
+        tmp <- as(tapply(unlist(index[i]), vid[g][togroup(index[i])], unique,
+            simplify = FALSE), "CompressedIntegerList")
+        countsVariant <- elementLengths(tmp)[match(vid, names(tmp))]
+        countsVariant[elementLengths(f) == 0] <- NA_integer_
+        counts[, paste0("countsVariant", s)] <- countsVariant
+
+        tmp <- as(tapply(unlist(index[i]), eid[g][togroup(index[i])], unique,
+            simplify = FALSE), "CompressedIntegerList")
+        countsTotal <- elementLengths(tmp)[match(eid, names(tmp))]
+        countsTotal[elementLengths(f) == 0] <- NA_integer_
+        counts[, paste0("countsTotal", s)] <- countsTotal
+
+    }
+    
+    if (verbose) generateCompleteMessage(paste(sample_name, gr2co(which)))
+    
+    return(counts)
     
 }

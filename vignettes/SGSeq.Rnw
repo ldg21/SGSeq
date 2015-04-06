@@ -234,7 +234,7 @@ sgf <- convertToSGFeatures(txf)
 sgf <- annotate(sgf, txf_annotated)
 sgfc <- getSGFeatureCounts(si, sgf)
 sgv <- findSGVariants(sgf)
-sgvc <- getSGVariantCounts(sgfc, sgv)
+sgvc <- getSGVariantCounts(sgv, sgfc)
 @ 
 
 \sloppy Feature prediction and counting (with \Rfunction{predictTxFeatures} 
