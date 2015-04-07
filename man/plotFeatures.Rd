@@ -5,8 +5,8 @@
 \title{Plot splice graph and heatmap of expression values}
 \usage{
 plotFeatures(x, geneID = NULL, geneName = NULL, which = NULL,
-  toscale = c("exon", "none", "gene"), color = "grey",
-  color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
+  toscale = c("exon", "none", "gene"), color = "gray",
+  color_novel = color, color_alpha = 0.8, color_labels = FALSE,
   border = "fill", cexLab = 1, cexExon = 1, ypos = 0.5, score = NULL,
   score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.3, 0.1),
   score_nbin = 400, score_summary = mean, ranges = NULL,

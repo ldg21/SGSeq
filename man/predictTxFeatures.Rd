@@ -7,7 +7,7 @@
 predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
   beta = 0.2, gamma = 0.2, min_junction_count = NULL,
   max_complexity = 20, min_n_sample = 1, min_overhang = NA,
-  verbose = FALSE, cores_per_sample = 1, BPPARAM = SerialParam())
+  verbose = FALSE, cores = 1)
 }
 \arguments{
 \item{sample_info}{Data frame with sample information.
@@ -61,10 +61,7 @@ postponed until after the merging step).}
 
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
-\item{cores_per_sample}{Number of cores per sample}
-
-\item{BPPARAM}{\code{BiocParallelParam} for processing samples in parallel,
-defaults to \code{SerialParam()}}
+\item{cores}{Number of cores available for parallel processing}
 }
 \value{
 A \code{TxFeatures} object

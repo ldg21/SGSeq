@@ -5,7 +5,7 @@
 \title{Compatible counts for splice graph features from BAM files}
 \usage{
 getSGFeatureCounts(sample_info, features, counts_only = FALSE,
-  verbose = FALSE, cores_per_sample = 1, BPPARAM = SerialParam())
+  verbose = FALSE, cores = 1)
 }
 \arguments{
 \item{sample_info}{Data frame with sample information.
@@ -20,10 +20,7 @@ function \code{getBamInfo}.}
 
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
-\item{cores_per_sample}{Number of cores per sample}
-
-\item{BPPARAM}{\code{BiocParallelParam} for processing samples in parallel,
-defaults to \code{SerialParam()}}
+\item{cores}{Number of cores available for parallel processing}
 }
 \value{
 An \code{SGFeatureCounts} object or integer matrix of counts

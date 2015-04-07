@@ -6,7 +6,7 @@
 \usage{
 plotSpliceGraph(x, geneID = NULL, geneName = NULL, eventID = NULL,
   which = NULL, toscale = c("exon", "none", "gene"), label = c("id",
-  "name", "label", "none"), color = "grey", color_novel = "red",
+  "name", "label", "none"), color = "gray", color_novel = color,
   color_alpha = 0.8, color_labels = FALSE, border = "fill", cexLab = 1,
   cexExon = 1, ypos = 0.5, score = NULL, score_color = "darkblue",
   score_ylim = NULL, score_ypos = c(0.3, 0.1), score_nbin = 400,

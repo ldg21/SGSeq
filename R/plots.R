@@ -254,8 +254,8 @@ exonGraphEdges <- function(v, J, tx_view)
 
 plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     eventID = NULL, which = NULL, toscale = c("exon", "none", "gene"),
-    label = c("id", "name", "label", "none"), color = "grey",
-    color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
+    label = c("id", "name", "label", "none"), color = "gray",
+    color_novel = color, color_alpha = 0.8, color_labels = FALSE,
     border = "fill", cexLab = 1, cexExon = 1, ypos = 0.5,
     score = NULL, score_color = "darkblue", score_ylim = NULL,
     score_ypos = c(0.3, 0.1), score_nbin = 400, score_summary = mean,
@@ -490,11 +490,7 @@ plotTrackScore <- function(pars, score, color, ylim, ypos, nbin, summary)
         xright = bin_breaks[-1], ytop = bin_y,
         MoreArgs = list(ybottom = ypos_2[1], col = color, border = NA))
 
-    labels <- names(ylim)
-    
-    if (is.null(labels)) { labels <- ylim }
-        
-    axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]), labels = labels,
+    axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]),
         mgp = c(3, 0.5, 0.5), tcl = -0.25, las = 1)
     
 }
@@ -819,8 +815,8 @@ addAlpha <- function(col, alpha)
 ##' @author Leonard Goldstein
 
 plotFeatures <- function(x, geneID = NULL, geneName = NULL,
-    which = NULL, toscale = c("exon", "none", "gene"), color = "grey",
-    color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
+    which = NULL, toscale = c("exon", "none", "gene"), color = "gray",
+    color_novel = color, color_alpha = 0.8, color_labels = FALSE,
     border = "fill", cexLab = 1, cexExon = 1, ypos = 0.5,
     score = NULL, score_color = "darkblue", score_ylim = NULL,
     score_ypos = c(0.3, 0.1), score_nbin = 400, score_summary = mean,
@@ -856,12 +852,12 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 
     }    
 
-    n_samples <- ncol(x)
+    n_sample <- ncol(x)
     include_type <- switch(include, junctions = "J", exons = "E",
         both = c("E", "J"))
-    n_features <- length(which(type(features) %in% include_type))
+    n_feature <- length(which(type(features) %in% include_type))
     
-    pars <- getLayoutParameters(n_samples, n_features, margin, heightTopPanel,
+    pars <- getLayoutParameters(n_sample, n_feature, margin, heightTopPanel,
         RowSideColors, square, tx_view)
 
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
@@ -915,8 +911,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' @author Leonard Goldstein
 
 plotVariants <- function(x, eventID = NULL,
-    toscale = c("exon", "none", "gene"), color = "grey",
-    color_novel = "red", color_alpha = 0.8, color_labels = FALSE,
+    toscale = c("exon", "none", "gene"), color = "gray",
+    color_novel = color, color_alpha = 0.8, color_labels = FALSE,
     border = "fill", cexLab = 1, cexExon = 1, ypos = 0.5,
     score = NULL, score_color = "darkblue", score_ylim = NULL,
     score_ypos = c(0.3, 0.1), score_nbin = 400,
@@ -978,10 +974,10 @@ plotVariants <- function(x, eventID = NULL,
 
     }    
 
-    n_samples <- ncol(x)
-    n_features <- nrow(x)
+    n_sample <- ncol(x)
+    n_feature <- nrow(x)
     
-    pars <- getLayoutParameters(n_samples, n_features, margin, heightTopPanel,
+    pars <- getLayoutParameters(n_sample, n_feature, margin, heightTopPanel,
         RowSideColors, square, tx_view)
 
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
@@ -1025,7 +1021,7 @@ extractFeaturesFromVariants <- function(variants)
     
 }
 
-getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
+getLayoutParameters <- function(n_sample, n_feature, margin, heightTopPanel,
     RowSideColors, square, tx_view)
 {
 
@@ -1057,7 +1053,7 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
 
     if (square) {
 
-        padding <- getPadding(n_samples, n_features, wid, hei)
+        padding <- getPadding(n_sample, n_feature, wid, hei)
         
         i_wid_mar <- c(1, length(wid))
         i_wid_img <- length(wid) - 1
@@ -1109,7 +1105,7 @@ getLayoutParameters <- function(n_samples, n_features, margin, heightTopPanel,
     
 }
 
-getPadding <- function(n_samples, n_features, wid, hei)
+getPadding <- function(n_sample, n_feature, wid, hei)
 {
 
     ds <- dev.size()
@@ -1122,8 +1118,8 @@ getPadding <- function(n_samples, n_features, wid, hei)
     img_wid_real <- img_wid / sum(wid) * dev_wid
     img_hei_real <- img_hei / sum(hei) * dev_hei
     
-    cel_wid_real <- img_wid_real / n_features
-    cel_hei_real <- img_hei_real / n_samples
+    cel_wid_real <- img_wid_real / n_feature
+    cel_hei_real <- img_hei_real / n_sample
     
     if (cel_wid_real > cel_hei_real) {
 

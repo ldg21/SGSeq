@@ -45,20 +45,28 @@ analyzeFeatures <- function(sample_info, which = NULL,
     features = NULL, predict = is.null(features), 
     alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
     min_n_sample = 1, min_overhang = NA, annotation = NULL,
-    max_complexity = 20, verbose = FALSE,
-    cores_per_sample = 1, BPPARAM = SerialParam())
+    max_complexity = 20, verbose = FALSE, cores = 1)
 {
 
     checkSampleInfo(sample_info)
     
-    if (is.null(features) && !predict)
+    if (is.null(features) && !predict) {
+      
         stop("cannot have features NULL and predict FALSE")
 
-    if (!is.null(features) && !is(features, "Features"))
+    }
+
+    if (!is.null(features) && !is(features, "Features")) {
+      
         stop("features must be a TxFeatures or SGFeatures object")
 
-    if (!is.null(annotation) && !is(annotation, "TxFeatures"))
+    }
+
+    if (!is.null(annotation) && !is(annotation, "TxFeatures")) {
+      
         stop("annotation must be a TxFeatures object")
+
+    }
     
     if (predict) {
 
@@ -74,8 +82,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
             min_overhang = min_overhang,
             max_complexity = max_complexity,
             verbose = verbose,
-            cores_per_sample = cores_per_sample,
-            BPPARAM = BPPARAM)
+            cores = cores)
 
         if (!is.null(features)) {
 
@@ -121,8 +128,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
         sample_info = sample_info,
         features = features,
         verbose = verbose,
-        cores_per_sample = cores_per_sample,
-        BPPARAM = BPPARAM)
+        cores = cores)
     
     return(counts)
     
@@ -141,8 +147,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
 ##' @param yieldSize Number of records used for obtaining alignment
 ##'   information, or \code{NULL} for all records
-##' @param BPPARAM \code{BiocParallelParam} for processing samples in
-##'   parallel, defaults to \code{SerialParam()}
+##' @param cores Number of cores available for parallel processing
 ##' @return \code{sample_info} with additional columns \dQuote{paired_end},
 ##'   \dQuote{read_length}, \dQuote{frag_length}, and \dQuote{lib_size}
 ##'   if \code{yieldSize} is \code{NULL}
@@ -154,12 +159,12 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' @author Leonard Goldstein
 
 getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
-    BPPARAM = SerialParam())
+    cores = 1)
 {
 
     checkSampleInfo(sample_info, FALSE)
 
-    list_bamInfo <- bpmapply(
+    list_bamInfo <- mcmapply(
         getBamInfoPerSample,
         file_bam = sample_info$file_bam,
         sample_name = sample_info$sample_name,
@@ -167,7 +172,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
             yieldSize = yieldSize,
             verbose = verbose),
         SIMPLIFY = FALSE,
-        BPPARAM = BPPARAM
+        mc.preschedule = FALSE,
+        mc.cores = cores
     )
 
     checkApplyResultsForErrors(
@@ -216,9 +222,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
 ##'   to disable processing (disabling processing is useful if results are
 ##'   subsequently merged with other predictions and processing is
 ##'   postponed until after the merging step).
-##' @param cores_per_sample Number of cores per sample
-##' @param BPPARAM \code{BiocParallelParam} for processing samples in parallel,
-##'   defaults to \code{SerialParam()}
+##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
 ##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
@@ -230,12 +234,14 @@ predictTxFeatures <- function(sample_info, which = NULL,
     alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
     min_junction_count = NULL, max_complexity = 20,
     min_n_sample = 1, min_overhang = NA, verbose = FALSE,
-    cores_per_sample = 1, BPPARAM = SerialParam())
+    cores = 1)
 {
 
     checkSampleInfo(sample_info)
-    
-    list_features <- bpmapply(
+
+    cores <- setCores(cores, sample_info)
+
+    list_features <- mcmapply(
         predictTxFeaturesPerSample,
         file_bam = sample_info$file_bam,
         paired_end = sample_info$paired_end,
@@ -255,10 +261,11 @@ predictTxFeatures <- function(sample_info, which = NULL,
             junctions_only = FALSE,
             max_complexity = max_complexity,
             verbose = verbose,
-            cores = cores_per_sample),
+            cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        BPPARAM = BPPARAM
+        mc.preschedule = FALSE,
+        mc.cores = cores$n_sample
     )
 
     checkApplyResultsForErrors(
@@ -295,15 +302,20 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @author Leonard Goldstein
 
 getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
-    verbose = FALSE, cores_per_sample = 1, BPPARAM = SerialParam())
+    verbose = FALSE, cores = 1)
 {
 
     checkSampleInfo(sample_info)
 
-    if (!is(features, "SGFeatures"))        
+    if (!is(features, "SGFeatures")) {
+      
         stop("features must be an SGFeatures object")
 
-    list_counts <- bpmapply(
+    }
+
+    cores <- setCores(cores, sample_info)
+
+    list_counts <- mcmapply(
         getSGFeatureCountsPerSample,
         file_bam = sample_info$file_bam,
         paired_end = sample_info$paired_end,
@@ -312,10 +324,11 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
             features = features,
             retain_coverage = FALSE,
             verbose = verbose,
-            cores = cores_per_sample),
+            cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        BPPARAM = BPPARAM
+        mc.preschedule = FALSE,
+        mc.cores = cores$n_sample
     )
 
     checkApplyResultsForErrors(
@@ -352,8 +365,11 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 {
 
-    if (!is(object, "SGFeatureCounts")) 
+    if (!is(object, "SGFeatureCounts")) {
+      
         stop("object must be an SGFeatureCounts object")
+
+    }
 
     variants <- findSGVariants(
         features = rowRanges(object),
@@ -379,7 +395,6 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##'   included in featureID5p(variants) and featureID3p(variants)
 ##' @param object \code{SGFeatureCounts} object
 ##' @param cores Number of cores available for parallel processing
-##'   when obtaining counts from an \code{SGFeatureCounts} object
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)
@@ -388,10 +403,8 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##' sgvc_from_bam <- getSGVariantCounts(sgv, features = sgf, sample_info = si)
 ##' @author Leonard Goldstein
 
-getSGVariantCounts <- function(variants, object = NULL,
-    features = rowRanges(object), cores = 1,
-    sample_info = NULL, verbose = FALSE,
-    cores_per_sample = 1, BPPARAM = SerialParam())
+getSGVariantCounts <- function(variants, object = NULL, features = NULL,
+    sample_info = NULL, verbose = FALSE, cores = 1)
 {
 
     if (!is(variants, "SGVariants")) {
@@ -411,18 +424,7 @@ getSGVariantCounts <- function(variants, object = NULL,
 
         stop("For use with 'sample_info', 'features' must be provided.")
 
-    }
-
-    if (!all(unlist(featureID5p(variants)) %in% featureID(features)) ||
-        !all(unlist(featureID3p(variants)) %in% featureID(features))) {
-
-        msg <- paste0(c(
-            "'features' is missing features with IDs included in",
-            "featureID5p(variants) or featureID3p(variants)"),
-            collapse = "\n")
-        stop(msg)    
-      
-    }
+    }    
     
     if (any(table(eventID(variants)) == 1)) {
 
@@ -442,7 +444,7 @@ getSGVariantCounts <- function(variants, object = NULL,
     } else {
 
         sgvc <- getSGVariantCountsFromBamFiles(variants, features,
-            sample_info, FALSE, verbose, cores_per_sample, BPPARAM)
+            sample_info, FALSE, verbose, cores)
 
     }
 
@@ -511,4 +513,13 @@ checkBamInfo <- function(bam_info)
 
     }
   
+}
+
+setCores <- function(cores, sample_info)
+{
+  
+    n <- as.integer(max(floor(cores/nrow(sample_info)), 1))
+    s <- as.integer(floor(cores/n))
+    list(per_sample = n, n_sample = s)
+    
 }

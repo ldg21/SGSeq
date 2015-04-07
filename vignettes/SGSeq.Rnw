@@ -171,11 +171,11 @@ sgfc <- annotate(sgfc, txf_annotated)
 @ 
 
 The predicted splice graph features and compatible FPKMs can be visualized
-as previously. By default, splice graph features with missing annotation
-are highlighted in red.
+as previously. Splice graph features with missing annotation can be 
+highlighted using argument \Rcode{color\_novel}.
 
 <<figure-2, fig.width=4.5, fig.height=4.5>>=
-plotFeatures(sgfc, geneID = 1)
+plotFeatures(sgfc, geneID = 1, color_novel = "red")
 @ 
 
 Note that, in contrast to the previous figure, the predicted gene model
@@ -217,7 +217,7 @@ Transcript variants and estimates of variant frequencies can be visualized
 with function \Rfunction{plotVariants}.
 
 <<figure-3, fig.width=1.5, fig.height=4.5>>=
-plotVariants(sgvc, eventID = 1)
+plotVariants(sgvc, eventID = 1, color_novel = "red")
 @ 
 
 \section{Advanced use}

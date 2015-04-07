@@ -55,8 +55,10 @@ mergeTxFeatures <- function(..., min_n_sample = 1)
     ## combine features
     features <- c(J, I, Z)
 
-    if (is.null(features)) { return(TxFeatures()) }
-
+    ## erase txName, geneName
+    txName(features) <- CharacterList(vector("list", length(features)))
+    geneName(features) <- CharacterList(vector("list", length(features)))
+    
     ## filter isolated exons (without flanking splice junctions)
     if (min_n_sample > 1) { features <- removeExonsIsolated(features) }
             
@@ -121,8 +123,9 @@ mergeExonsTerminal <- function(features, min_n_sample = 1)
             
     } else {
 
+        si <- seqinfo(features)
         exons <- TxFeatures()
-        seqinfo(exons) <- seqinfo(features)
+        seqinfo(exons) <- si
         
     }
     

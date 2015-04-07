@@ -2,7 +2,7 @@ Package: SGSeq
 Type: Package
 Title: Prediction, quantification and visualization of splice events
        from RNA-seq data
-Version: 1.1.25
+Version: 1.1.26
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: RNA-seq data are informative for the analysis of known and
@@ -14,7 +14,7 @@ Description: RNA-seq data are informative for the analysis of known and
              quantification and visualization of splice events from BAM files.
 License: Artistic-2.0
 LazyData: yes
-Depends: BiocParallel, GenomicRanges, IRanges, methods
+Depends: GenomicRanges, IRanges, methods
 Imports: AnnotationDbi, BiocGenerics, Biostrings, GenomicAlignments,
          GenomicFeatures, GenomeInfoDb, igraph, parallel, Rsamtools,
          rtracklayer, S4Vectors (>= 0.2.3)

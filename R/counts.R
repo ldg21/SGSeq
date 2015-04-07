@@ -300,10 +300,10 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
         
     }
 
-    n_features <- length(features)
-    n_samples <- length(paired_end)
+    n_feature <- length(features)
+    n_sample <- length(paired_end)
 
-    E <- matrix(NA_real_, nrow = n_features, ncol = n_samples)
+    E <- matrix(NA_real_, nrow = n_feature, ncol = n_sample)
 
     i_PE <- which(paired_end)
     n_PE <- length(i_PE)
@@ -311,11 +311,11 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
     if (n_PE > 0) {
 
         L_PE <- rep(L, n_PE)
-        R_PE <- rep(read_length[i_PE], rep(n_features, n_PE))
-        F_PE <- rep(frag_length[i_PE], rep(n_features, n_PE))
+        R_PE <- rep(read_length[i_PE], rep(n_feature, n_PE))
+        F_PE <- rep(frag_length[i_PE], rep(n_feature, n_PE))
         I_PE <- F_PE - 2 * R_PE
         E_PE <- L_PE + F_PE - 1 - pmax(I_PE - L_PE + 1, 0)
-        E[, i_PE] <- matrix(E_PE, nrow = n_features, ncol = n_PE)
+        E[, i_PE] <- matrix(E_PE, nrow = n_feature, ncol = n_PE)
 
     }
 
@@ -325,9 +325,9 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
     if (n_SE > 0) {
     
         L_SE <- rep(L, n_SE)
-        R_SE <- rep(read_length[i_SE], rep(n_features, n_SE))
+        R_SE <- rep(read_length[i_SE], rep(n_feature, n_SE))
         E_SE <- L_SE + R_SE - 1
-        E[, i_SE] <- matrix(E_SE, nrow = n_features, ncol = n_SE)
+        E[, i_SE] <- matrix(E_SE, nrow = n_feature, ncol = n_SE)
         
     }    
     
@@ -339,14 +339,25 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, object, cores)
 {
 
     n_variants <- length(variants)
-    n_samples <- ncol(object)
-    features <- rowRanges(object)
+    n_sample <- ncol(object)
 
     if (n_variants == 0) {
 
         return(SGVariantCounts())
 
     }
+
+    featureIDs <- union(
+        unlist(featureID5p(variants)), unlist(featureID3p(variants)))
+    
+    if (!all(featureIDs %in% featureID(object))) {
+
+        stop("'object' is missing features included in 'variants'")
+
+    }
+
+    object <- object[featureID(object) %in% featureIDs, ]
+    features <- rowRanges(object)
     
     variant_i_start <- relist(match(unlist(featureID5p(variants)),
         featureID(features)), featureID5p(variants))
@@ -456,12 +467,25 @@ getVariantFreq <- function(SE)
 }
 
 getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
-    counts_only = FALSE, verbose, cores_per_sample, BPPARAM)
+    counts_only = FALSE, verbose, cores)
 {
 
     checkSampleInfo(sample_info)
 
-    list_counts <- bpmapply(
+    featureIDs <- union(
+        unlist(featureID5p(variants)), unlist(featureID3p(variants)))
+    
+    if (!all(featureIDs %in% featureID(features))) {
+
+        stop("'features' is missing features included in 'variants'")
+
+    }
+
+    features <- features[featureID(features) %in% featureIDs]
+    
+    cores <- setCores(cores, sample_info)
+
+    list_counts <- mcmapply(
         getSGVariantCountsPerSample,
         file_bam = sample_info$file_bam,
         paired_end = sample_info$paired_end,
@@ -470,10 +494,11 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
             variants = variants,
             features = features,
             verbose = verbose,
-            cores = cores_per_sample),
+            cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        BPPARAM = BPPARAM
+        mc.preschedule = FALSE,
+        mc.cores = cores$n_sample
     )
 
     checkApplyResultsForErrors(
@@ -507,19 +532,26 @@ getSGVariantCountsPerSample <- function(variants, features,
 {
 
     variants_range <- unlist(range(variants))
-    list_range <- range(variants_range)
-    hits <- findOverlaps(variants_range, list_range)
-    list_index <- split(queryHits(hits), subjectHits(hits))
-    list_variants <- split(variants[queryHits(hits)], subjectHits(hits))
+    list_range <- range(variants_range) + 1
+
+    hits_1 <- findOverlaps(variants_range, list_range)
+    list_index <- split(queryHits(hits_1), subjectHits(hits_1))
+    list_variants <- split(variants[queryHits(hits_1)], subjectHits(hits_1))
     
-    list_counts <- mclapply(
-        list_variants,
+    hits_2 <- findOverlaps(features, list_range)
+    list_features <- split(features[queryHits(hits_2)], subjectHits(hits_2))
+                         
+    list_counts <- mcmapply(
         getSGVariantCountsPerStrand,
-        features = features,
-        file_bam = file_bam,
-        paired_end = paired_end,
-        sample_name = sample_name,
-        verbose = verbose,
+        variants = list_variants,
+        features = list_features,
+        MoreArgs = list(
+            file_bam = file_bam,
+            paired_end = paired_end,
+            sample_name = sample_name,
+            verbose = verbose),
+        SIMPLIFY = FALSE,
+        USE.NAMES = FALSE,
         mc.preschedule = FALSE,
         mc.cores = cores)
 

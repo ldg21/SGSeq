@@ -5,9 +5,8 @@
 \title{Representative counts and frequency estimates for
   transcript variants}
 \usage{
-getSGVariantCounts(variants, object = NULL, features = rowRanges(object),
-  cores = 1, sample_info = NULL, verbose = FALSE, cores_per_sample = 1,
-  BPPARAM = SerialParam())
+getSGVariantCounts(variants, object = NULL, features = NULL,
+  sample_info = NULL, verbose = FALSE, cores = 1)
 }
 \arguments{
 \item{variants}{\code{SGVariants} object}
@@ -17,9 +16,6 @@ getSGVariantCounts(variants, object = NULL, features = rowRanges(object),
 \item{features}{\code{SGFeatures} object that must include all features
 included in featureID5p(variants) and featureID3p(variants)}
 
-\item{cores}{Number of cores available for parallel processing
-when obtaining counts from an \code{SGFeatureCounts} object}
-
 \item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
@@ -28,10 +24,7 @@ function \code{getBamInfo}.}
 
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
-\item{cores_per_sample}{Number of cores per sample}
-
-\item{BPPARAM}{\code{BiocParallelParam} for processing samples in parallel,
-defaults to \code{SerialParam()}}
+\item{cores}{Number of cores available for parallel processing}
 }
 \value{
 An \code{SGVariantCounts} object
