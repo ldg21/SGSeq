@@ -2,26 +2,16 @@ spliceGraph <- function(features)
 {
 
     if (is(features, "SGFeatures")) {
-        
+
         features <- asGRanges(features)
 
     } else if (is(features, "SGSegments")) {
-        
+    
         features <- asGRangesList(features)
 
     }
-
+  
     if (is(features, "GRanges")) {
-        
-        option <- "features"
-
-    } else if (is(features, "GRangesList")) {
-        
-        option <- "segments"
-
-    }
-    
-    if (option == "features") {
 
         edges <- features[mcols(features)$type %in% c("J", "E")]
         d <- cbind(from = NA, to = NA, as.data.frame(mcols(edges)))
@@ -33,43 +23,61 @@ spliceGraph <- function(features)
         i_D <- which(mcols(nodes)$type == "D")
         i_A <- which(mcols(nodes)$type == "A")
 
-        ## identify 'from' nodes
-        
+        ## determine 'from' nodes
+
+        ## splice junctions -> D
         i <- which(mcols(edges)$type == "J")
         pos <- gr2pos(flank(edges[i], -1, start = TRUE))
         d$from[i] <- paste0("D:", pos)
+        
+        ## exons with 5' splice -> A
         i <- which(mcols(edges)$type == "E" & mcols(edges)$splice5p)
         pos <- gr2pos(flank(edges[i], -1, start = TRUE))
         d$from[i] <- paste0("A:", pos)
+
+        ## exons without 5' splice -> A (if included)
         i <- which(mcols(edges)$type == "E" & !mcols(edges)$splice5p)
         pos <- gr2pos(flank(edges[i], -1, start = TRUE))
         d$from[i] <- nodes_name[i_A][match(pos, nodes_pos[i_A])]
+
+        ## remaining exons without 5' splice -> D (if included)
         i <- i[which(is.na(d$from[i]))]
         pos <- gr2pos(suppressWarnings(flank(edges[i], 1, start = TRUE)))
         d$from[i] <- nodes_name[i_D][match(pos, nodes_pos[i_D])]
+
+        ## remaining edges -> S
         i <- i[which(is.na(d$from[i]))]
         pos <- gr2pos(flank(edges[i], -1, start = TRUE))
         d$from[i] <- paste0("S:", pos)
 
-        ## identify 'to' nodes
-        
+        ## determine 'to' nodes
+
+        ## splice junctions -> A
         i <- which(mcols(edges)$type == "J")
         pos <- gr2pos(flank(edges[i], -1, start = FALSE))
         d$to[i] <- paste0("A:", pos)
+
+        ## exons with 3' splice -> D
         i <- which(mcols(edges)$type == "E" & mcols(edges)$splice3p)
         pos <- gr2pos(flank(edges[i], -1, start = FALSE))
         d$to[i] <- paste0("D:", pos)
+
+        ## exons without 3' splice -> D (if included)
         i <- which(mcols(edges)$type == "E" & !mcols(edges)$splice3p)
         pos <- gr2pos(flank(edges[i], -1, start = FALSE))
         d$to[i] <- nodes_name[i_D][match(pos, nodes_pos[i_D])]
+
+        ## remaining exons without 3' splice -> A (if included)
         i <- i[which(is.na(d$to[i]))]
         pos <- gr2pos(suppressWarnings(flank(edges[i], 1, start = FALSE)))
         d$to[i] <- nodes_name[i_A][match(pos, nodes_pos[i_A])]
+
+        ## remaining edges -> E
         i <- i[which(is.na(d$to[i]))]
         pos <- gr2pos(flank(edges[i], -1, start = FALSE))
         d$to[i] <- paste0("E:", pos)
 
-    } else {
+    } else if (is(features, "GRangesList")) {
         
         d <- as.data.frame(mcols(features))
         
@@ -80,7 +88,7 @@ spliceGraph <- function(features)
     gv <- nodes(g)
     gv$type <- substr(gv$name, 1, 1)
 
-    if (option == "features") {
+    if (is(features, "GRanges")) {
     
         gv$featureID <- mcols(nodes)$featureID[match(gv$name, nodes_name)]
 
@@ -113,8 +121,7 @@ spliceGraph <- function(features)
 
     }
         
-    ## For each gene reorder nodes in 5' to 3' direction 
-    ## and by type (S -> A -> D -> E)
+    ## For each gene, reorder nodes 5' to 3' and by type (S -> A -> D -> E)
 
     tmp <- strsplit(gv$name, split = ":", fixed = TRUE)
     type <- c(S = 0, A = 1, D = 2, E = 3)[sapply(tmp, "[", 1)]
@@ -124,7 +131,7 @@ spliceGraph <- function(features)
     pos[i_neg] <- -1 * pos[i_neg]
     gv <- gv[order(gv$geneID, pos, type), ]    
 
-    ## For each gene reorder edges in 5' to 3' direction 
+    ## For each gene, reorder edges in 5' to 3' direction 
 
     split_from <- strsplit(gd$from, split = ":", fixed = TRUE)
     split_to <- strsplit(gd$to, split = ":", fixed = TRUE)
@@ -170,7 +177,7 @@ neighborhood2 <- function(graph, order, nodes, mode)
 
 }
 
-addRootAndLeafNodes <- function(g)
+addSourceAndSinkNodes <- function(g)
 {
 
     gv <- nodes(g)
@@ -178,51 +185,41 @@ addRootAndLeafNodes <- function(g)
 
     strand <- strsplit(gv$name[1], ":", fixed = TRUE)[[1]][4]
     
-    ## Add unique root node and edges
+    ## Add unique source node and edges
     
     i <- which(gv$type == "S")
 
     if (length(i) > 0) {
 
-        pos <- as.integer(sapply(strsplit(gv$name[i], ":", fixed = TRUE),
-            "[", 3))
-        i_R <- i[which.min(switch(strand, "+" = 1, "-" = -1) * pos)]
-        R <- sub("^S", "R", gv$name[i_R])
-        
         gd_R <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
         names(gd_R) <- names(gd)
-        gd_R$from <- R
+        gd_R$from <- "R"
         gd_R$to <- gv$name[i]
         gd <- rbind(gd_R, gd)
 
         gv_R <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
         names(gv_R) <- names(gv)
-        gv_R$name <- R
+        gv_R$name <- "R"
         gv <- rbind(gv_R, gv)
 
     }
 
-    ## Add unique leaf nodes and edges
+    ## Add unique sink nodes and edges
 
     i <- which(gv$type == "E")
 
     if (length(i) > 0) {
 
-        pos <- as.integer(sapply(strsplit(gv$name[i], ":", fixed = TRUE),
-            "[", 3))
-        i_L <- i[which.max(switch(strand, "+" = 1, "-" = -1) * pos)]
-        L <- sub("^E", "L", gv$name[i_L])
+        gd_K <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
+        names(gd_K) <- names(gd)
+        gd_K$from <- gv$name[i]
+        gd_K$to <- "K"
+        gd <- rbind(gd, gd_K)
 
-        gd_L <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
-        names(gd_L) <- names(gd)
-        gd_L$from <- gv$name[i]
-        gd_L$to <- L
-        gd <- rbind(gd, gd_L)
-
-        gv_L <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
-        names(gv_L) <- names(gv)
-        gv_L$name <- L
-        gv <- rbind(gv, gv_L)
+        gv_K <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
+        names(gv_K) <- names(gv)
+        gv_K$name <- "K"
+        gv <- rbind(gv, gv_K)
 
     }
     
@@ -301,23 +298,23 @@ findSGSegmentsPerGene <- function(g, geneID)
     hv <- nodes(h)
     hd <- edges(h)
     
-    ## Find source and target nodes
+    ## Find start and end nodes
     
-    sources <- which(hv$type != "E" & (hv$type == "S" |
+    starts <- which(hv$type != "E" & (hv$type == "S" |
         degree(h, mode = "out") > 1 | degree(h, mode = "in") > 1))
-    targets <- which(hv$type != "S" & (hv$type == "E" |
+    ends <- which(hv$type != "S" & (hv$type == "E" |
         degree(h, mode = "out") > 1 | degree(h, mode = "in") > 1))
 
-    names(sources) <- NULL
-    names(targets) <- NULL
+    names(starts) <- NULL
+    names(ends) <- NULL
     
-    list_neighbors <- neighborhood2(h, 1, sources, "out")
+    list_neighbors <- neighborhood2(h, 1, starts, "out")
     
-    s <- sources[togroup(list_neighbors)]
+    s <- starts[togroup(list_neighbors)]
     n <- unlist(list_neighbors)
     
-    r <- is.finite(shortest.paths(h, n, targets, "out"))
-    t <- targets[apply(r, 1, function(x) { min(which(x)) })]
+    r <- is.finite(shortest.paths(h, n, ends, "out"))
+    t <- ends[apply(r, 1, function(x) { min(which(x)) })]
     
     fun <- function(from, to)
     {
@@ -558,8 +555,8 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
     ## Extract subgraph corresponding to geneID
     h <- subgraph(g, geneID)
         
-    ## Add unique root and leaf nodes    
-    h <- addRootAndLeafNodes(h)
+    ## Add unique source and sink nodes    
+    h <- addSourceAndSinkNodes(h)
 
     ## Extract data frames of nodes and edges    
     hv <- nodes(h)
@@ -580,8 +577,8 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
     
     for (k in seq_len(nrow(b))) {
 
-        from <- hv$name[b$source[k]]
-        to <- hv$name[b$target[k]]
+        from <- hv$name[b$start[k]]
+        to <- hv$name[b$end[k]]
 
         paths_index_ref <- findAllPaths(from, to, NULL, ref, hv$name)
 
@@ -606,15 +603,15 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
         paths_featureID <- paths_featureID[o]
         paths_segmentID <- paths_segmentID[o]
 
-        ## nodes within event (including source and target nodes)
-        bv <- intersect(subcomponent(h, b$source[k], "out"),
-            subcomponent(h, b$target[k], "in"))
+        ## nodes within event (including start and end nodes)
+        bv <- intersect(subcomponent(h, b$start[k], "out"),
+            subcomponent(h, b$end[k], "in"))
 
         ## nodes outside of event
         ov <- setdiff(seq_len(nrow(hv)), bv)
 
-        ## nodes within event, excluding source and target nodes
-        bv <- setdiff(bv, c(b$source[k], b$target[k]))
+        ## nodes within event, excluding start and end nodes
+        bv <- setdiff(bv, c(b$start[k], b$end[k]))
 
         ## find adjacent nodes for all nodes within event
         bn_out <- unique(unlist(neighborhood(h, 1, bv, "out")))
@@ -654,7 +651,7 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
     
     path_info <- do.call(rbind, list_path_info)
 
-    ## remove references to artifical root and leaf nodes
+    ## remove references to artifical source and sink nodes
     path_info$type <- gsub("NA", "", path_info$type, fixed = TRUE)
     path_info$featureID <- gsub("NA,", "", path_info$featureID, fixed = TRUE)
     path_info$featureID <- gsub(",NA", "", path_info$featureID, fixed = TRUE)
@@ -664,6 +661,16 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
     ## include geneID
     path_info$geneID <- geneID
 
+    ## replace source nodes with corresponding start nodes
+    i <- which(path_info$from == "R")
+    s <- pfirst(CharacterList(strsplit(path_info$segmentID[i], ",")))
+    path_info$from[i] <- hd$from[match(s, hd$segmentID)]
+
+    ## replace sink nodes with corresponding end nodes
+    i <- which(path_info$to == "K")
+    s <- plast(CharacterList(strsplit(path_info$segmentID[i], ",")))
+    path_info$to[i] <- hd$to[match(s, hd$segmentID)]
+    
     return(path_info)
     
 }
@@ -673,14 +680,14 @@ findEvents <- function(g)
 
     gv <- nodes(g)
 
-    i_source <- setNames(which(degree(g, mode = "out") > 1), NULL)
+    i_start <- setNames(which(degree(g, mode = "out") > 1), NULL)
     
-    list_source <- vector()
-    list_target <- vector()
+    list_start <- vector()
+    list_end <- vector()
     
-    for (s in i_source) {
+    for (s in i_start) {
 
-        ## Initialize vector of target nodes completing events from s
+        ## Initialize vector of end nodes completing events from s
         t <- vector()
         
         ## Consider alternative nodes immediately downstream (proximal) from s
@@ -734,25 +741,25 @@ findEvents <- function(g)
         t <- c(t, branchpts[j])
         t <- unique(t)
         
-        list_source <- c(list_source, rep(s, length(t)))
-        list_target <- c(list_target, t)
+        list_start <- c(list_start, rep(s, length(t)))
+        list_end <- c(list_end, t)
 
     }
     
-    ## exclude special case when source and target node are
-    ## root and leaf node, respectively (cf. PLEKHA5)
+    ## exclude special case when start and end node are
+    ## source and sink node, respectively (cf. PLEKHA5)
 
-    exclude <- intersect(grep("^R", gv$name[list_source]),
-        grep("^L", gv$name[list_target]))
+    exclude <- intersect(which(gv$name[list_start] == "R"),
+        which(gv$name[list_end] == "K"))
     
     if (length(exclude) > 0) {
         
-        list_source <- list_source[-exclude]
-        list_target <- list_target[-exclude]
+        list_start <- list_start[-exclude]
+        list_end <- list_end[-exclude]
         
     }
     
-    events <- data.frame(source = list_source, target = list_target)
+    events <- data.frame(start = list_start, end = list_end)
     
     return(events)
     
@@ -766,23 +773,23 @@ sortEvents <- function(events, g)
     gv_pos <- as.integer(sapply(name_split, "[", 3))
     st <- setdiff(sapply(name_split, "[", 4), NA)
 
-    source_type <- gv_type[events$source]
-    source_pos <- gv_pos[events$source]
+    start_type <- gv_type[events$start]
+    start_pos <- gv_pos[events$start]
     
-    target_type <- gv_type[events$target]
-    target_pos <- gv_pos[events$target]
+    end_type <- gv_type[events$end]
+    end_pos <- gv_pos[events$end]
 
-    i_I <- which(source_type != "R" & target_type != "L")
-    i_I <- i_I[order(target_pos[i_I] - source_pos[i_I],
+    i_I <- which(start_type != "R" & end_type != "K")
+    i_I <- i_I[order(end_pos[i_I] - start_pos[i_I],
         decreasing = (st == "-"))]
 
-    i_R <- which(source_type == "R")
-    i_R <- i_R[order(target_pos[i_R], decreasing = (st == "-"))]
+    i_R <- which(start_type == "R")
+    i_R <- i_R[order(end_pos[i_R], decreasing = (st == "-"))]
 
-    i_L <- which(target_type == "L")
-    i_L <- i_L[order(source_pos[i_L], decreasing = (st == "+"))]
+    i_K <- which(end_type == "K")
+    i_K <- i_K[order(start_pos[i_K], decreasing = (st == "+"))]
     
-    i <- c(i_I, i_R, i_L)
+    i <- c(i_I, i_R, i_K)
 
     events <- events[i, ]
     
@@ -917,8 +924,8 @@ annotateSGVariants <- function(variants)
 
         i <- unique(togroup(path_type)[grep(type, unlist(path_type))])
 
-        if (event == "AFE") { i <- i[grep("^R", from(variants)[i])] }
-        if (event == "ALE") { i <- i[grep("^L", to(variants)[i])] }
+        if (event == "AFE") { i <- i[grep("^S", from(variants)[i])] }
+        if (event == "ALE") { i <- i[grep("^E", to(variants)[i])] }
         
         if (length(i) > 0) {
 
@@ -933,11 +940,11 @@ annotateSGVariants <- function(variants)
 
     ## alternative start/end
 
-    i <- intersect(grep("^R", from(variants)),
+    i <- intersect(grep("^S", from(variants)),
         which(!any(path_event == "AFE")))
     path_event[i] <- pc(path_event[i], rep("AS", length(i)))
 
-    i <- intersect(grep("^L", to(variants)),
+    i <- intersect(grep("^E", to(variants)),
         which(!any(path_event == "ALE")))
     path_event[i] <- pc(path_event[i], rep("AE", length(i)))
 

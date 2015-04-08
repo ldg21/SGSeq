@@ -167,7 +167,7 @@ predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
 
     }
     
-    if (verbose) generateCompleteMessage(sample_name)
+    generateCompleteMessage(sample_name)
     
     return(features)
     

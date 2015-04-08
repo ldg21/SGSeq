@@ -46,7 +46,15 @@ co2str <- function(seqlevel, start, end, strand)
 gr2co <- function(x)
 {
 
-    co2str(seqnames(x), start(x), end(x), strand(x))
+    if (length(x) == 0) {
+
+        return()
+
+    } else {
+      
+        co2str(seqnames(x), start(x), end(x), strand(x))
+
+    }
     
 }
 
@@ -73,8 +81,16 @@ pos2str <- function(seqlevel, position, strand)
 gr2pos <- function(x)
 {
 
-    pos2str(seqnames(x), start(x), strand(x))
+    if (length(x) == 0) {
 
+        return()
+
+    } else {
+      
+        pos2str(seqnames(x), start(x), strand(x))
+
+    }
+    
 }
 
 pos2gr <- function(x)
@@ -231,7 +247,7 @@ completeMcols <- function(x, include_counts, retain_coverage)
 
 }
 
-getBamInfoPerSample <- function(file_bam, yieldSize, sample_name, verbose)
+getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
 {
 
     if (is.null(yieldSize)) file <- BamFile(file_bam)
@@ -271,7 +287,7 @@ getBamInfoPerSample <- function(file_bam, yieldSize, sample_name, verbose)
         
     } 
 
-    if (verbose) generateCompleteMessage(sample_name)
+    generateCompleteMessage(sample_name)
     
     return(x)
     

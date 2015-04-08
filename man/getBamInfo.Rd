@@ -4,7 +4,7 @@
 \alias{getBamInfo}
 \title{Obtain alignment information from BAM files}
 \usage{
-getBamInfo(sample_info, yieldSize = NULL, verbose = FALSE, cores = 1)
+getBamInfo(sample_info, yieldSize = NULL, cores = 1)
 }
 \arguments{
 \item{sample_info}{Data frame with sample information including
@@ -12,8 +12,6 @@ mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 
 \item{yieldSize}{Number of records used for obtaining alignment
 information, or \code{NULL} for all records}
-
-\item{verbose}{If \code{TRUE}, generate messages indicating progress}
 
 \item{cores}{Number of cores available for parallel processing}
 }

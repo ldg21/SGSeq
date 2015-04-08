@@ -142,7 +142,6 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' Note that library size can only be obtained if \code{yieldSize} is {NULL}.
 ##' 
 ##' @title Obtain alignment information from BAM files
-##' @inheritParams predictTxFeaturesPerSample
 ##' @param sample_info Data frame with sample information including
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
 ##' @param yieldSize Number of records used for obtaining alignment
@@ -158,8 +157,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' si_complete <- getBamInfo(si)
 ##' @author Leonard Goldstein
 
-getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
-    cores = 1)
+getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 {
 
     checkSampleInfo(sample_info, FALSE)
@@ -169,8 +167,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, verbose = FALSE,
         file_bam = sample_info$file_bam,
         sample_name = sample_info$sample_name,
         MoreArgs = list(
-            yieldSize = yieldSize,
-            verbose = verbose),
+            yieldSize = yieldSize),
         SIMPLIFY = FALSE,
         mc.preschedule = FALSE,
         mc.cores = cores
@@ -239,7 +236,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 
     checkSampleInfo(sample_info)
 
-    cores <- setCores(cores, sample_info)
+    cores <- setCores(cores, nrow(sample_info))
 
     list_features <- mcmapply(
         predictTxFeaturesPerSample,
@@ -313,7 +310,7 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 
     }
 
-    cores <- setCores(cores, sample_info)
+    cores <- setCores(cores, nrow(sample_info))
 
     list_counts <- mcmapply(
         getSGFeatureCountsPerSample,
@@ -515,10 +512,10 @@ checkBamInfo <- function(bam_info)
   
 }
 
-setCores <- function(cores, sample_info)
+setCores <- function(cores, n_sample)
 {
   
-    n <- as.integer(max(floor(cores/nrow(sample_info)), 1))
+    n <- as.integer(max(floor(cores/n_sample), 1))
     s <- as.integer(floor(cores/n))
     list(per_sample = n, n_sample = s)
     

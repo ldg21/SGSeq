@@ -44,7 +44,7 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         
     }    
 
-    if (verbose) generateCompleteMessage(sample_name)
+    generateCompleteMessage(sample_name)
     
     return(counts)
     
@@ -483,7 +483,7 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
 
     features <- features[featureID(features) %in% featureIDs]
     
-    cores <- setCores(cores, sample_info)
+    cores <- setCores(cores, nrow(sample_info))
 
     list_counts <- mcmapply(
         getSGVariantCountsPerSample,
@@ -563,7 +563,7 @@ getSGVariantCountsPerSample <- function(variants, features,
     counts <- do.call(rbind, list_counts)
     counts <- counts[order(unlist(list_index)), ]
       
-    if (verbose) generateCompleteMessage(sample_name)
+    generateCompleteMessage(sample_name)
     
     return(counts)
     

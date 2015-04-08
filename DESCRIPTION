@@ -2,7 +2,7 @@ Package: SGSeq
 Type: Package
 Title: Prediction, quantification and visualization of splice events
        from RNA-seq data
-Version: 1.1.26
+Version: 1.1.27
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: RNA-seq data are informative for the analysis of known and

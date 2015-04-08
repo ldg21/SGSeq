@@ -15,16 +15,8 @@ exonGraph <- function(features, tx_view)
     J <- features[type(features) == "J"]
     
     v <- exonGraphNodes(E, J, tx_view)
-    d <- exonGraphEdges(v, J, tx_view)    
-
-    ## Reorder exons 
-
-    tmp <- strsplit(v$coordinates, split = ":", fixed = TRUE)
-    tmp <- strsplit(sapply(tmp, "[", 2), "-", fixed = TRUE)
-    start <- as.integer(sapply(tmp, "[", 1))
-    end <- as.integer(sapply(tmp, "[", 2))
-    v <- v[order(start, end), ]
-
+    d <- exonGraphEdges(v, J, tx_view)
+    
     g <- graph.data.frame(d = d, directed = TRUE, vertices = v)
     
     invisible(g)
@@ -118,7 +110,18 @@ addDummyNodes <- function(v, E, J, tx_view)
 
 exonGraphEdges <- function(v, J, tx_view)
 {
-    
+
+    if (length(J) == 0) {
+      
+        d <- data.frame(
+            from = character(),
+            to = character(),
+            stringsAsFactors = FALSE)
+
+        return(d)
+        
+    }
+  
     E_A <- flank(co2gr(v$coordinates), -1, TRUE)
     E_D <- flank(co2gr(v$coordinates), -1, FALSE)
 
@@ -396,13 +399,13 @@ getPlottingParameters <- function(g, ypos, toscale, border, asp, tx_view,
 
         exon_y <- as.integer(as.factor(as.character(gv$tx_name)))
         exon_y <- exon_y - 1
-        exon_y <- exon_y * tx_dist * 2
+        exon_y <- exon_y * 2 * tx_dist
         exon_y <- exon_y - mean(unique(exon_y))
         edge_curved <- rep(0, nrow(gd))
 
     } else {
 
-        exon_y <- rep(ypos, nrow(gv))
+        exon_y <- rep(-1 + 2 * ypos, nrow(gv))
         edge_curved <- as.numeric(rank(exon_x)[i_to] >
             rank(exon_x)[i_from] + 1)
         edge_curved <- edge_curved / asp
@@ -480,7 +483,7 @@ plotTrackScore <- function(pars, score, color, ylim, ypos, nbin, summary)
     bin_y[bin_y < ylim[1]] <- ylim[1]
     bin_y[bin_y > ylim[2]] <- ylim[2]
 
-    ypos_2 <- c(-1 + ypos[1] * 2, ypos[2] * 2)
+    ypos_2 <- c(-1 + 2 * ypos[1], 2 * ypos[2])
     
     bin_y <- bin_y - ylim[1]
     bin_y <- bin_y / diff(range(ylim)) * ypos_2[2]
@@ -570,7 +573,7 @@ plotTrackRanges <- function(pars, toscale, score, color, ypos)
     score <- score[which(unlist(range(score)) %over% gr_gene)]
     score <- endoapply(score, restrict, start(gr_gene), end(gr_gene))
     
-    ypos_2 <- c(-1 + ypos[1] * 2, ypos[2] * 2)
+    ypos_2 <- c(-1 + 2 * ypos[1], 2 * ypos[2])
 
     n <- length(score)
     h <- ypos_2[2] / (2 * n - 1)
@@ -645,8 +648,11 @@ getGraphInfo <- function(g, pars, color_labels, tx_view)
     co_J <- gd$coordinates[i_junc]
     
     df <- data.frame(
-        id = c(paste0("E", as.integer(factor(co_E, levels = unique(co_E)))),
-            paste0("J", as.integer(factor(co_J, levels = unique(co_J))))),
+        id = c(
+            paste0(rep("E", length(co_E)),
+                as.integer(factor(co_E, levels = unique(co_E)))),
+            paste0(rep("J", length(co_J)),
+                as.integer(factor(co_J, levels = unique(co_J))))),
         name = paste0(c(gv$type[i_exon], gd$type[i_junc]), ":",
             c(gv$coordinates[i_exon], gd$coordinates[i_junc])),
         x = c(x_exon[i_exon], x_junc[i_junc]),
@@ -850,7 +856,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 
         RowSideColors <- list(RowSideColors)
 
-    }    
+    }
 
     n_sample <- ncol(x)
     include_type <- switch(include, junctions = "J", exons = "E",
