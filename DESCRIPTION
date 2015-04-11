@@ -2,22 +2,22 @@ Package: SGSeq
 Type: Package
 Title: Prediction, quantification and visualization of splice events
        from RNA-seq data
-Version: 1.1.27
+Version: 1.1.28
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
-Description: RNA-seq data are informative for the analysis of known and
-             novel transcript isoforms. While the short length of RNA-seq
-             reads limits the ability to predict and quantify full-length
-             transcripts, short read data are well suited for the analysis
-             of individual splice events (e.g. inclusion or skipping of a
-             cassette exon). The SGSeq package enables the prediction, 
-             quantification and visualization of splice events from BAM files.
+Description: Prediction of splice junctions, exons from BAM files. 
+	     Quantification of splice junctions, exons based on 
+	     compatible reads (counts, FPKMs). Identification of
+	     splice events from implied splice graph. Quantification
+	     of splice variants based on compatible reads spanning
+ 	     event boundaries (counts, psi-values). Functions for
+	     annotation and visualization.
 License: Artistic-2.0
 LazyData: yes
 Depends: GenomicRanges, IRanges, methods
 Imports: AnnotationDbi, BiocGenerics, Biostrings, GenomicAlignments,
          GenomicFeatures, GenomeInfoDb, igraph, parallel, Rsamtools,
-         rtracklayer, S4Vectors (>= 0.2.3)
+         rtracklayer, S4Vectors
 Suggests: BiocStyle, knitr, TxDb.Hsapiens.UCSC.hg19.knownGene
 VignetteBuilder: knitr
 biocViews: AlternativeSplicing, RNASeq, Transcription

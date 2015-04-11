@@ -1,0 +1,19 @@
+CHANGES IN VERSION 1.2.0
+------------------------
+
+    o Renamed class TxVariants to SGVariants
+
+    o Renamed findTxVariants() to findSGVariants()
+
+    o Renamed getTxVariantCounts() to getSGVariantCounts()
+
+    o Parallelization is now controlled with a single cores argument
+
+    o Argument max_complexity for predictTxFeatures() controls 
+      skipping of problematic regions
+
+    o getBamInfo() is no longer run as part of analyzeFeatures()
+
+    o getSGVariantCounts() now supports obtaining counts from BAM files
+
+    o Bug fixes and other improvements
