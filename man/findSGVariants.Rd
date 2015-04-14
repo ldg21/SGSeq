@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphs.R
 \name{findSGVariants}
 \alias{findSGVariants}
-\title{Find transcript variants from splice graph}
+\title{Find splice variants from splice graph}
 \usage{
 findSGVariants(features, maxnvariant = 20, annotate_events = TRUE,
   cores = 1)
@@ -15,7 +15,7 @@ identified in an event, the gene is skipped, resulting in a warning.
 Set to \code{NA} to include all genes.}
 
 \item{annotate_events}{Logical indicating whether identified
-transcript variants should be annotated in terms of canonical events.
+splice variants should be annotated in terms of canonical events.
 For details see help page for \code{\link{annotateSGVariants}}.}
 
 \item{cores}{Number of cores available for parallel processing}
@@ -24,7 +24,7 @@ For details see help page for \code{\link{annotateSGVariants}}.}
 A \code{SGVariants} object
 }
 \description{
-Find transcript variants from splice graph
+Find splice variants from splice graph
 }
 \examples{
 sgv <- findSGVariants(sgf)

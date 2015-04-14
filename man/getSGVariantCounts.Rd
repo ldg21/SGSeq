@@ -3,7 +3,7 @@
 \name{getSGVariantCounts}
 \alias{getSGVariantCounts}
 \title{Representative counts and frequency estimates for
-  transcript variants}
+  splice variants}
 \usage{
 getSGVariantCounts(variants, object = NULL, features = NULL,
   sample_info = NULL, verbose = FALSE, cores = 1)
@@ -19,7 +19,7 @@ included in featureID5p(variants) and featureID3p(variants)}
 \item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-and \dQuote{lib_size}. Alignment information can be obtained with
+and \dQuote{lib_size}. Sample information can be obtained with
 function \code{getBamInfo}.}
 
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
@@ -30,9 +30,9 @@ function \code{getBamInfo}.}
 An \code{SGVariantCounts} object
 }
 \description{
-For transcript variants, obtain counts of compatible fragments
-extending across the start and/or end of each variant.
-Variant frequencies are estimated based on representive counts.
+For splice variants obtain counts of compatible fragments
+extending across the start or end of each variant.
+Splice variant frequencies are estimated based on representive counts.
 }
 \examples{
 sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)

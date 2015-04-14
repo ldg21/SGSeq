@@ -40,7 +40,7 @@ For terminal exons sharing a splice site with an internal exon,
 minimum overhang required for terminal exons to be included.
 For remaining terminal exons overlapping other exons, minimum
 overhang required to suppress trimming. Use \code{NA} to remove all
-terminal exons sharing a splice with an internal exon and trim all
+terminal exons sharing a splice site with an internal exon and trim all
 remaining terminal exons overlapping other exons. Use \code{NULL}
 to disable processing (disabling processing is useful if results are
 subsequently merged with other predictions and processing is
@@ -68,9 +68,6 @@ High-level function for the prediction and quantification of
 splice junctions, exon bins and splice sites from BAM files.
 }
 \details{
-If alignment information is not included in \code{sample_info},
-it is obtained directly from BAM files with \code{\link{getBamInfo}}.
-
 Splice junctions and exons are predicted from BAM files with
 \code{\link{predictTxFeatures}}.
 

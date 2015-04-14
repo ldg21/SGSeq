@@ -2,10 +2,10 @@
 % Please edit documentation in R/data.R
 \name{sgvc}
 \alias{sgvc}
-\title{Example transcript variant counts}
+\title{Example splice variant counts}
 \format{A \code{SGVariantCounts} object.}
 \description{
-Transcript variant counts and frequencies for FBXO31. Splice graph
+Splice variant counts and frequencies for FBXO31. Splice graph
 features were predicted and counts obtained from example BAM files.
 }
 \author{

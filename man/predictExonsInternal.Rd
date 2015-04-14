@@ -28,9 +28,9 @@ using more stringent criteria after the initial prediction.}
 }
 \value{
 \code{IRanges} of internal exons with elementMetadata column
-  \dQuote{type} and optionally \dQuote{N} (for
-  \code{include_counts = TRUE}), \dQuote{N_splicesite},
-  \dQuote{coverage} (for \code{retain_coverage = TRUE})
+  \dQuote{type} and optionally \dQuote{N} for
+  \code{include_counts = TRUE}, \dQuote{N_splicesite},
+  \dQuote{coverage} for \code{retain_coverage = TRUE}
 }
 \description{
 Identify internal exons based on candidate internal exons and

@@ -53,7 +53,7 @@ be the same as feature colors}
 \item{cexExon}{Scale factor for exon height}
 
 \item{ypos}{Numeric value indicating vertical position of splice graph
-(exons bins) specified as fraction of height of the plotting region
+(exon bins) specified as fraction of height of the plotting region
 (not supported for \code{tx_view = TRUE})}
 
 \item{score}{\code{RLeList} containing nucleotide-level scores
@@ -64,7 +64,7 @@ to be plotted with the splice graph}
 \item{score_ylim}{y-axis range used for plotting scores}
 
 \item{score_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the score panel, specificed as fractions of the
+position and height of the score panel, specificed as fraction of the
 height of the plotting region}
 
 \item{score_nbin}{Number of bins for plotting scores}
@@ -76,7 +76,7 @@ height of the plotting region}
 \item{ranges_color}{Color used for plotting ranges}
 
 \item{ranges_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the ranges panel, specificed as fractions of the
+position and height of the ranges panel, specificed as fraction of the
 height of the plotting region}
 
 \item{main}{Plot title}
@@ -132,7 +132,8 @@ if \code{NULL} range of finite values}
 graphics device}
 }
 \value{
-Return value of \code{plotSpliceGraph}
+\code{data.frame} with information on exon bins and
+  splice junctions included in the splice graph
 }
 \description{
 Plot splice graph and heatmap of expression values

@@ -18,13 +18,13 @@ feature prediction, passed to \code{ScanBamParam}}
 \item{paired_end}{Logical, \code{TRUE} for paired-end data,
 \code{FALSE} for single-end data}
 
-\item{read_length}{Read length (required for use with \code{alpha})}
+\item{read_length}{Read length required for use with \code{alpha}}
 
-\item{frag_length}{Fragment length for paired-end data (required
-for use with \code{alpha})}
+\item{frag_length}{Fragment length for paired-end data required
+for use with \code{alpha}}
 
-\item{lib_size}{Number of aligned fragments (required for use with
-\code{alpha})}
+\item{lib_size}{Number of aligned fragments required for use with
+\code{alpha}}
 
 \item{min_junction_count}{Minimum fragment count required for a splice
 junction to be included. If specified, argument \code{alpha} is ignored.}

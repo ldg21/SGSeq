@@ -17,8 +17,7 @@ coverage required for internal exon prediction}
 }
 \description{
 Identify candidate internal exons based on previously identified
-splice junctions and regions with minimal read coverage required
-for internal exon prediction.
+splice junctions and regions with sufficient read coverage.
 }
 \author{
 Leonard Goldstein

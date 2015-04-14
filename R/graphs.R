@@ -360,13 +360,13 @@ findSGSegmentsPerGene <- function(g, geneID)
     
 }
 
-##' @title Find transcript variants from splice graph
+##' @title Find splice variants from splice graph
 ##' @param features \code{SGFeatures} object
 ##' @param maxnvariant If more than \code{maxnvariant} variants are
 ##'   identified in an event, the gene is skipped, resulting in a warning.
 ##'   Set to \code{NA} to include all genes.
 ##' @param annotate_events Logical indicating whether identified
-##'   transcript variants should be annotated in terms of canonical events.
+##'   splice variants should be annotated in terms of canonical events.
 ##'   For details see help page for \code{\link{annotateSGVariants}}.
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{SGVariants} object
@@ -388,8 +388,8 @@ findSGVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
 
     if (length(variants) == 0) {
 
-        warning("features do not include any alternative transcript
-            events, no transcript variants identified")
+        warning("features do not include any splice events,
+            no splice variants identified")
         return(variants)
 
     }
@@ -840,27 +840,38 @@ findAllPaths <- function(from, to, path, ref, nodes)
         
 }
 
-##' Annotate transcript variants in terms of canonical events.
+##' Annotate splice variants in terms of canonical events.
 ##'
 ##' The following events are considered:
-##' \dQuote{SE} (skipped exon),
-##' \dQuote{S2E} (two consecutive exons skipped),
-##' \dQuote{RI} (retained intron),
-##' \dQuote{MXE} (mutually exclusive exons),
-##' \dQuote{A5SS} (alternative 5' splice site),
-##' \dQuote{A3SS} (alternative 3' splice site),
-##' \dQuote{AFE} (alternative first exon),
-##' \dQuote{ALE} (alternative last exon),
-##' \dQuote{AS} (alternative start other than \dQuote{AFE}) and
-##' \dQuote{AE} (alternative end other than \dQuote{ALE}).
 ##'
-##' These are binary events, defined by two alternative variants.
-##' A variant is annotated as a canonical event if it coincides with one
-##' of the two variants in the canonical event, and there is at least one
-##' variant in the same event that coincides with the second variant of the
-##' canonical event.
+##' \describe{
+##'   \item{dQuote{SE}}{skipped exon}
+##'   \item{dQuote{S2E}}{two consecutive exons skipped}
+##'   \item{dQuote{RI}}{retained intron}
+##'   \item{dQuote{MXE}}{mutually exclusive exons}
+##'   \item{dQuote{A5SS}}{alternative 5' splice site}
+##'   \item{dQuote{A3SS}}{alternative 3' splice site}
+##'   \item{dQuote{AFE}}{alternative first exon}
+##'   \item{dQuote{ALE}}{alternative last exon}
+##'   \item{dQuote{AS}}{alternative start other than \dQuote{AFE}}
+##'   \item{dQuote{AE}}{alternative end other than \dQuote{ALE}}
+##' }
 ##'
-##' @title Annotate transcript variants in terms of canonical events
+##' For events \dQuote{SE} and \dQuote{S2E}, suffixes \dQuote{I} and
+##' \dQuote{S} indicate inclusion and skipping, respectively.
+##' For event \dQuote{RI} suffixes \dQuote{E} and \dQuote{R} indicate
+##' exclusion and retention, respectively.
+##' For events \dQuote{A5SS} and \dQuote{A3SS}, suffixes \dQuote{P} and
+##' \dQuote{D} indicate use of the proximal (intron-shortening) and
+##' distal (intron-lengthening) splice site, respectively. 
+##' 
+##' All considered events are binary events defined by two alternative
+##' variants. A variant is annotated as a canonical event if it coincides
+##' with one of the two variants in the canonical event, and there is at
+##' least one variant in the same event that coincides with the second
+##' variant of the canonical event.
+##'
+##' @title Annotate splice variants in terms of canonical events
 ##' @param variants \code{SGVariants} object
 ##' @return \code{variants} with added elementMetadata column
 ##'   \dQuote{variantType} indicating canonical event(s)
@@ -1259,18 +1270,19 @@ expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
     
 }
 
-##' This function creates interpretable transcript variant names
+##' This function creates interpretable splice variant names
 ##' taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
 ##' GENE is based on geneName if available, and geneID otherwise.
 ##' EVENT and VARIANT enumerate events and variants for the same gene
 ##' and event, respectively. ORDER indicates the total number of
 ##' variants in the same event (e.g. 1/2 refers to the first out of two
-##' transcript variants in the event). TYPE is based on variantType.
-##' @title Create interpretable transcript variant names 
+##' splice variants in the event). TYPE is based on variantType.
+##' @title Create interpretable splice variant names
 ##' @param variants \code{SGVariants} object
-##' @return Character vector with transcript variant names
+##' @return Character vector with splice variant names
 ##' @examples
 ##' makeVariantNames(sgv)
+##' @keywords internal
 ##' @author Leonard Goldstein
 
 makeVariantNames <- function(variants)

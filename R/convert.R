@@ -316,8 +316,8 @@ collapseFeatures <- function(features)
 
 }
 
-##' Convert transcript features, predicted from RNA-seq data or
-##' extracted from transcript annotation, to splice graph features. 
+##' Convert transcript features (predicted from RNA-seq data or
+##' extracted from transcript annotation) to splice graph features. 
 ##'
 ##' Splice junctions are unaltered. Exons are disjoined into
 ##' non-overlapping exon bins. Adjacent exon bins without a splice site
@@ -328,11 +328,12 @@ collapseFeatures <- function(features)
 ##' upstream and downstream of introns, respectively) are added.
 ##'
 ##' In the returned \code{SGFeatures} object, column slots \code{splice5p}
-##' and \code{splice3p} indicate whether compatibility with an exon bin
-##' requires a fragment to be spliced at the 5' or 3' boundary, respectively.
-##' \code{splice5p} (\code{splice3p}) is \code{TRUE} if the first
-##' (last) position of the exon coincides with a splice acceptor (donor),
-##' and it is not adjacent to a neighboring exon bin.
+##' and \code{splice3p} indicate mandatory splices at the 5' and 3' end
+##' of an exon bin, respectively (determining whether reads overlapping
+##' exon boundaries must be spliced at the boundary to be considered
+##' compatible). \code{splice5p} (\code{splice3p}) is \code{TRUE}
+##' if the first (last) position of the exon coincides with a splice
+##' acceptor (donor) and it is not adjacent to a neighboring exon bin.
 ##'
 ##' Each feature is assigned a unique feature and gene identifier,
 ##' stored in column slots \code{featureID} and \code{geneID},

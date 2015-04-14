@@ -1,9 +1,6 @@
 ##' High-level function for the prediction and quantification of
 ##' splice junctions, exon bins and splice sites from BAM files.
 ##'
-##' If alignment information is not included in \code{sample_info},
-##' it is obtained directly from BAM files with \code{\link{getBamInfo}}.
-##'
 ##' Splice junctions and exons are predicted from BAM files with
 ##' \code{\link{predictTxFeatures}}.
 ##'
@@ -135,11 +132,11 @@ analyzeFeatures <- function(sample_info, which = NULL,
 }
 
 ##' Obtain paired-end status, median aligned read length, 
-##' median aligned insert size and library size from BAM file.
+##' median aligned insert size and library size from BAM files.
 ##'
 ##' Alignment information can be inferred from a subset of BAM records
 ##' by setting the number of records via argument \code{yieldSize}.
-##' Note that library size can only be obtained if \code{yieldSize} is {NULL}.
+##' Note that library size is only obtained if \code{yieldSize} is {NULL}.
 ##' 
 ##' @title Obtain alignment information from BAM files
 ##' @param sample_info Data frame with sample information including
@@ -196,8 +193,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 }
 
 ##' Transcript features are predicted for each sample and merged across
-##' samples. Subsequently, terminal exons are filtered and trimmed
-##' (if applicable). For details, see the help pages for
+##' samples. Terminal exons are filtered and trimmed, if applicable.
+##' For details, see the help pages for
 ##' \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
 ##' and \code{\link{processTerminalExons}}.
 ##' 
@@ -207,14 +204,14 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 ##' @param sample_info Data frame with sample information.
 ##'   Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 ##'   \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-##'   and \dQuote{lib_size}. Alignment information can be obtained with
+##'   and \dQuote{lib_size}. Sample information can be obtained with
 ##'   function \code{getBamInfo}.
 ##' @param min_overhang After merging, terminal exons are processed.
 ##'   For terminal exons sharing a splice site with an internal exon,
 ##'   minimum overhang required for terminal exons to be included.
 ##'   For remaining terminal exons overlapping other exons, minimum 
 ##'   overhang required to suppress trimming. Use \code{NA} to remove all
-##'   terminal exons sharing a splice with an internal exon and trim all
+##'   terminal exons sharing a splice site with an internal exon and trim all
 ##'   remaining terminal exons overlapping other exons. Use \code{NULL}
 ##'   to disable processing (disabling processing is useful if results are
 ##'   subsequently merged with other predictions and processing is
@@ -346,15 +343,15 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
         
 }
 
-##' High-level function for the analysis of transcript variants from 
-##' splice graph features. Transcript variants are identified with
-##' \code{\link{findSGVariants}}. Representative counts and estimated
-##' variant frequencies are obtained with \code{\link{getSGVariantCounts}}.
+##' High-level function for the analysis of splice variants from 
+##' splice graph features. Splice variants are identified with
+##' \code{\link{findSGVariants}}. Representative counts are obtained
+##' and variant frequencies estimated with \code{\link{getSGVariantCounts}}.
 ##' 
-##' @title Analysis of transcript variants
+##' @title Analysis of splice variants
 ##' @inheritParams findSGVariants
 ##' @param object \code{SGFeatureCounts} object
-##' @return A \code{SGVariantCounts} object
+##' @return An \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- analyzeVariants(sgfc)
 ##' @author Leonard Goldstein
@@ -379,12 +376,12 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 
 }
 
-##' For transcript variants, obtain counts of compatible fragments
-##' extending across the start and/or end of each variant.
-##' Variant frequencies are estimated based on representive counts.
+##' For splice variants obtain counts of compatible fragments
+##' extending across the start or end of each variant.
+##' Splice variant frequencies are estimated based on representive counts.
 ##' 
 ##' @title Representative counts and frequency estimates for
-##'   transcript variants
+##'   splice variants
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param variants \code{SGVariants} object

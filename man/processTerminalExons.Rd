@@ -37,7 +37,7 @@ This approach results in many predicted terminal exons that
 share a splice site with predicted internal exons (often contained
 within them or with a short overhang due to incorrect alignments).
 Most of these are not real terminal exons and are filtered before
-further analysis. Filtering based on the overhang is possible via
+further analysis. Filtering based on the overhang is controlled with
 argument \code{min_overhang}.
 
 Some of the remaining predicted terminal exons overlap other exons

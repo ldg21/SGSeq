@@ -30,9 +30,9 @@ using more stringent criteria after the initial prediction.}
 }
 \value{
 \code{IRanges} of splice junctions with elementMetadata
-  column \dQuote{type} and optionally \dQuote{N} (for
-  \code{include_counts = TRUE}), \dQuote{N_splicesite} (for
-  \code{retain_coverage = TRUE})
+  column \dQuote{type} and optionally \dQuote{N} for
+  \code{include_counts = TRUE}, \dQuote{N_splicesite} for
+  \code{retain_coverage = TRUE}
 }
 \description{
 Identify splice junctions from genomic RNA-seq read alignments.

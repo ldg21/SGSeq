@@ -1,12 +1,12 @@
 ##' Accessor and replacement functions for column slots.
 ##'
-##' S4 classes defined in the \code{SGSeq} package contain columns
-##' with information for each element in the object. For example, class
+##' S4 classes defined in the \code{SGSeq} package contain columns that
+##' store information for each element in the object. For example, class
 ##' \code{TxFeatures} contains a column \code{type} that indicates feature
 ##' type. The specific columns contained in an object depend on its class.
 ##'
 ##' To facilitate accessing and modifying columns, for each column
-##' there exists a function, with name identical to the column name,
+##' there exists a function with name identical to the column name
 ##' that can be used to access and modify it (see examples).
 ##' 
 ##' @title Accessing and replacing column slots
@@ -28,7 +28,7 @@ NULL
 ##' contains assays \code{counts} and \code{FPKM}. 
 ##'
 ##' To facilitate accessing and modifying assays, for each assay
-##' there exists a function, with name identical to the assay name,
+##' there exists a function with name identical to the assay name
 ##' that can be used to access and modify it (see examples).
 ##'
 ##' @title Accessing and replacing assay data

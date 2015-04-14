@@ -3,6 +3,8 @@ CHANGES IN VERSION 1.2.0
 
     o Renamed class TxVariants to SGVariants
 
+    o Renamed class TxVariantCounts to SGVariantCounts
+
     o Renamed findTxVariants() to findSGVariants()
 
     o Renamed getTxVariantCounts() to getSGVariantCounts()

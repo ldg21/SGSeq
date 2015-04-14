@@ -10,7 +10,7 @@ TxFeatures(x, type = mcols(x)$type, txName = mcols(x)$txName,
 \arguments{
 \item{x}{\code{GRanges} with known strand (\dQuote{+}, \dQuote{-})}
 
-\item{type}{Character vector or factor taking values in
+\item{type}{Character vector or factor, taking values in
 \code{J}, \code{I}, \code{F}, \code{L}, \code{U}}
 
 \item{txName}{\code{CharacterList} of transcript names or \code{NULL}}
@@ -25,7 +25,7 @@ Creates an instance of S4 class \code{TxFeatures} for storing
 transcript features.
 }
 \details{
-\code{TxFeatures} extend \code{GRanges} with column slot \code{type}
+\code{TxFeatures} extends \code{GRanges} with column slot \code{type}
 specifying feature type. \code{type} is a factor with levels
 \code{J} (splice junction), \code{I} (internal exon),
 \code{F} (5' terminal exon), \code{L} (3' terminal exon),

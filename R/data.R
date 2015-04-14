@@ -51,9 +51,9 @@ NULL
 ##' @name sgfc
 NULL
 
-##' Example transcript variants
+##' Example splice variants
 ##'
-##' Transcript variants for FBXO31, based on splice graph features predicted
+##' Splice variants for FBXO31, based on splice graph features predicted
 ##' from example BAM files.
 ##'
 ##' @format A \code{SGVariants} object.
@@ -62,9 +62,9 @@ NULL
 ##' @name sgv
 NULL
 
-##' Example transcript variant counts
+##' Example splice variant counts
 ##'
-##' Transcript variant counts and frequencies for FBXO31. Splice graph
+##' Splice variant counts and frequencies for FBXO31. Splice graph
 ##' features were predicted and counts obtained from example BAM files.
 ##'
 ##' @format A \code{SGVariantCounts} object.

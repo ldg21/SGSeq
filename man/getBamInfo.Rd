@@ -22,12 +22,12 @@ information, or \code{NULL} for all records}
 }
 \description{
 Obtain paired-end status, median aligned read length,
-median aligned insert size and library size from BAM file.
+median aligned insert size and library size from BAM files.
 }
 \details{
 Alignment information can be inferred from a subset of BAM records
 by setting the number of records via argument \code{yieldSize}.
-Note that library size can only be obtained if \code{yieldSize} is {NULL}.
+Note that library size is only obtained if \code{yieldSize} is {NULL}.
 }
 \examples{
 path <- system.file("extdata", package = "SGSeq")

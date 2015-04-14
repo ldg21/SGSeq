@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphs.R
 \name{annotateSGVariants}
 \alias{annotateSGVariants}
-\title{Annotate transcript variants in terms of canonical events}
+\title{Annotate splice variants in terms of canonical events}
 \usage{
 annotateSGVariants(variants)
 }
@@ -14,26 +14,37 @@ annotateSGVariants(variants)
   \dQuote{variantType} indicating canonical event(s)
 }
 \description{
-Annotate transcript variants in terms of canonical events.
+Annotate splice variants in terms of canonical events.
 }
 \details{
 The following events are considered:
-\dQuote{SE} (skipped exon),
-\dQuote{S2E} (two consecutive exons skipped),
-\dQuote{RI} (retained intron),
-\dQuote{MXE} (mutually exclusive exons),
-\dQuote{A5SS} (alternative 5' splice site),
-\dQuote{A3SS} (alternative 3' splice site),
-\dQuote{AFE} (alternative first exon),
-\dQuote{ALE} (alternative last exon),
-\dQuote{AS} (alternative start other than \dQuote{AFE}) and
-\dQuote{AE} (alternative end other than \dQuote{ALE}).
 
-These are binary events, defined by two alternative variants.
-A variant is annotated as a canonical event if it coincides with one
-of the two variants in the canonical event, and there is at least one
-variant in the same event that coincides with the second variant of the
-canonical event.
+\describe{
+  \item{dQuote{SE}}{skipped exon}
+  \item{dQuote{S2E}}{two consecutive exons skipped}
+  \item{dQuote{RI}}{retained intron}
+  \item{dQuote{MXE}}{mutually exclusive exons}
+  \item{dQuote{A5SS}}{alternative 5' splice site}
+  \item{dQuote{A3SS}}{alternative 3' splice site}
+  \item{dQuote{AFE}}{alternative first exon}
+  \item{dQuote{ALE}}{alternative last exon}
+  \item{dQuote{AS}}{alternative start other than \dQuote{AFE}}
+  \item{dQuote{AE}}{alternative end other than \dQuote{ALE}}
+}
+
+For events \dQuote{SE} and \dQuote{S2E}, suffixes \dQuote{I} and
+\dQuote{S} indicate inclusion and skipping, respectively.
+For event \dQuote{RI} suffixes \dQuote{E} and \dQuote{R} indicate
+exclusion and retention, respectively.
+For events \dQuote{A5SS} and \dQuote{A3SS}, suffixes \dQuote{P} and
+\dQuote{D} indicate use of the proximal (intron-shortening) and
+distal (intron-lengthening) splice site, respectively.
+
+All considered events are binary events defined by two alternative
+variants. A variant is annotated as a canonical event if it coincides
+with one of the two variants in the canonical event, and there is at
+least one variant in the same event that coincides with the second
+variant of the canonical event.
 }
 \author{
 Leonard Goldstein

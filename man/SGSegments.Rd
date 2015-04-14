@@ -15,7 +15,7 @@ A \code{SGSegments} object
 }
 \description{
 Creates an instance of S4 class \code{SGSegments} for storing
-transcript segments.
+splice graph segments.
 }
 \author{
 Leonard Goldstein

@@ -268,7 +268,7 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 ##' Creates an instance of S4 class \code{TxFeatures} for storing
 ##' transcript features.
 ##' 
-##' \code{TxFeatures} extend \code{GRanges} with column slot \code{type}
+##' \code{TxFeatures} extends \code{GRanges} with column slot \code{type}
 ##' specifying feature type. \code{type} is a factor with levels
 ##' \code{J} (splice junction), \code{I} (internal exon),
 ##' \code{F} (5' terminal exon), \code{L} (3' terminal exon),
@@ -279,7 +279,7 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 ##' 
 ##' @title Constructor function for S4 class \code{TxFeatures}
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
-##' @param type Character vector or factor taking values in
+##' @param type Character vector or factor, taking values in
 ##'   \code{J}, \code{I}, \code{F}, \code{L}, \code{U}
 ##' @param txName \code{CharacterList} of transcript names or \code{NULL}
 ##' @param geneName \code{CharacterList} of gene names or \code{NULL}
@@ -323,15 +323,16 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 ##' Creates an instance of S4 class \code{SGFeatures} for storing
 ##' splice graph features.
 ##' 
-##' \code{SGFeatures} extend \code{GRanges} with column slot \code{type}
+##' \code{SGFeatures} extends \code{GRanges} with column slot \code{type}
 ##' specifying feature type. \code{type} is a factor with levels
 ##' \code{J} (splice junction), \code{E} (exon bin),
 ##' \code{D} (splice donor), \code{A} (splice acceptor).
 ##'
 ##' \code{splice5p} and \code{splice3p} are logical vectors indicating
-##' whether reads extending across the 5' and 3' boundaries of an
-##' exon bin must be spliced at the boundary to be considered compatible
-##' with the exon bin.
+##' mandatory splices at the 5' and 3' end of an exon bin, respectively.
+##' These are used to determine whether reads extending across the
+##' 5' and 3' boundaries of an exon bin must be spliced at the boundary
+##' to be considered compatible with the exon bin.
 ##'
 ##' \code{featureID} and \code{geneID} are integer vectors representing
 ##' unique identifiers for features and genes (connected components in
@@ -344,10 +345,12 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
 ##' @param type Character vector or factor taking values in \code{J},
 ##'   \code{E}, \code{D}, \code{A}
-##' @param splice5p Logical vector indicating whether reads extending across
-##'   the 5' boundary of an exon bin must be spliced at the boundary
-##' @param splice3p Logical vector indicating whether reads extending across
-##'   the 3' boundary of an exon bin must be spliced at the boundary
+##' @param splice5p Logical vector indicating a mandatory splice at the
+##'   5' end of an exon bin (determining whether reads extending across
+##'   the 5' boundary must be spliced to be considered compatible)
+##' @param splice3p Logical vector indicating a mandatory splice at the
+##'   3' end of an exon bin (determining whether reads extending across
+##'   the 3' boundary must be spliced to be considered compatible)
 ##' @param featureID Integer vector of feature IDs
 ##' @param geneID Integer vector of gene IDs
 ##' @param txName \code{CharacterList} of transcript names or \code{NULL}
@@ -394,7 +397,7 @@ SGFeatures <- function(x, type = mcols(x)$type,
 }
 
 ##' Creates an instance of S4 class \code{SGSegments} for storing
-##' transcript segments. 
+##' splice graph segments.
 ##' 
 ##' @title Constructor function for S4 class \code{SGSegments}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
@@ -439,7 +442,7 @@ SGSegments <- function(x)
 }
 
 ##' Creates an instance of S4 class \code{SGVariants} for storing
-##' transcript variants. 
+##' splice variants.
 ##' 
 ##' @title Constructor function for S4 class \code{SGVariants}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
@@ -525,7 +528,7 @@ SGFeatureCounts <- function(x)
 }
 
 ##' Creates an instance of S4 class \code{SGVariantCounts} for storing
-##' representative transcript variant counts.
+##' representative splice variant counts.
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{SummarizedExperiment} with \code{SGVariants}

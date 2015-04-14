@@ -13,7 +13,7 @@ predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
 \item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-and \dQuote{lib_size}. Alignment information can be obtained with
+and \dQuote{lib_size}. Sample information can be obtained with
 function \code{getBamInfo}.}
 
 \item{which}{\code{GRanges} of genomic regions to be considered for
@@ -53,7 +53,7 @@ For terminal exons sharing a splice site with an internal exon,
 minimum overhang required for terminal exons to be included.
 For remaining terminal exons overlapping other exons, minimum
 overhang required to suppress trimming. Use \code{NA} to remove all
-terminal exons sharing a splice with an internal exon and trim all
+terminal exons sharing a splice site with an internal exon and trim all
 remaining terminal exons overlapping other exons. Use \code{NULL}
 to disable processing (disabling processing is useful if results are
 subsequently merged with other predictions and processing is
@@ -68,8 +68,8 @@ A \code{TxFeatures} object
 }
 \description{
 Transcript features are predicted for each sample and merged across
-samples. Subsequently, terminal exons are filtered and trimmed
-(if applicable). For details, see the help pages for
+samples. Terminal exons are filtered and trimmed, if applicable.
+For details, see the help pages for
 \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
 and \code{\link{processTerminalExons}}.
 }

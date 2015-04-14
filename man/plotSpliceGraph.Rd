@@ -56,7 +56,7 @@ be the same as feature colors}
 \item{cexExon}{Scale factor for exon height}
 
 \item{ypos}{Numeric value indicating vertical position of splice graph
-(exons bins) specified as fraction of height of the plotting region
+(exon bins) specified as fraction of height of the plotting region
 (not supported for \code{tx_view = TRUE})}
 
 \item{score}{\code{RLeList} containing nucleotide-level scores
@@ -67,7 +67,7 @@ to be plotted with the splice graph}
 \item{score_ylim}{y-axis range used for plotting scores}
 
 \item{score_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the score panel, specificed as fractions of the
+position and height of the score panel, specificed as fraction of the
 height of the plotting region}
 
 \item{score_nbin}{Number of bins for plotting scores}
@@ -79,7 +79,7 @@ height of the plotting region}
 \item{ranges_color}{Color used for plotting ranges}
 
 \item{ranges_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the ranges panel, specificed as fractions of the
+position and height of the ranges panel, specificed as fraction of the
 height of the plotting region}
 
 \item{main}{Plot title}
@@ -96,19 +96,22 @@ of plotting region}
 \item{asp}{Aspect ratio of graphics region}
 }
 \value{
-\code{data.frame} with plotting information for exons and
-  splice junctions in the splice graph
+\code{data.frame} with information on exon bins and
+  splice junctions included in the splice graph
 }
 \description{
 Plot splice graph implied by splice junctions and exon bins.
 }
 \details{
-By default, splice graph feature color is determined by annotation
-(see arguments \code{color}, \code{color_novel}) and labels are
-generated automatically (see argument \code{label}).
+By default, the color of features in the splice graph is
+determined by annotation status (see arguments \code{color},
+\code{color_novel}) and feature labels are generated automatically
+(see argument \code{label}). Alternatively, colors and labels can
+be specified via elementMetadata columns \dQuote{color} and
+\dQuote{label}, respectively.
 
-Alternatively, colors and labels can be specified via elementMetadata
-columns \dQuote{color} and \dQuote{label}, respectively.
+A \code{data.frame} with information on plotted features, including
+genomic coordinates, is returned invisibly.
 }
 \examples{
 \dontrun{

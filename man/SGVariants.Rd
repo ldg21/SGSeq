@@ -15,7 +15,7 @@ A \code{SGVariants} object
 }
 \description{
 Creates an instance of S4 class \code{SGVariants} for storing
-transcript variants.
+splice variants.
 }
 \examples{
 sgv <- SGVariants()

@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphs.R
 \name{makeVariantNames}
 \alias{makeVariantNames}
-\title{Create interpretable transcript variant names}
+\title{Create interpretable splice variant names}
 \usage{
 makeVariantNames(variants)
 }
@@ -10,16 +10,16 @@ makeVariantNames(variants)
 \item{variants}{\code{SGVariants} object}
 }
 \value{
-Character vector with transcript variant names
+Character vector with splice variant names
 }
 \description{
-This function creates interpretable transcript variant names
+This function creates interpretable splice variant names
 taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
 GENE is based on geneName if available, and geneID otherwise.
 EVENT and VARIANT enumerate events and variants for the same gene
 and event, respectively. ORDER indicates the total number of
 variants in the same event (e.g. 1/2 refers to the first out of two
-transcript variants in the event). TYPE is based on variantType.
+splice variants in the event). TYPE is based on variantType.
 }
 \examples{
 makeVariantNames(sgv)
@@ -27,4 +27,5 @@ makeVariantNames(sgv)
 \author{
 Leonard Goldstein
 }
+\keyword{internal}
 

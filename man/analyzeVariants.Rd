@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{analyzeVariants}
 \alias{analyzeVariants}
-\title{Analysis of transcript variants}
+\title{Analysis of splice variants}
 \usage{
 analyzeVariants(object, maxnvariant = 20, cores = 1)
 }
@@ -16,13 +16,13 @@ Set to \code{NA} to include all genes.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{SGVariantCounts} object
+An \code{SGVariantCounts} object
 }
 \description{
-High-level function for the analysis of transcript variants from
-splice graph features. Transcript variants are identified with
-\code{\link{findSGVariants}}. Representative counts and estimated
-variant frequencies are obtained with \code{\link{getSGVariantCounts}}.
+High-level function for the analysis of splice variants from
+splice graph features. Splice variants are identified with
+\code{\link{findSGVariants}}. Representative counts are obtained
+and variant frequencies estimated with \code{\link{getSGVariantCounts}}.
 }
 \examples{
 sgvc <- analyzeVariants(sgfc)

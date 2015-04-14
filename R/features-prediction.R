@@ -40,11 +40,11 @@
 ##'   feature prediction, passed to \code{ScanBamParam}
 ##' @param paired_end Logical, \code{TRUE} for paired-end data,
 ##'   \code{FALSE} for single-end data
-##' @param read_length Read length (required for use with \code{alpha})
-##' @param frag_length Fragment length for paired-end data (required
-##'   for use with \code{alpha})
-##' @param lib_size Number of aligned fragments (required for use with
-##'   \code{alpha})
+##' @param read_length Read length required for use with \code{alpha}
+##' @param frag_length Fragment length for paired-end data required
+##'   for use with \code{alpha}
+##' @param lib_size Number of aligned fragments required for use with
+##'   \code{alpha}
 ##' @param min_junction_count Minimum fragment count required for a splice
 ##'   junction to be included. If specified, argument \code{alpha} is ignored.
 ##' @param alpha Minimum FPKM required for a splice junction to be
@@ -355,9 +355,9 @@ constructGRangesFromRanges <- function(x, seqname, strand, seqinfo)
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams predictSpliced
 ##' @return \code{IRanges} of splice junctions with elementMetadata
-##'   column \dQuote{type} and optionally \dQuote{N} (for
-##'   \code{include_counts = TRUE}), \dQuote{N_splicesite} (for
-##'   \code{retain_coverage = TRUE})
+##'   column \dQuote{type} and optionally \dQuote{N} for
+##'   \code{include_counts = TRUE}, \dQuote{N_splicesite} for
+##'   \code{retain_coverage = TRUE}
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
@@ -413,8 +413,7 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
 }
 
 ##' Identify candidate internal exons based on previously identified
-##' splice junctions and regions with minimal read coverage required
-##' for internal exon prediction.
+##' splice junctions and regions with sufficient read coverage.
 ##' 
 ##' @title Identify candidate internal exons
 ##' @param junctions \code{IRanges} of splice junctions
@@ -458,9 +457,9 @@ predictCandidatesInternal <- function(junctions, islands)
 ##' @param candidates \code{IRanges} of candidate internal exons
 ##' @param relCov Minimum relative coverage required for exon prediction
 ##' @return \code{IRanges} of internal exons with elementMetadata column
-##'   \dQuote{type} and optionally \dQuote{N} (for
-##'   \code{include_counts = TRUE}), \dQuote{N_splicesite},
-##'   \dQuote{coverage} (for \code{retain_coverage = TRUE})
+##'   \dQuote{type} and optionally \dQuote{N} for
+##'   \code{include_counts = TRUE}, \dQuote{N_splicesite},
+##'   \dQuote{coverage} for \code{retain_coverage = TRUE}
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
@@ -504,8 +503,7 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
 }
 
 ##' Identify candidate terminal exons based on previously identified
-##' splice junctions and regions with minimal read coverage required
-##' for terminal exon prediction.
+##' splice junctions and regions with sufficient read coverage.
 ##' 
 ##' @title Identify candidate terminal exons
 ##' @inheritParams predictCandidatesInternal
@@ -553,9 +551,9 @@ predictCandidatesTerminal <- function(junctions, islands,
 ##' @inheritParams predictCandidatesTerminal
 ##' @param relCov Minimum relative coverage required for exon prediction
 ##' @return \code{IRanges} of terminal exons with elementMetadata column
-##'   \dQuote{type} and optionally \dQuote{N} (for
-##'   \code{include_counts = TRUE}), \dQuote{N_splicesite},
-##'   \dQuote{coverage} (for \code{retain_coverage = TRUE})
+##'   \dQuote{type} and optionally \dQuote{N} for
+##'   \code{include_counts = TRUE}, \dQuote{N_splicesite},
+##'   \dQuote{coverage} for \code{retain_coverage = TRUE}
 ##' @keywords internal
 ##' @author Leonard Goldstein
 

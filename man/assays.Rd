@@ -125,7 +125,7 @@ different types of assay data. For example, class \code{SGFeatureCounts}
 contains assays \code{counts} and \code{FPKM}.
 
 To facilitate accessing and modifying assays, for each assay
-there exists a function, with name identical to the assay name,
+there exists a function with name identical to the assay name
 that can be used to access and modify it (see examples).
 }
 \examples{

@@ -2,10 +2,10 @@
 % Please edit documentation in R/data.R
 \name{sgv}
 \alias{sgv}
-\title{Example transcript variants}
+\title{Example splice variants}
 \format{A \code{SGVariants} object.}
 \description{
-Transcript variants for FBXO31, based on splice graph features predicted
+Splice variants for FBXO31, based on splice graph features predicted
 from example BAM files.
 }
 \author{

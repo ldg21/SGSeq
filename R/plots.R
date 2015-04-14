@@ -30,6 +30,7 @@ exonGraphNodes <- function(E, J, tx_view)
         name = seq_along(E),
         coordinates = gr2co(E),
         type = type(E),
+        featureID = featureID(E),
         stringsAsFactors = FALSE)
 
     v$color <- mcols(E)$color
@@ -82,6 +83,7 @@ addDummyNodes <- function(v, E, J, tx_view)
             name = nrow(v) + seq_along(dummy_nodes),
             coordinates = coordinates,
             type = NA,
+            featureID = NA_integer_,
             stringsAsFactors = FALSE)
 
         if (!is.null(v$color)) {
@@ -167,6 +169,7 @@ exonGraphEdges <- function(v, J, tx_view)
         to = v$name[i_to],
         coordinates = gr2co(J)[i_junc],
         type = "J",
+        featureID = featureID(J)[i_junc],
         stringsAsFactors = FALSE)
 
     d$color <- mcols(J)$color[i_junc]
@@ -184,13 +187,16 @@ exonGraphEdges <- function(v, J, tx_view)
 
 ##' Plot splice graph implied by splice junctions and exon bins.
 ##'
-##' By default, splice graph feature color is determined by annotation
-##' (see arguments \code{color}, \code{color_novel}) and labels are 
-##' generated automatically (see argument \code{label}). 
+##' By default, the color of features in the splice graph is
+##' determined by annotation status (see arguments \code{color},
+##' \code{color_novel}) and feature labels are generated automatically
+##' (see argument \code{label}). Alternatively, colors and labels can
+##' be specified via elementMetadata columns \dQuote{color} and
+##' \dQuote{label}, respectively.
 ##'
-##' Alternatively, colors and labels can be specified via elementMetadata
-##' columns \dQuote{color} and \dQuote{label}, respectively.
-##'
+##' A \code{data.frame} with information on plotted features, including
+##' genomic coordinates, is returned invisibly.
+##' 
 ##' @title Plot splice graph
 ##' @param x \code{SGFeatures} or \code{SGVariants} object
 ##' @param geneID Single gene identifier used to subset \code{x}
@@ -219,21 +225,21 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' @param cexLab Scale factor for feature labels
 ##' @param cexExon Scale factor for exon height
 ##' @param ypos Numeric value indicating vertical position of splice graph
-##'   (exons bins) specified as fraction of height of the plotting region
+##'   (exon bins) specified as fraction of height of the plotting region
 ##'   (not supported for \code{tx_view = TRUE})
 ##' @param score \code{RLeList} containing nucleotide-level scores
 ##'   to be plotted with the splice graph
 ##' @param score_color Color used for plotting scores
 ##' @param score_ylim y-axis range used for plotting scores
 ##' @param score_ypos Numeric vector of length two, indicating the vertical
-##'   position and height of the score panel, specificed as fractions of the
+##'   position and height of the score panel, specificed as fraction of the
 ##'   height of the plotting region
 ##' @param score_nbin Number of bins for plotting scores
 ##' @param score_summary Function used to calculate per-bin score summaries
 ##' @param ranges \code{GRangesList} to be plotted with the splice graph
 ##' @param ranges_color Color used for plotting ranges
 ##' @param ranges_ypos Numeric vector of length two, indicating the vertical
-##'   position and height of the ranges panel, specificed as fractions of the
+##'   position and height of the ranges panel, specificed as fraction of the
 ##'   height of the plotting region
 ##' @param main Plot title
 ##' @param cexMain Scale factor for plot title
@@ -242,8 +248,8 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   of plotting region
 ##' @param tx_cex Scale factor for transcript labels
 ##' @param asp Aspect ratio of graphics region
-##' @return \code{data.frame} with plotting information for exons and
-##'   splice junctions in the splice graph
+##' @return \code{data.frame} with information on exon bins and
+##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
 ##'   sgf_annotated <- annotate(sgf, txf)
@@ -357,8 +363,12 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
             cex = 0.8 * tx_cex, line = 0.5, las = 1)
 
     }
+
+    out_cols <- c("id", "name", "featureID", "label")
+    out_cols <- out_cols[out_cols %in% names(df)]
+    out_df <- df[!is.na(df$featureID), out_cols]
     
-    invisible(df)
+    invisible(out_df)
     
 }
 
@@ -655,6 +665,7 @@ getGraphInfo <- function(g, pars, color_labels, tx_view)
                 as.integer(factor(co_J, levels = unique(co_J))))),
         name = paste0(c(gv$type[i_exon], gd$type[i_junc]), ":",
             c(gv$coordinates[i_exon], gd$coordinates[i_junc])),
+        featureID = c(gv$featureID[i_exon], gd$featureID[i_junc]),
         x = c(x_exon[i_exon], x_junc[i_junc]),
         y = c(y_exon[i_exon], y_junc[i_junc]))
     
@@ -812,7 +823,8 @@ addAlpha <- function(col, alpha)
 ##'   if \code{NULL} range of finite values
 ##' @param heightTopPanel Height of top panel as fraction of height of the
 ##'   graphics device
-##' @return Return value of \code{plotSpliceGraph}
+##' @return \code{data.frame} with information on exon bins and
+##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
 ##'   sgfc_annotated <- annotate(sgfc, txf)
@@ -902,13 +914,14 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 
 }
 
-##' @title Plot splice graph and heatmap of variant frequencies
+##' @title Plot splice graph and heatmap of splice variant frequencies
 ##' @inheritParams plotSpliceGraph
 ##' @inheritParams plotFeatures
 ##' @param x \code{SGVariantCounts} object 
-##' @param transform Transformation applied to variant frequencies
+##' @param transform Transformation applied to splice variant frequencies
 ##' @param expand_variants Experimental option - leave set to \code{FALSE}
-##' @return Return value of \code{plotSpliceGraph}
+##' @return \code{data.frame} with information on exon bins and
+##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
 ##'   sgvc_annotated <- annotate(sgvc, txf)
@@ -957,20 +970,20 @@ plotVariants <- function(x, eventID = NULL,
     
     if (all(not_quantifiable)) {
 
-        stop("none of the selected transcript variants could be quantified")
+        stop("none of the selected splice variants could be quantified")
 
     }
 
     if (any(not_quantifiable)) {
 
-        warning("one or more transcript variants could not be quantified")
+        warning("one or more splice variants could not be quantified")
 
     }
 
     if (any(elementLengths(featureID5p(x)) == 0 &
         elementLengths(featureID3p(x)) == 0)) {
 
-        warning("one or more transcript variants could not be quantified")
+        warning("one or more splice variants could not be quantified")
 
     }
         

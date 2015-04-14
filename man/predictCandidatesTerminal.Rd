@@ -21,8 +21,7 @@ should be identified to the left (\dQuote{exon_L}) or right
 }
 \description{
 Identify candidate terminal exons based on previously identified
-splice junctions and regions with minimal read coverage required
-for terminal exon prediction.
+splice junctions and regions with sufficient read coverage.
 }
 \author{
 Leonard Goldstein

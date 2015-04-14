@@ -11,7 +11,7 @@ getSGFeatureCounts(sample_info, features, counts_only = FALSE,
 \item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-and \dQuote{lib_size}. Alignment information can be obtained with
+and \dQuote{lib_size}. Sample information can be obtained with
 function \code{getBamInfo}.}
 
 \item{features}{\code{SGFeatures} object}

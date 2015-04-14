@@ -15,7 +15,7 @@ A \code{SGVariantCounts} object
 }
 \description{
 Creates an instance of S4 class \code{SGVariantCounts} for storing
-representative transcript variant counts.
+representative splice variant counts.
 }
 \examples{
 sgvc <- SGVariantCounts()
