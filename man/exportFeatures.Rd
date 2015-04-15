@@ -19,8 +19,8 @@ Export features to BED format. Splice sites are not included.
 }
 \examples{
 \dontrun{
-  exportFeatures(txf, "txf.bed")
-  exportFeatures(sgf, "sgf.bed")
+exportFeatures(txf, "txf.bed")
+exportFeatures(sgf, "sgf.bed")
 }
 }
 \author{

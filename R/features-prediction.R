@@ -68,12 +68,11 @@
 ##' @param junctions_only Logical indicating whether predictions
 ##'   should be limited to identification of splice junctions only
 ##' @param max_complexity Maximum allowed complexity. If a locus exceeds
-##'   this threshold, it is skipped, resulting in a warning message.
-##'   Here complexity is defined as the maximum number of unique filtered
-##'   splice junctions overlapping a given position in a locus.
+##'   this threshold, it is skipped, resulting in a warning.
+##'   Complexity is defined as the maximum number of unique predicted
+##'   splice junctions overlapping a given position.
 ##'   High complexity regions are often due to spurious read alignments
-##'   and can significantly slow down processing. 
-##'   To disable this filter, set to \code{NA}.
+##'   and can slow down processing. To disable this filter, set to \code{NA}.
 ##' @param sample_name Sample name used in messages
 ##' @param verbose If \code{TRUE}, generate messages indicating progress
 ##' @param cores Number of cores available for parallel processing

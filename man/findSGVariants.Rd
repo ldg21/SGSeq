@@ -21,7 +21,7 @@ For details see help page for \code{\link{annotateSGVariants}}.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{SGVariants} object
+An \code{SGVariants} object
 }
 \description{
 Find splice variants from splice graph

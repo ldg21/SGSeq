@@ -1,13 +1,12 @@
 Package: SGSeq
 Type: Package
 Title: Splice event detection and quantification from RNA-seq data
-Version: 1.1.29
+Version: 1.1.30
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
-Description: Predict splice junctions and exons from BAM files. Obtain 
-	     compatible read counts/FPKMs for splice junctions and disjoint
-	     exon bins. Identify splice events from the implied splice graph.
-	     Estimate relative usage of splice variants based on compatible
+Description: Predict splice junctions and exons from BAM files and obtain
+	     compatible read counts and FPKMs. Identify splice events and
+	     estimate relative usage of splice variants based on compatible
 	     read counts at event boundaries. 
 License: Artistic-2.0
 LazyData: yes

@@ -140,8 +140,8 @@ Plot splice graph and heatmap of expression values
 }
 \examples{
 \dontrun{
-  sgfc_annotated <- annotate(sgfc, txf)
-  plotFeatures(sgfc_annotated)
+sgfc_annotated <- annotate(sgfc, txf)
+plotFeatures(sgfc_annotated)
 }
 }
 \author{

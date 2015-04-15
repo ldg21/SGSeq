@@ -129,8 +129,8 @@ Plot splice graph and heatmap of splice variant frequencies
 }
 \examples{
 \dontrun{
-  sgvc_annotated <- annotate(sgvc, txf)
-  plotVariants(sgvc_annotated)
+sgvc_annotated <- annotate(sgvc, txf)
+plotVariants(sgvc_annotated)
 }
 }
 \author{

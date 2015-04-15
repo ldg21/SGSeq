@@ -21,11 +21,9 @@
 ##' obtained from BAM files with \code{\link{getSGFeatureCounts}}.
 ##' 
 ##' @title Analysis of splice graph features from BAM files
-##' @inheritParams getBamInfo
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
-##' @inheritParams processTerminalExons
 ##' @param features \code{TxFeatures} or \code{SGFeatures} object
 ##' @param predict Logical indicating whether transcript
 ##'   features should be predicted from BAM files
@@ -134,14 +132,14 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' Obtain paired-end status, median aligned read length, 
 ##' median aligned insert size and library size from BAM files.
 ##'
-##' Alignment information can be inferred from a subset of BAM records
+##' Library information can be inferred from a subset of BAM records
 ##' by setting the number of records via argument \code{yieldSize}.
 ##' Note that library size is only obtained if \code{yieldSize} is {NULL}.
 ##' 
-##' @title Obtain alignment information from BAM files
+##' @title Obtain library information from BAM files
 ##' @param sample_info Data frame with sample information including
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
-##' @param yieldSize Number of records used for obtaining alignment
+##' @param yieldSize Number of records used for obtaining library
 ##'   information, or \code{NULL} for all records
 ##' @param cores Number of cores available for parallel processing
 ##' @return \code{sample_info} with additional columns \dQuote{paired_end},
@@ -192,30 +190,26 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
     
 }
 
-##' Transcript features are predicted for each sample and merged across
-##' samples. Terminal exons are filtered and trimmed, if applicable.
+##' Splice junctions and exons are predicted for each sample and merged
+##' across samples. Terminal exons are filtered and trimmed, if applicable.
 ##' For details, see the help pages for
 ##' \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
 ##' and \code{\link{processTerminalExons}}.
 ##' 
-##' @title Transcript feature prediction from BAM files
+##' @title Splice junction and exon prediction from BAM files
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
 ##' @param sample_info Data frame with sample information.
 ##'   Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 ##'   \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-##'   and \dQuote{lib_size}. Sample information can be obtained with
+##'   and \dQuote{lib_size}. Library information can be obtained with
 ##'   function \code{getBamInfo}.
-##' @param min_overhang After merging, terminal exons are processed.
-##'   For terminal exons sharing a splice site with an internal exon,
-##'   minimum overhang required for terminal exons to be included.
-##'   For remaining terminal exons overlapping other exons, minimum 
-##'   overhang required to suppress trimming. Use \code{NA} to remove all
-##'   terminal exons sharing a splice site with an internal exon and trim all
-##'   remaining terminal exons overlapping other exons. Use \code{NULL}
-##'   to disable processing (disabling processing is useful if results are
-##'   subsequently merged with other predictions and processing is
-##'   postponed until after the merging step).
+##' @param min_overhang Minimum overhang required to suppress filtering or
+##'   trimming of predicted terminal exons (see the manual page for
+##'   \code{processTerminalExons}). Use \code{NULL} to disable processing
+##'   (disabling processing is useful if results are subsequently merged
+##'   with other predictions and processing is postponed until after the
+##'   merging step).
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{TxFeatures} object
 ##' @examples
@@ -378,7 +372,10 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 
 ##' For splice variants obtain counts of compatible fragments
 ##' extending across the start or end of each variant.
-##' Splice variant frequencies are estimated based on representive counts.
+##' Counts can be obtained from an \code{SGFeatureCounts} object
+##' or from BAM files. Only one of the two arguments \code{object}
+##' and \code{sample_info} must be specified. Splice variant
+##' frequencies are estimated based on representive counts.
 ##' 
 ##' @title Representative counts and frequency estimates for
 ##'   splice variants

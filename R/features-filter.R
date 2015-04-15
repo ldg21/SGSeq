@@ -157,9 +157,7 @@ removeExonsIsolated <- function(features)
     
 }
 
-##' Prediction of transcript starts and ends from RNA-seq data is imprecise.
-##' Due to the employed prediction strategy, further processing of predicted
-##' terminal exons is required to avoid common artifacts.
+##' Predicted terminal exons are processed as described under Details.
 ##' 
 ##' Processing of terminal exon predictions is done in two steps:
 ##' (1) terminal exons that share a splice site with an internal exon are
@@ -186,11 +184,9 @@ removeExonsIsolated <- function(features)
 ##' 
 ##' @title Process predicted terminal exons
 ##' @param features \code{TxFeatures} object
-##' @param min_overhang For terminal exons sharing a splice site with an
-##'   internal exon, minimum overhang required for terminal exons to be
-##'   included. For remaining terminal exons overlapping other exons,
-##'   minimum overhang required to suppress trimming. Use \code{NA} to
-##'   remove all terminal exons sharing a splice with an internal exon
+##' @param min_overhang Minimum overhang required to suppress filtering or
+##'   trimming of predicted terminal exons (see Details). Use \code{NA} to
+##'   exclude all terminal exons sharing a splice with an internal exon
 ##'   and trim all remaining terminal exons overlapping other exons.
 ##' @return \code{TxFeatures} object with processed features
 ##' @examples

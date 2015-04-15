@@ -5,6 +5,11 @@
 ##' can be specified as character vectors in elementMetadata
 ##' columns \code{txName} and \code{geneName}, respectively.
 ##' If missing, transcript names are based on \code{names(x)}. 
+##'
+##' In the returned \code{TxFeatures} object, column \code{type} takes
+##' values \dQuote{J} (splice junction), \dQuote{I} (internal exon),
+##' \dQuote{F} (5'/first exon), \dQuote{L} (3'/last exon) or \dQuote{U}
+##' (unspliced).
 ##' 
 ##' @title Convert to TxFeatures object
 ##' @param x \code{TxDb} object, or \code{GRangesList} of exons
@@ -321,22 +326,24 @@ collapseFeatures <- function(features)
 ##'
 ##' Splice junctions are unaltered. Exons are disjoined into
 ##' non-overlapping exon bins. Adjacent exon bins without a splice site
-##' at the shared boundary are merged. All exon bins are assigned type
-##' \dQuote{E}.
+##' at the shared boundary are merged. 
 ##' 
 ##' Entries for splice donor and acceptor sites (positions immediately
 ##' upstream and downstream of introns, respectively) are added.
 ##'
-##' In the returned \code{SGFeatures} object, column slots \code{splice5p}
-##' and \code{splice3p} indicate mandatory splices at the 5' and 3' end
-##' of an exon bin, respectively (determining whether reads overlapping
-##' exon boundaries must be spliced at the boundary to be considered
-##' compatible). \code{splice5p} (\code{splice3p}) is \code{TRUE}
-##' if the first (last) position of the exon coincides with a splice
-##' acceptor (donor) and it is not adjacent to a neighboring exon bin.
+##' In the returned \code{SGFeatures} object, column \code{type} takes
+##' values \dQuote{J} (splice junction), \dQuote{E} (exon bin),
+##' \dQuote{D} (splice donor) or \dQuote{A} (splice acceptor).
+##' Columns \code{splice5p} and \code{splice3p} indicate mandatory
+##' splices at the 5' and 3' end of exon bins, respectively
+##' (determining whether reads overlapping exon boundaries must be
+##' spliced at the boundary to be considered compatible).
+##' \code{splice5p} (\code{splice3p}) is \code{TRUE} if the first (last)
+##' position of the exon coincides with a splice acceptor (donor)
+##' and it is not adjacent to a neighboring exon bin.
 ##'
 ##' Each feature is assigned a unique feature and gene identifier,
-##' stored in column slots \code{featureID} and \code{geneID},
+##' stored in columns \code{featureID} and \code{geneID},
 ##' respectively. The latter indicates features that belong to the
 ##' same gene, represented by a connected component in the splice graph.
 ##' 

@@ -342,8 +342,8 @@ uniqueFeatures <- function(features)
 ##' @return \code{NULL}
 ##' @examples
 ##' \dontrun{
-##'   exportFeatures(txf, "txf.bed")
-##'   exportFeatures(sgf, "sgf.bed")
+##' exportFeatures(txf, "txf.bed")
+##' exportFeatures(sgf, "sgf.bed")
 ##' }
 ##' @author Leonard Goldstein
 

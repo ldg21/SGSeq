@@ -25,11 +25,11 @@ BiocStyle::latex()
 
 \section{Background}
 
-RNA-seq data can be used for transcript isoform discovery and transcript-level expression studies. Most computational tools for genome-guided transcript isoform analysis (methods that work with RNA-seq data aligned against a reference genome) fall into two categories: Methods for the analysis of splice events, which often rely on transcript annotation, and methods for reconstructing and quantifying full-length transcripts. \Rpackage{SGSeq} implements a method for the annotation-free detection and quantification of splice events from RNA-seq data. 
+RNA-seq data can be used for transcript isoform discovery and transcript-level expression studies. Most computational tools for genome-guided transcript isoform analysis (methods that work with RNA-seq data aligned against a reference genome) fall into one of two categories: Methods for the analysis of splice events, which often rely on transcript annotation, and methods for reconstructing and quantifying full-length transcripts. \Rpackage{SGSeq} implements a method for the annotation-free detection and quantification of splice events from RNA-seq data. 
 
 \section{Overview}
 
-\Rpackage{SGSeq} predicts splice junctions and exons from RNA-seq reads aligned against a reference genome. Splice junctions and disjoint exon bins are quantified using counts or FPKMs based on structurally compatible reads. Input data must be in BAM format. It is essential that BAM files are obtained using a splice-aware alignment program that generates the custom tag 'XS' indicating the direction of transcription for spliced reads. Splice junctions and disjoint exon bins are assembled into a genome-wide splice graph \cite{Heber:2002aa}. In the \Rpackage{SGSeq} framework, the splice graph is a directed acyclic graph with nodes corresponding to transcript starts, ends and splice sites, and edges corresponding to disjoint exon bins and splice junctions, directed from $5^\prime$ to the $3^\prime$ end. A splice event is defined by a start node and an end node connected by two or more paths and no intervening nodes with all paths intersecting. \Rpackage{SGSeq} identifies splice events from the graph, and estimates relative usage of splice variants based on compatible reads spanning the event boundaries.
+\Rpackage{SGSeq} predicts splice junctions and exons from RNA-seq reads aligned against a reference genome. Splice junctions and disjoint exon bins are quantified using counts or FPKMs based on structurally compatible reads. Input data must be in BAM format. It is essential that BAM files are obtained using a splice-aware alignment program that generates the custom tag 'XS' indicating the direction of transcription for spliced reads. Splice junctions and disjoint exon bins are assembled into a genome-wide splice graph \cite{Heber:2002aa}. In the \Rpackage{SGSeq} framework, the splice graph is a directed acyclic graph with nodes corresponding to transcript starts, ends and splice sites, and edges corresponding to disjoint exon bins and splice junctions, directed from $5^\prime$ to the $3^\prime$ end. A splice event is defined by a start node and an end node connected by two or more paths and no intervening nodes with all paths intersecting. \Rpackage{SGSeq} identifies splice events recursively from the graph, and estimates relative usage of splice variants based on compatible reads spanning the event boundaries.
 
 \section{Preliminaries}
 
@@ -42,7 +42,7 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 
 In the following, we use a \Rclass{data.frame} \Robject{si} with sample information, and a \Rclass{GRanges} object \Robject{gr} with genomic coordinates of the \emph{FBXO31} gene.
 
-The \Rclass{data.frame} with sample information contains alignment information, including paired-end status, median read length, median insert size and the total number of alignments. These were obtained from the original BAM files using function \Rfunction{getBamInfo()}. We set the correct BAM file paths in the sample information.
+The \Rclass{data.frame} \Robject{si} contains library information, including paired-end status, median read length, median insert size and the total number of alignments. These were obtained from the original BAM files using function \Rfunction{getBamInfo()}. When analyzing a new data set, library information must be obtained once initially and can then be used for all subsequent analyses. The following code block sets the correct BAM file paths in the sample information for this vignette.
 
 <<>>=
 path <- system.file("extdata", package = "SGSeq")
@@ -57,9 +57,9 @@ txdb <- keepSeqlevels(txdb, "chr16")
 seqlevelsStyle(txdb) <- "NCBI"
 @ 
 
-\Rpackage{SGSeq} makes extensive use of the \Bioconductor{} infrastructure for genomic ranges \cite{Lawrence:2013hi}. To store genomic coordinates for both exons and splice junctions, \Rpackage{SGSeq} implements the \Rclass{TxFeatures} class, which extends the \Rclass{GRanges} class with additional columns. Column \Rcode{type} takes values in \Rcode{J} (splice junction), \Rcode{I} (internal exon), \Rcode{F} (first/$5^\prime$ terminal exon), \Rcode{L} (last/$3^\prime$ terminal exon) and \Rcode{U} (unspliced).
+\Rpackage{SGSeq} makes extensive use of the \Bioconductor{} infrastructure for genomic ranges \cite{Lawrence:2013hi}. To store genomic coordinates for both exons and splice junctions, \Rpackage{SGSeq} implements the \Rclass{TxFeatures} class, which extends the \Rclass{GRanges} class with additional columns. Column \Rcode{type} takes values \Rcode{J} (splice junction), \Rcode{I} (internal exon), \Rcode{F} (first/$5^\prime$ terminal exon), \Rcode{L} (last/$3^\prime$ terminal exon) or \Rcode{U} (unspliced).
 
-In addition to \Rclass{TxFeatures}, \Rpackage{SGSeq} implements the \Rclass{SGFeatures} class to store splice graph features. Similar to \Rclass{TxFeatures}, \Rclass{SGFeatures} extends the \Rclass{GRanges} class with additional columns. Column \Rcode{type} for an \Rclass{SGFeatures} object takes values in \Rcode{J} (splice junction), \Rcode{E} (disjoint exon bin), \Rcode{D} (splice donor) and \Rcode{A} (splice acceptor).
+In addition to \Rclass{TxFeatures}, \Rpackage{SGSeq} implements the \Rclass{SGFeatures} class to store splice graph features. Similar to \Rclass{TxFeatures}, \Rclass{SGFeatures} extends the \Rclass{GRanges} class with additional columns. Column \Rcode{type} for an \Rclass{SGFeatures} object takes values \Rcode{J} (splice junction), \Rcode{E} (disjoint exon bin), \Rcode{D} (splice donor) or \Rcode{A} (splice acceptor).
 
 For both \Rclass{TxFeatures} and \Rclass{SGFeatures}, class-specific columns can be accessed using functions named after the columns they access (e.g. use function \Rfunction{type()} to obtain feature type). Transcript features or splice graph features can be exported to BED files using function \Rfunction{exportFeatures()}.
 
@@ -74,7 +74,7 @@ If transcript annotation is not available as a \Rclass{TxDb} object, \Rfunction{
 
 \section{Analysis based on annotated transcript features}
 
-Initially, we perform an analysis based on annotated transcript features. The following example converts the transcript features into splice graph features and obtains compatible counts for each feature and each sample. 
+We first perform an analysis based on annotated transcript features. The following example converts the transcript features into splice graph features and obtains compatible counts for each feature and each sample. 
 
 <<>>=
 sgfc <- analyzeFeatures(si, features = txf_annotated)
@@ -82,7 +82,7 @@ sgfc <- analyzeFeatures(si, features = txf_annotated)
 
 \sloppy \Rfunction{analyzeFeatures()} returns an object of class \Rclass{SGFeatureCounts}, which extends the \Rclass{SummarizedExperiment} class from the \Biocpkg{GenomicRanges} package. \Rclass{SGFeatureCounts} contains sample information as \Rcode{colData}, splice graph features as \Rcode{rowRanges} and assays \Rcode{counts} and \Rcode{FPKM}, which store compatible counts and FPKMs for each splice graph feature and sample, respectively. Accessor functions \Rfunction{colData()}, \Rfunction{rowRanges()}, \Rfunction{counts()} and \Rfunction{FPKM()} can be used to access the data.
 
-Compatible FPKMs for splice graph features can be visualized with \Rfunction{plotFeatures()}. The plotting function invisibly returns a \Rcode{data.frame} with information on splice junctions and exon bins included in the splice graph. 
+Compatible FPKMs for splice graph features can be visualized with \Rfunction{plotFeatures()}. The plotting function invisibly returns a \Rcode{data.frame} with information on splice graph features, including genomic coordinates.
 
 <<figure-1, fig.width=4.5, fig.height=4.5>>=
 df <- plotFeatures(sgfc, geneID = 1)
@@ -114,7 +114,7 @@ Note that, in contrast to the previous figure, the predicted gene model does not
 
 \section{Analysis of splice variants}
 
-Instead of considering the complete splice graph of a gene, we can focus our analysis on individual splice events. The following example identifies splice events from the splice graph and obtains representative counts for each splice variant. 
+Instead of considering the complete splice graph of a gene, we can focus our analysis on individual splice events. The following example identifies splice events from the splice graph and obtains representative counts for each splice variant.
 
 <<>>=
 sgvc <- analyzeVariants(sgfc)
@@ -151,7 +151,7 @@ sgvc <- getSGVariantCounts(sgv, sgfc)
 
 \section{Performance}
 
-\sloppy When performing genome-wide analyses or working with large data sets, parallelization is highly recommended. Functions \Rfunction{analyzeFeatures()}, \Rfunction{predictTxFeatures()} and \Rfunction{getSGFeatureCounts()} support parallel processing of multiple samples, as well as parallel processing of multiple chromosomes/strands for a given sample. Parallization is controlled with argument \Robject{cores}. Running a single BAM file with $\sim50$ million paired-end reads using 4 cores typically takes $\sim2-3$ hours for prediction and $\sim1-2$ hours for counting. Processing times can be affected by individual genes or genomic regions with many read alignments (e.g. the mitochondrial chromosome). Thus it can be benefical to exclude high coverage regions by filtering BAM files prior to analysis with \Rpackage{SGSeq}. For prediction, genomic regions with high splice complexity can be skipped automatically to speed up processing. Skipping is controlled with argument \Rcode{max\_complexity}. Identification of splice events is performed on a per-gene basis and can be parallelized using argument \Robject{cores} for \Rfunction{analyzeVariants()} and \Rfunction{findSGVariants()}.
+\sloppy When performing genome-wide analyses or working with large data sets, parallelization is highly recommended. Functions \Rfunction{getBamInfo()}, \Rfunction{predictTxFeatures()} and \Rfunction{getSGFeatureCounts()} support parallel processing of multiple samples. \Rfunction{predictTxFeatures()} and \Rfunction{getSGFeatureCounts()} also support parallel processing of multiple chromosomes/strands for a given sample. Parallization is controlled with argument \Robject{cores}. Running a single BAM file with $\sim50$ million paired-end reads using 4 cores typically takes $\sim2-3$ hours for prediction and $\sim1-2$ hours for counting. Processing times can be affected by individual genes or genomic regions with many read alignments (e.g. the mitochondrial chromosome). Thus it can be benefical to exclude high coverage regions by filtering BAM files prior to analysis with \Rpackage{SGSeq}. For prediction with \Rfunction{predictTxFeatures()}, genomic regions with high splice complexity likely due to spurious alignments can be skipped automatically to speed up processing. Skipping is controlled with argument \Rcode{max\_complexity}. Identification of splice events is performed on a per-gene basis and can be parallelized using argument \Robject{cores} for \Rfunction{analyzeVariants()} and \Rfunction{findSGVariants()}.
 
 \section{Session information}
 

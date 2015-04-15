@@ -19,7 +19,7 @@ included in featureID5p(variants) and featureID3p(variants)}
 \item{sample_info}{Data frame with sample information.
 Required columns are \dQuote{sample_name}, \dQuote{file_bam},
 \dQuote{paired_end}, \dQuote{read_length}, \dQuote{frag_length}
-and \dQuote{lib_size}. Sample information can be obtained with
+and \dQuote{lib_size}. Library information can be obtained with
 function \code{getBamInfo}.}
 
 \item{verbose}{If \code{TRUE}, generate messages indicating progress}
@@ -32,7 +32,10 @@ An \code{SGVariantCounts} object
 \description{
 For splice variants obtain counts of compatible fragments
 extending across the start or end of each variant.
-Splice variant frequencies are estimated based on representive counts.
+Counts can be obtained from an \code{SGFeatureCounts} object
+or from BAM files. Only one of the two arguments \code{object}
+and \code{sample_info} must be specified. Splice variant
+frequencies are estimated based on representive counts.
 }
 \examples{
 sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)

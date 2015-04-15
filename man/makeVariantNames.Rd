@@ -13,8 +13,8 @@ makeVariantNames(variants)
 Character vector with splice variant names
 }
 \description{
-This function creates interpretable splice variant names
-taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
+Create interpretable splice variant names
+taking format GENE_EVENT_VARIANT/ORDER_TYPE.
 GENE is based on geneName if available, and geneID otherwise.
 EVENT and VARIANT enumerate events and variants for the same gene
 and event, respectively. ORDER indicates the total number of

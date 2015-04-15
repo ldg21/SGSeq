@@ -9,20 +9,16 @@ processTerminalExons(features, min_overhang = NA)
 \arguments{
 \item{features}{\code{TxFeatures} object}
 
-\item{min_overhang}{For terminal exons sharing a splice site with an
-internal exon, minimum overhang required for terminal exons to be
-included. For remaining terminal exons overlapping other exons,
-minimum overhang required to suppress trimming. Use \code{NA} to
-remove all terminal exons sharing a splice with an internal exon
+\item{min_overhang}{Minimum overhang required to suppress filtering or
+trimming of predicted terminal exons (see Details). Use \code{NA} to
+exclude all terminal exons sharing a splice with an internal exon
 and trim all remaining terminal exons overlapping other exons.}
 }
 \value{
 \code{TxFeatures} object with processed features
 }
 \description{
-Prediction of transcript starts and ends from RNA-seq data is imprecise.
-Due to the employed prediction strategy, further processing of predicted
-terminal exons is required to avoid common artifacts.
+Predicted terminal exons are processed as described under Details.
 }
 \details{
 Processing of terminal exon predictions is done in two steps:

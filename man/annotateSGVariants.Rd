@@ -20,16 +20,16 @@ Annotate splice variants in terms of canonical events.
 The following events are considered:
 
 \describe{
-  \item{dQuote{SE}}{skipped exon}
-  \item{dQuote{S2E}}{two consecutive exons skipped}
-  \item{dQuote{RI}}{retained intron}
-  \item{dQuote{MXE}}{mutually exclusive exons}
-  \item{dQuote{A5SS}}{alternative 5' splice site}
-  \item{dQuote{A3SS}}{alternative 3' splice site}
-  \item{dQuote{AFE}}{alternative first exon}
-  \item{dQuote{ALE}}{alternative last exon}
-  \item{dQuote{AS}}{alternative start other than \dQuote{AFE}}
-  \item{dQuote{AE}}{alternative end other than \dQuote{ALE}}
+  \item{\dQuote{SE}}{skipped exon}
+  \item{\dQuote{S2E}}{two consecutive exons skipped}
+  \item{\dQuote{RI}}{retained intron}
+  \item{\dQuote{MXE}}{mutually exclusive exons}
+  \item{\dQuote{A5SS}}{alternative 5' splice site}
+  \item{\dQuote{A3SS}}{alternative 3' splice site}
+  \item{\dQuote{AFE}}{alternative first exon}
+  \item{\dQuote{ALE}}{alternative last exon}
+  \item{\dQuote{AS}}{alternative start other than \dQuote{AFE}}
+  \item{\dQuote{AE}}{alternative end other than \dQuote{ALE}}
 }
 
 For events \dQuote{SE} and \dQuote{S2E}, suffixes \dQuote{I} and

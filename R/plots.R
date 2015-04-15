@@ -252,12 +252,12 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##'   sgf_annotated <- annotate(sgf, txf)
-##'   plotSpliceGraph(sgf_annotated)
+##' sgf_annotated <- annotate(sgf, txf)
+##' plotSpliceGraph(sgf_annotated)
 ##' }
 ##' \dontrun{
-##'   sgv_annotated <- annotate(sgv, txf)
-##'   plotSpliceGraph(sgv_annotated)
+##' sgv_annotated <- annotate(sgv, txf)
+##' plotSpliceGraph(sgv_annotated)
 ##' }
 ##' @author Leonard Goldstein
 
@@ -827,8 +827,8 @@ addAlpha <- function(col, alpha)
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##'   sgfc_annotated <- annotate(sgfc, txf)
-##'   plotFeatures(sgfc_annotated)
+##' sgfc_annotated <- annotate(sgfc, txf)
+##' plotFeatures(sgfc_annotated)
 ##' }
 ##' @author Leonard Goldstein
 
@@ -924,8 +924,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##'   sgvc_annotated <- annotate(sgvc, txf)
-##'   plotVariants(sgvc_annotated)
+##' sgvc_annotated <- annotate(sgvc, txf)
+##' plotVariants(sgvc_annotated)
 ##' }
 ##' @author Leonard Goldstein
 

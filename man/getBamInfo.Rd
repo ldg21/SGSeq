@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{getBamInfo}
 \alias{getBamInfo}
-\title{Obtain alignment information from BAM files}
+\title{Obtain library information from BAM files}
 \usage{
 getBamInfo(sample_info, yieldSize = NULL, cores = 1)
 }
@@ -10,7 +10,7 @@ getBamInfo(sample_info, yieldSize = NULL, cores = 1)
 \item{sample_info}{Data frame with sample information including
 mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.}
 
-\item{yieldSize}{Number of records used for obtaining alignment
+\item{yieldSize}{Number of records used for obtaining library
 information, or \code{NULL} for all records}
 
 \item{cores}{Number of cores available for parallel processing}
@@ -25,7 +25,7 @@ Obtain paired-end status, median aligned read length,
 median aligned insert size and library size from BAM files.
 }
 \details{
-Alignment information can be inferred from a subset of BAM records
+Library information can be inferred from a subset of BAM records
 by setting the number of records via argument \code{yieldSize}.
 Note that library size is only obtained if \code{yieldSize} is {NULL}.
 }

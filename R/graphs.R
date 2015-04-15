@@ -369,7 +369,7 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##'   splice variants should be annotated in terms of canonical events.
 ##'   For details see help page for \code{\link{annotateSGVariants}}.
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{SGVariants} object
+##' @return An \code{SGVariants} object
 ##' @examples
 ##' sgv <- findSGVariants(sgf)
 ##' @author Leonard Goldstein
@@ -845,16 +845,16 @@ findAllPaths <- function(from, to, path, ref, nodes)
 ##' The following events are considered:
 ##'
 ##' \describe{
-##'   \item{dQuote{SE}}{skipped exon}
-##'   \item{dQuote{S2E}}{two consecutive exons skipped}
-##'   \item{dQuote{RI}}{retained intron}
-##'   \item{dQuote{MXE}}{mutually exclusive exons}
-##'   \item{dQuote{A5SS}}{alternative 5' splice site}
-##'   \item{dQuote{A3SS}}{alternative 3' splice site}
-##'   \item{dQuote{AFE}}{alternative first exon}
-##'   \item{dQuote{ALE}}{alternative last exon}
-##'   \item{dQuote{AS}}{alternative start other than \dQuote{AFE}}
-##'   \item{dQuote{AE}}{alternative end other than \dQuote{ALE}}
+##'   \item{\dQuote{SE}}{skipped exon}
+##'   \item{\dQuote{S2E}}{two consecutive exons skipped}
+##'   \item{\dQuote{RI}}{retained intron}
+##'   \item{\dQuote{MXE}}{mutually exclusive exons}
+##'   \item{\dQuote{A5SS}}{alternative 5' splice site}
+##'   \item{\dQuote{A3SS}}{alternative 3' splice site}
+##'   \item{\dQuote{AFE}}{alternative first exon}
+##'   \item{\dQuote{ALE}}{alternative last exon}
+##'   \item{\dQuote{AS}}{alternative start other than \dQuote{AFE}}
+##'   \item{\dQuote{AE}}{alternative end other than \dQuote{ALE}}
 ##' }
 ##'
 ##' For events \dQuote{SE} and \dQuote{S2E}, suffixes \dQuote{I} and
@@ -1270,8 +1270,8 @@ expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
     
 }
 
-##' This function creates interpretable splice variant names
-##' taking the format GENE_EVENT_VARIANT/ORDER_TYPE.
+##' Create interpretable splice variant names
+##' taking format GENE_EVENT_VARIANT/ORDER_TYPE.
 ##' GENE is based on geneName if available, and geneID otherwise.
 ##' EVENT and VARIANT enumerate events and variants for the same gene
 ##' and event, respectively. ORDER indicates the total number of

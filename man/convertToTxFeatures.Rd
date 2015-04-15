@@ -22,6 +22,11 @@ If \code{x} is a \code{GRangesList}, transcript names and gene names
 can be specified as character vectors in elementMetadata
 columns \code{txName} and \code{geneName}, respectively.
 If missing, transcript names are based on \code{names(x)}.
+
+In the returned \code{TxFeatures} object, column \code{type} takes
+values \dQuote{J} (splice junction), \dQuote{I} (internal exon),
+\dQuote{F} (5'/first exon), \dQuote{L} (3'/last exon) or \dQuote{U}
+(unspliced).
 }
 \examples{
 gr <- GRanges(c(1, 1), IRanges(c(1, 201), c(100, 300)), c("+", "+"))
