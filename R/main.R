@@ -511,6 +511,6 @@ setCores <- function(cores, n_sample)
   
     n <- as.integer(max(floor(cores/n_sample), 1))
     s <- as.integer(floor(cores/n))
-    list(per_sample = n, n_sample = s)
+    list(n_sample = s, per_sample = n, total = s * n)
     
 }

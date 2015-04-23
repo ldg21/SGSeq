@@ -508,22 +508,10 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
 
     if (counts_only) return(list_counts)
 
-    assays <- list()
-
-    for (k in colnames(list_counts[[1]])) {
-
-        assays[[k]] <- do.call(cbind,
-            lapply(list_counts, function(x) { x[, k] }))
-      
-    }
-        
-    SE <- SummarizedExperiment(assays = assays, rowRanges = variants,
-        colData = DataFrame(sample_info))
-    colnames(SE) <- sample_info$sample_name
-    SE <- getVariantFreq(SE)
-    SE <- SGVariantCounts(SE)
+    sgvc <- makeSGVariantCounts(variants, sample_info, list_counts,
+        cores$total)
     
-    return(SE)
+    return(sgvc)
         
 }
 
@@ -671,5 +659,27 @@ getSGVariantCountsPerStrand <- function(variants, features,
     if (verbose) generateCompleteMessage(paste(sample_name, gr2co(which)))
     
     return(counts)
+    
+}
+
+makeSGVariantCounts <- function(rowRanges, colData, counts, cores)
+{
+
+    assays <- list()
+
+    for (k in colnames(counts[[1]])) {
+
+        assays[[k]] <- do.call(cbind,
+            mclapply(counts, function(x) { x[, k] }, mc.cores = cores))
+      
+    }
+        
+    x <- SummarizedExperiment(assays = assays,
+        rowRanges = rowRanges, colData = DataFrame(colData))
+    colnames(x) <- colData$sample_name
+    x <- getVariantFreq(x)
+    x <- SGVariantCounts(x)
+
+    return(x)
     
 }
