@@ -426,14 +426,14 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     
     list_variant_info <- mclapply(
         geneIDs,
-        findSGVariantsPerGene,
+        findVariantsPerGene,
         g = g,
         maxnvariant = maxnvariant,
         mc.cores = cores)
 
     checkApplyResultsForErrors(
         list_variant_info,
-        "findSGVariantsPerGene",
+        "findVariantsPerGene",
         geneIDs)
 
     variant_info <- rbindListOfDFs(list_variant_info, cores)
@@ -444,22 +444,46 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 
     }
 
-    variant_info$eventID <- eventIDs(variant_info)
-    variant_info <- variant_info[order(variant_info$eventID), ]
-    variant_info$variantID <- seq_len(nrow(variant_info))
-    variant_info$featureID5p <- getRepresentativeFeatureIDs(
-        variant_info, features, TRUE)
-    variant_info$featureID3p <- getRepresentativeFeatureIDs(
-        variant_info, features, FALSE)
-    
+    ## obtain variants in terms of SGFeatures
     variant_featureID <- variant_info$featureID
     variant_featureID <- gsub("(", "", variant_featureID, fixed = TRUE)
     variant_featureID <- gsub(")", "", variant_featureID, fixed = TRUE)
     variant_featureID <- gsub("|", ",", variant_featureID, fixed = TRUE)
     variant_featureID <- strsplit(variant_featureID, ",", fixed = TRUE)
-
+    variant_featureID <- as(variant_featureID, "CompressedIntegerList")
+    variant_featureID <- unique(variant_featureID)
     variants <- split(features[match(unlist(variant_featureID),
         featureID(features))], togroup(variant_featureID))
+    variant_gr <- unlist(range(variants))
+
+    ## sort by genomic position
+    i <- order(variant_gr)
+    variant_info <- variant_info[i, ]
+    variants <- variants[i]
+    variant_gr <- variant_gr[i]
+    
+    ## obtain event IDs and variant IDs
+    ft <- paste(variant_info$from, variant_info$to)
+    variant_info$eventID <- as.integer(factor(ft, levels = unique(ft)))
+    variant_info$variantID <- seq_len(nrow(variant_info))
+    
+    ## replace source nodes with corresponding start nodes
+    x <- flank(variant_gr, -1, TRUE)
+    i <- which(variant_info$from == "R")
+    if (length(i) > 0) { variant_info$from[i] <- paste0("S:", gr2pos(x[i])) }
+
+    ## replace sink nodes with corresponding end nodes
+    x <- flank(variant_gr, -1, FALSE)
+    i <- which(variant_info$to == "K")
+    if (length(i) > 0) { variant_info$to[i] <- paste0("E:", gr2pos(x[i])) }
+
+    ## obtain representative feature IDs
+    variant_info$featureID5p <- getRepresentativeFeatureIDs(
+        variant_info, features, TRUE)
+    variant_info$featureID3p <- getRepresentativeFeatureIDs(
+        variant_info, features, FALSE)
+
+    ## create SGVariants object
     mcols(variants) <- variant_info
     variants <- SGVariants(variants)
     variants <- annotatePaths(variants)
@@ -468,88 +492,69 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 
 }
 
-eventIDs <- function(variant_info)
-{
-
-    from_to <- paste(variant_info$from, variant_info$to)
-
-    unique_from_to <- unique(from_to)
-    unique_from <- sapply(strsplit(unique_from_to, " ", fixed = TRUE), "[", 1)
-    unique_to <- sapply(strsplit(unique_from_to, " ", fixed = TRUE), "[", 2)
-    
-    sl <- sapply(strsplit(unique_from, ":", fixed = TRUE), "[", 2)
-    st <- sapply(strsplit(unique_from, ":", fixed = TRUE), "[", 4)
-    start <- as.integer(sapply(strsplit(unique_from, ":", fixed = TRUE),
-        "[", 3))
-    end <- as.integer(sapply(strsplit(unique_to, ":", fixed = TRUE), "[", 3))
-    tmp_start <- start
-    tmp_end <- end
-    i_neg <- which(st == "-")
-    start[i_neg] <- -tmp_end[i_neg]
-    end[i_neg] <- -tmp_start[i_neg]    
-    o <- order(sl, start, end)
-    
-    eventIDs <- match(from_to, unique_from_to[o])
-
-    return(eventIDs)
-    
-}
-
 getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
 {
 
+    variant_rep_id <- vector("list", nrow(variant_info))
+    variant_rep_id <- as(variant_rep_id, "CompressedIntegerList")
+    
     if (start) {
 
-        variant_node <- variant_info$from
-        variant_informative <- variant_info$closed3p
-
+        index <- grep("^D", variant_info$from)
+        tmp_info <- variant_info[index, ]
+        tmp_node <- tmp_info$from
+        tmp_informative <- tmp_info$closed3p
+        
     } else {
 
-        variant_node <- variant_info$to
-        variant_informative <- variant_info$closed5p
-
+        index <- grep("^A", variant_info$to)
+        tmp_info <- variant_info[index, ]
+        tmp_node <- tmp_info$to
+        tmp_informative <- tmp_info$closed5p
+        
     }
 
-    variant_rep_id <- getTerminalFeatureIDs(variant_info$featureID, start)
+    if (length(index) == 0) {
+
+        return(variant_rep_id)
+
+    }
+    
+    tmp_rep_id <- getTerminalFeatureIDs(tmp_info$featureID, start)
 
     ## replace exons with splice sites
 
-    index <- which(elementLengths(variant_rep_id) > 0)
-    tmp_id <- variant_rep_id[index]
-    tmp_node <- variant_node[index]
-    
-    tmp_id_unlisted <- unlist(tmp_id)
-    tmp_i_unlisted <- match(tmp_id_unlisted, featureID(features))
+    tmp_rep_id_unlisted <- unlist(tmp_rep_id)
+    tmp_rep_id_unlisted_i <- match(tmp_rep_id_unlisted, featureID(features))
 
-    i_E <- which(type(features)[tmp_i_unlisted] == "E")
+    i_E <- which(type(features)[tmp_rep_id_unlisted_i] == "E")
 
     if (length(i_E) > 0) {
     
-        tmp_i_unlisted[i_E] <- match(tmp_node[togroup(tmp_id)][i_E],
-            feature2name(features))
+        tmp_rep_id_unlisted_i[i_E] <- match(
+            tmp_node[togroup(tmp_rep_id)][i_E], feature2name(features))
 
     }
     
-    tmp_id_unlisted <- featureID(features)[tmp_i_unlisted]
-    tmp_id <- relist(tmp_id_unlisted, tmp_id)
-
-    variant_rep_id[index] <- tmp_id
-    variant_rep_id <- IntegerList(variant_rep_id)
+    tmp_rep_id_unlisted <- featureID(features)[tmp_rep_id_unlisted_i]
+    tmp_rep_id <- relist(tmp_rep_id_unlisted, tmp_rep_id)
     
     ## exclude variants due to open events or ambiguous features
 
-    event_dup <- tapply(unlist(variant_rep_id),
-        variant_info$eventID[togroup(variant_rep_id)],
+    event_dup <- tapply(unlist(tmp_rep_id),
+        tmp_info$eventID[togroup(tmp_rep_id)],
         function(x) { any(duplicated(x)) })
-    i <- which(!variant_informative |
-        variant_info$eventID %in% names(which(event_dup)))
-    variant_rep_id[i] <- vector("list", length(i))    
+    i <- which(!tmp_informative |
+        tmp_info$eventID %in% names(which(event_dup)))
+    tmp_rep_id[i] <- vector("list", length(i))    
 
+    variant_rep_id[index] <- tmp_rep_id
+    
     return(variant_rep_id)
     
 }
 
-findSGVariantsPerGene <- function(g, geneID, maxnvariant)
+findVariantsPerGene <- function(g, geneID, maxnvariant)
 {
 
     ## Extract subgraph corresponding to geneID
@@ -661,16 +666,6 @@ findSGVariantsPerGene <- function(g, geneID, maxnvariant)
     ## include geneID
     path_info$geneID <- geneID
 
-    ## replace source nodes with corresponding start nodes
-    i <- which(path_info$from == "R")
-    s <- pfirst(CharacterList(strsplit(path_info$segmentID[i], ",")))
-    path_info$from[i] <- hd$from[match(s, hd$segmentID)]
-
-    ## replace sink nodes with corresponding end nodes
-    i <- which(path_info$to == "K")
-    s <- plast(CharacterList(strsplit(path_info$segmentID[i], ",")))
-    path_info$to[i] <- hd$to[match(s, hd$segmentID)]
-    
     return(path_info)
     
 }
@@ -901,7 +896,7 @@ annotateSGVariants <- function(variants)
     
     ## preliminaries
     
-    path_from_to <- paste(from(variants), to(variants))
+    path_event_id <- eventID(variants)
     path_event <- CharacterList(vector("list", length(variants)))
     path_type <- expandType(type(variants), max_n_J)
     
@@ -917,9 +912,9 @@ annotateSGVariants <- function(variants)
 
         i_1 <- unique(togroup(path_type)[grep(type_1, unlist(path_type))])
         i_2 <- unique(togroup(path_type)[grep(type_2, unlist(path_type))])
-        from_to <- intersect(path_from_to[i_1], path_from_to[i_2])
-        i_1 <- i_1[path_from_to[i_1] %in% from_to]
-        i_2 <- i_2[path_from_to[i_2] %in% from_to]
+        event_id <- intersect(path_event_id[i_1], path_event_id[i_2])
+        i_1 <- i_1[path_event_id[i_1] %in% event_id]
+        i_2 <- i_2[path_event_id[i_2] %in% event_id]
 
         path_event[i_1] <- pc(path_event[i_1], rep(event_1, length(i_1)))
         path_event[i_2] <- pc(path_event[i_2], rep(event_2, length(i_2)))
@@ -940,9 +935,9 @@ annotateSGVariants <- function(variants)
         
         if (length(i) > 0) {
 
-            from_to_n <- table(path_from_to[i])
-            from_to <- names(which(from_to_n >= 2))
-            i <- i[path_from_to[i] %in% from_to]
+            event_id_n <- table(path_event_id[i])
+            event_id <- names(which(event_id_n >= 2))
+            i <- i[path_event_id[i] %in% event_id]
             path_event[i] <- pc(path_event[i], rep(event, length(i)))
             
         }
@@ -1160,8 +1155,7 @@ getTerminalFeatureIDs <- function(x, start = TRUE)
 
     }
 
-    x <- suppressWarnings(as.integer(x))
-    out <- as(tapply(x, x_f, setdiff, NA, simplify = FALSE), "list")
+    out <- as(tapply(as.integer(x), x_f, unique, simplify = FALSE), "list")
     
     return(out)
     
