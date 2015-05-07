@@ -364,7 +364,7 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
 
     }
 
-    out_cols <- c("id", "name", "featureID", "label")
+    out_cols <- c("id", "name", "featureID", "label", "color")
     out_cols <- out_cols[out_cols %in% names(df)]
     out_df <- df[!is.na(df$featureID), out_cols]
     

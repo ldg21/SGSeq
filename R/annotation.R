@@ -249,7 +249,7 @@ plintersect <- function(x, y)
 annotateFrame <- function(query, subject)
 {
     
-    hits <- matchExon(query, subject)
+    hits <- matchExon(query, subject, FALSE)
     qH <- queryHits(hits)
     sH <- subjectHits(hits)
 
@@ -359,7 +359,7 @@ matchJunction <- function(query, subject) {
     
 }
 
-matchExon <- function(query, subject) {
+matchExon <- function(query, subject, stringent = TRUE) {
 
     i_q <- which(type(query) == "E")    
     i_s <- which(type(subject) %in% c("I", "F", "L", "U"))
@@ -372,6 +372,15 @@ matchExon <- function(query, subject) {
     qH <- queryHits(hits)
     sH <- subjectHits(hits)
 
+    hits <- new2("Hits",
+        queryHits = i_q[queryHits(hits)],
+        subjectHits = i_s[subjectHits(hits)],
+        queryLength = length(query),
+        subjectLength = length(subject),
+        check = FALSE)
+
+    if (!stringent) { return(hits) }
+    
     ## exclude hits with inconsistent 5' spliced boundary
     
     i <- which(splice5p(q2)[qH])
@@ -425,14 +434,9 @@ matchExon <- function(query, subject) {
     excl <- unique(c(excl_q_5p, excl_q_3p, excl_s_5p, excl_s_3p))
 
     if (length(excl) > 0) { hits <- hits[-excl] }
-    
-    new2("Hits",
-        queryHits = i_q[queryHits(hits)],
-        subjectHits = i_s[subjectHits(hits)],
-        queryLength = length(query),
-        subjectLength = length(subject),
-        check = FALSE)
 
+    return(hits)
+    
 }
 
 matchSplice <- function(query, subject, type = c("D", "A")) {
