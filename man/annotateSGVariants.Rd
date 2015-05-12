@@ -10,7 +10,7 @@ annotateSGVariants(variants)
 \item{variants}{\code{SGVariants} object}
 }
 \value{
-\code{variants} with added elementMetadata column
+\code{variants} with added metadata column
   \dQuote{variantType} indicating canonical event(s)
 }
 \description{

@@ -27,11 +27,11 @@ to be included}
 to be included}
 
 \item{include_counts}{Logical indicating whether counts of
-compatible fragments should be included in elementMetadata column
+compatible fragments should be included in metadata column
 \dQuote{N}}
 
 \item{retain_coverage}{Logical indicating whether coverages for each
-exon should be retained as an \code{IntegerList} in elementMetadata
+exon should be retained as an \code{IntegerList} in metadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 

@@ -20,16 +20,16 @@ junction to be included. If specified, argument \code{alpha} is ignored.}
 to be included}
 
 \item{include_counts}{Logical indicating whether counts of
-compatible fragments should be included in elementMetadata column
+compatible fragments should be included in metadata column
 \dQuote{N}}
 
 \item{retain_coverage}{Logical indicating whether coverages for each
-exon should be retained as an \code{IntegerList} in elementMetadata
+exon should be retained as an \code{IntegerList} in metadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 }
 \value{
-\code{IRanges} of splice junctions with elementMetadata
+\code{IRanges} of splice junctions with metadata
   column \dQuote{type} and optionally \dQuote{N} for
   \code{include_counts = TRUE}, \dQuote{N_splicesite} for
   \code{retain_coverage = TRUE}

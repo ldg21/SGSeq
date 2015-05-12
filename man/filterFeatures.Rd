@@ -9,7 +9,7 @@ filterFeatures(features, paired_end, read_length, frag_length, lib_size,
 }
 \arguments{
 \item{features}{\code{TxFeatures} object with predicted features,
-including elementMetadata columns \dQuote{N}, \dQuote{N_splicesite} and
+including metadata columns \dQuote{N}, \dQuote{N_splicesite} and
 \dQuote{coverage}.}
 
 \item{paired_end}{Logical, \code{TRUE} for paired-end data,
@@ -50,7 +50,7 @@ Filter previously predicted features using more stringent criteria.
 \details{
 Initial predictions with \code{predictTxFeatures} must have been performed
 with \code{include_counts = TRUE} and \code{retain_coverage = TRUE},
-so that predicted features contain elementMetadata columns \dQuote{N},
+so that predicted features contain metadata columns \dQuote{N},
 \dQuote{N_splicesite} and \dQuote{coverage}.
 }
 \author{

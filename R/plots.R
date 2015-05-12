@@ -191,7 +191,7 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' determined by annotation status (see arguments \code{color},
 ##' \code{color_novel}) and feature labels are generated automatically
 ##' (see argument \code{label}). Alternatively, colors and labels can
-##' be specified via elementMetadata columns \dQuote{color} and
+##' be specified via metadata columns \dQuote{color} and
 ##' \dQuote{label}, respectively.
 ##'
 ##' A \code{data.frame} with information on plotted features, including
@@ -210,13 +210,13 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' @param label Format of exon/splice junction labels,
 ##'   possible values are \dQuote{id} (format E1,... J1,...), \dQuote{name}
 ##'   (format type:chromosome:start-end:strand), \dQuote{label} for labels
-##'   specified in elementMetadata column \dQuote{label}, or \dQuote{none}
+##'   specified in metadata column \dQuote{label}, or \dQuote{none}
 ##'   for no labels.
 ##' @param color Color used for plotting the splice graph. Ignored if features
-##'   elementMetadata column \dQuote{color} is not \code{NULL}.
+##'   metadata column \dQuote{color} is not \code{NULL}.
 ##' @param color_novel Features with missing annotation are
 ##'   highlighted in \code{color_novel}. Ignored if features
-##'   elementMetadata column \dQuote{color} is not \code{NULL}.
+##'   metadata column \dQuote{color} is not \code{NULL}.
 ##' @param color_alpha Controls color transparency
 ##' @param color_labels Logical indicating whether label colors should
 ##'   be the same as feature colors

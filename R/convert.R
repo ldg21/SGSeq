@@ -2,7 +2,7 @@
 ##' grouped by transcripts to a \code{TxFeatures} object.
 ##'
 ##' If \code{x} is a \code{GRangesList}, transcript names and gene names
-##' can be specified as character vectors in elementMetadata
+##' can be specified as character vectors in metadata
 ##' columns \code{txName} and \code{geneName}, respectively.
 ##' If missing, transcript names are based on \code{names(x)}. 
 ##'

@@ -144,7 +144,7 @@ validMcols <- function(object, mcol_type)
     
     if (length(i) > 0) {
 
-        return(paste("missing elementMetadata column(s)",
+        return(paste("missing metadata column(s)",
             paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
         
     }
@@ -153,7 +153,7 @@ validMcols <- function(object, mcol_type)
     
     if (length(i) > 0) {
 
-        return(paste("invalid type for elementMetadata column(s)",
+        return(paste("invalid type for metadata column(s)",
             paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
         
     }
@@ -227,14 +227,14 @@ setClass(
 setClass(
     Class = "SGFeatureCounts",
     slots = c(rowRanges = "SGFeatures"),
-    contains = "SummarizedExperiment",
+    contains = "RangedSummarizedExperiment",
     validity = validSGFeatureCounts
 )
 
 setClass(
     Class = "SGVariantCounts",
     slots = c(rowRanges = "SGVariants"),
-    contains = "SummarizedExperiment",
+    contains = "RangedSummarizedExperiment",
     validity = validSGVariantCounts
 )
 
@@ -401,7 +401,7 @@ SGFeatures <- function(x, type = mcols(x)$type,
 ##' 
 ##' @title Constructor function for S4 class \code{SGSegments}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
-##'   outer elementMetadata columns
+##'   outer metadata columns
 ##' @return A \code{SGSegments} object
 ##' @keywords internal
 ##' @author Leonard Goldstein
@@ -446,7 +446,7 @@ SGSegments <- function(x)
 ##' 
 ##' @title Constructor function for S4 class \code{SGVariants}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
-##'   outer elementMetadata columns
+##'   outer metadata columns
 ##' @return A \code{SGVariants} object
 ##' @examples
 ##' sgv <- SGVariants()
@@ -503,7 +503,7 @@ SGVariants <- function(x)
 ##' compatible splice graph feature counts.
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
-##' @param x \code{SummarizedExperiment} with \code{SGFeatures}
+##' @param x \code{RangedSummarizedExperiment} with \code{SGFeatures}
 ##'   as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}
 ##' @return An \code{SGFeatureCounts} object
 ##' @examples
@@ -531,7 +531,7 @@ SGFeatureCounts <- function(x)
 ##' representative splice variant counts.
 ##' 
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
-##' @param x \code{SummarizedExperiment} with \code{SGVariants}
+##' @param x \code{RangedSummarizedExperiment} with \code{SGVariants}
 ##'   as \code{rowRanges} and appropriate assays
 ##' @return A \code{SGVariantCounts} object
 ##' @examples

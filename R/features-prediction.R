@@ -59,10 +59,10 @@
 ##' @param gamma Minimum relative coverage required for a terminal exon
 ##'   to be included 
 ##' @param include_counts Logical indicating whether counts of
-##'   compatible fragments should be included in elementMetadata column
+##'   compatible fragments should be included in metadata column
 ##'   \dQuote{N}
 ##' @param retain_coverage Logical indicating whether coverages for each
-##'   exon should be retained as an \code{IntegerList} in elementMetadata
+##'   exon should be retained as an \code{IntegerList} in metadata
 ##'   column \dQuote{coverage}. This allows filtering of features
 ##'   using more stringent criteria after the initial prediction.
 ##' @param junctions_only Logical indicating whether predictions
@@ -353,7 +353,7 @@ constructGRangesFromRanges <- function(x, seqname, strand, seqinfo)
 ##' @title Identify splice junctions
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams predictSpliced
-##' @return \code{IRanges} of splice junctions with elementMetadata
+##' @return \code{IRanges} of splice junctions with metadata
 ##'   column \dQuote{type} and optionally \dQuote{N} for
 ##'   \code{include_counts = TRUE}, \dQuote{N_splicesite} for
 ##'   \code{retain_coverage = TRUE}
@@ -455,7 +455,7 @@ predictCandidatesInternal <- function(junctions, islands)
 ##' @inheritParams predictSpliced
 ##' @param candidates \code{IRanges} of candidate internal exons
 ##' @param relCov Minimum relative coverage required for exon prediction
-##' @return \code{IRanges} of internal exons with elementMetadata column
+##' @return \code{IRanges} of internal exons with metadata column
 ##'   \dQuote{type} and optionally \dQuote{N} for
 ##'   \code{include_counts = TRUE}, \dQuote{N_splicesite},
 ##'   \dQuote{coverage} for \code{retain_coverage = TRUE}
@@ -549,7 +549,7 @@ predictCandidatesTerminal <- function(junctions, islands,
 ##' @inheritParams predictExonsInternal
 ##' @inheritParams predictCandidatesTerminal
 ##' @param relCov Minimum relative coverage required for exon prediction
-##' @return \code{IRanges} of terminal exons with elementMetadata column
+##' @return \code{IRanges} of terminal exons with metadata column
 ##'   \dQuote{type} and optionally \dQuote{N} for
 ##'   \code{include_counts = TRUE}, \dQuote{N_splicesite},
 ##'   \dQuote{coverage} for \code{retain_coverage = TRUE}

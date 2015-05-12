@@ -7,7 +7,7 @@
 SGFeatureCounts(x)
 }
 \arguments{
-\item{x}{\code{SummarizedExperiment} with \code{SGFeatures}
+\item{x}{\code{RangedSummarizedExperiment} with \code{SGFeatures}
 as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}}
 }
 \value{

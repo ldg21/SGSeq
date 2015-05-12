@@ -34,11 +34,11 @@ have constant length), \dQuote{exon} (exonic regions are drawn to scale)
 and \dQuote{gene} (both exonic and intronic regions are drawn to scale).}
 
 \item{color}{Color used for plotting the splice graph. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+metadata column \dQuote{color} is not \code{NULL}.}
 
 \item{color_novel}{Features with missing annotation are
 highlighted in \code{color_novel}. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+metadata column \dQuote{color} is not \code{NULL}.}
 
 \item{color_alpha}{Controls color transparency}
 

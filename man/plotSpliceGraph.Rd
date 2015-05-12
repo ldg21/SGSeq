@@ -33,15 +33,15 @@ and \dQuote{gene} (both exonic and intronic regions are drawn to scale).}
 \item{label}{Format of exon/splice junction labels,
 possible values are \dQuote{id} (format E1,... J1,...), \dQuote{name}
 (format type:chromosome:start-end:strand), \dQuote{label} for labels
-specified in elementMetadata column \dQuote{label}, or \dQuote{none}
+specified in metadata column \dQuote{label}, or \dQuote{none}
 for no labels.}
 
 \item{color}{Color used for plotting the splice graph. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+metadata column \dQuote{color} is not \code{NULL}.}
 
 \item{color_novel}{Features with missing annotation are
 highlighted in \code{color_novel}. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+metadata column \dQuote{color} is not \code{NULL}.}
 
 \item{color_alpha}{Controls color transparency}
 
@@ -107,7 +107,7 @@ By default, the color of features in the splice graph is
 determined by annotation status (see arguments \code{color},
 \code{color_novel}) and feature labels are generated automatically
 (see argument \code{label}). Alternatively, colors and labels can
-be specified via elementMetadata columns \dQuote{color} and
+be specified via metadata columns \dQuote{color} and
 \dQuote{label}, respectively.
 
 A \code{data.frame} with information on plotted features, including

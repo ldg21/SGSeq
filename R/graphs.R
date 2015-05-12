@@ -868,7 +868,7 @@ findAllPaths <- function(from, to, path, ref, nodes)
 ##'
 ##' @title Annotate splice variants in terms of canonical events
 ##' @param variants \code{SGVariants} object
-##' @return \code{variants} with added elementMetadata column
+##' @return \code{variants} with added metadata column
 ##'   \dQuote{variantType} indicating canonical event(s)
 ##' @keywords internal
 ##' @author Leonard Goldstein

@@ -22,16 +22,16 @@ should be identified to the left (\dQuote{exon_L}) or right
 (\dQuote{exon_R}) of provided splice junctions}
 
 \item{include_counts}{Logical indicating whether counts of
-compatible fragments should be included in elementMetadata column
+compatible fragments should be included in metadata column
 \dQuote{N}}
 
 \item{retain_coverage}{Logical indicating whether coverages for each
-exon should be retained as an \code{IntegerList} in elementMetadata
+exon should be retained as an \code{IntegerList} in metadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 }
 \value{
-\code{IRanges} of terminal exons with elementMetadata column
+\code{IRanges} of terminal exons with metadata column
   \dQuote{type} and optionally \dQuote{N} for
   \code{include_counts = TRUE}, \dQuote{N_splicesite},
   \dQuote{coverage} for \code{retain_coverage = TRUE}

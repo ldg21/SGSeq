@@ -2,13 +2,13 @@
 ##' 
 ##' Initial predictions with \code{predictTxFeatures} must have been performed
 ##' with \code{include_counts = TRUE} and \code{retain_coverage = TRUE},
-##' so that predicted features contain elementMetadata columns \dQuote{N},
+##' so that predicted features contain metadata columns \dQuote{N},
 ##' \dQuote{N_splicesite} and \dQuote{coverage}.
 ##'
 ##' @title Filter predicted features
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param features \code{TxFeatures} object with predicted features,
-##'   including elementMetadata columns \dQuote{N}, \dQuote{N_splicesite} and
+##'   including metadata columns \dQuote{N}, \dQuote{N_splicesite} and
 ##'   \dQuote{coverage}.
 ##' @return \code{TxFeatures} object with filtered features
 ##' @keywords internal

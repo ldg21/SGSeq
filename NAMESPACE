@@ -1,12 +1,13 @@
 ## IMPORT NAMESPACES
 
-import(BiocGenerics)
-import(IRanges)
-import(GenomicAlignments)
-import(GenomicRanges)
 import(methods)
-import(Rsamtools)
+import(BiocGenerics)
 import(S4Vectors)
+import(IRanges)
+import(GenomicRanges)
+import(SummarizedExperiment)
+import(Rsamtools)
+import(GenomicAlignments)
 
 ## IMPORT FUNCTIONS
 

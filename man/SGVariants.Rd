@@ -8,7 +8,7 @@ SGVariants(x)
 }
 \arguments{
 \item{x}{\code{GRangesList} of \code{SGFeatures} with appropriate
-outer elementMetadata columns}
+outer metadata columns}
 }
 \value{
 A \code{SGVariants} object

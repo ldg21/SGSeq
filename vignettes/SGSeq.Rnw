@@ -80,7 +80,7 @@ We first perform an analysis based on annotated transcript features. The followi
 sgfc <- analyzeFeatures(si, features = txf_annotated)
 @ 
 
-\sloppy \Rfunction{analyzeFeatures()} returns an object of class \Rclass{SGFeatureCounts}, which extends the \Rclass{SummarizedExperiment} class from the \Biocpkg{GenomicRanges} package. \Rclass{SGFeatureCounts} contains sample information as \Rcode{colData}, splice graph features as \Rcode{rowRanges} and assays \Rcode{counts} and \Rcode{FPKM}, which store compatible counts and FPKMs for each splice graph feature and sample, respectively. Accessor functions \Rfunction{colData()}, \Rfunction{rowRanges()}, \Rfunction{counts()} and \Rfunction{FPKM()} can be used to access the data.
+\sloppy \Rfunction{analyzeFeatures()} returns an object of class \Rclass{SGFeatureCounts}, which extends the \Rclass{RangedSummarizedExperiment} class from the \Biocpkg{SummarizedExperiment} package. \Rclass{SGFeatureCounts} contains sample information as \Rcode{colData}, splice graph features as \Rcode{rowRanges} and assays \Rcode{counts} and \Rcode{FPKM}, which store compatible counts and FPKMs for each splice graph feature and sample, respectively. Accessor functions \Rfunction{colData()}, \Rfunction{rowRanges()}, \Rfunction{counts()} and \Rfunction{FPKM()} can be used to access the data.
 
 Compatible FPKMs for splice graph features can be visualized with \Rfunction{plotFeatures()}. The plotting function invisibly returns a \Rcode{data.frame} with information on splice graph features, including genomic coordinates.
 
@@ -120,9 +120,9 @@ Instead of considering the complete splice graph of a gene, we can focus our ana
 sgvc <- analyzeVariants(sgfc)
 @ 
 
-\Rfunction{analyzeVariants()} returns an \Rclass{SGVariantCounts} object. Similar to \Rclass{SGFeatureCounts}, \Rclass{SGVariantCounts} extends the \Rclass{SummarizedExperiment} class. \Rclass{SGVariantCounts} contains sample information as \Rcode{colData} and splice variants as \Rcode{rowRanges}. Assay \Rcode{variantFreq} stores estimates of relative usage for each splice variant and sample. Accessor functions \Rfunction{colData()}, \Rfunction{rowRanges()} and \Rfunction{variantFreq()} can be used to access the data. 
+\Rfunction{analyzeVariants()} returns an \Rclass{SGVariantCounts} object. Similar to \Rclass{SGFeatureCounts}, \Rclass{SGVariantCounts} extends the \Rclass{RangedSummarizedExperiment} class. \Rclass{SGVariantCounts} contains sample information as \Rcode{colData} and splice variants as \Rcode{rowRanges}. Assay \Rcode{variantFreq} stores estimates of relative usage for each splice variant and sample. Accessor functions \Rfunction{colData()}, \Rfunction{rowRanges()} and \Rfunction{variantFreq()} can be used to access the data. 
 
-Each splice variant consists of one or more splice graph features. Information on splice variants is stored as \Rcode{elementMetadata} (or \Rcode{mcols}) in the \Rclass{SGVariants} object and can be accessed as follows.
+Each splice variant consists of one or more splice graph features. Information on splice variants is stored as metadata columns in the \Rclass{SGVariants} object and can be accessed as follows.
 
 <<>>=
 mcols(sgvc)
