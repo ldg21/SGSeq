@@ -190,7 +190,7 @@ predictTxFeaturesPerStrand <- function(file_bam, paired_end, which,
     si <- seqinfo(BamFile(file_bam))
     
     gap <- readGap(file_bam, paired_end, which)
-    gap <- gap[strand(gap) %in% c(strand, "*")]
+    gap <- gap[mcols(gap)$strand %in% c(strand, "*")]
     
     if (length(gap) == 0) {
 

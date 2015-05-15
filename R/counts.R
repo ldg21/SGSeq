@@ -69,7 +69,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
     
     ## obtain GAlignmentPairs
     gap <- readGap(file_bam, paired_end, which)
-    gap <- gap[strand(gap) %in% c(strand, "*")]
+    gap <- gap[mcols(gap)$strand %in% c(strand, "*")]
     
     ## get exons and introns
     frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
@@ -207,8 +207,10 @@ makeSGFeatureCounts <- function(rowRanges, colData, counts)
 {
 
     colnames(counts) <- colData$sample_name    
-    x <- SummarizedExperiment(assays = list(counts = counts),
-        rowRanges = rowRanges, colData = DataFrame(colData))
+    x <- SummarizedExperiment(
+        assays = list(counts = counts),
+        rowRanges = rowRanges,
+        colData = DataFrame(colData))
     colnames(x) <- colData$sample_name
     x <- getScaledCounts(x)
     x <- SGFeatureCounts(x)
@@ -388,7 +390,9 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, object, cores)
         "countsVariant3p" = variant_x_end,
         "countsTotal3p" = variant_x_end_total)
 
-    SE <- SummarizedExperiment(assays = assays, rowRanges = variants,
+    SE <- SummarizedExperiment(
+        assays = assays,
+        rowRanges = variants,
         colData = colData(object))
     colnames(SE) <- colnames(object)
     SE <- getVariantFreq(SE)
@@ -593,7 +597,7 @@ getSGVariantCountsPerStrand <- function(variants, features,
     
     ## obtain GAlignmentPairs
     gap <- readGap(file_bam, paired_end, which)
-    gap <- gap[strand(gap) %in% c(strand, "*")]
+    gap <- gap[mcols(gap)$strand %in% c(strand, "*")]
     
     ## get exons and introns
     frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
@@ -674,8 +678,10 @@ makeSGVariantCounts <- function(rowRanges, colData, counts, cores)
       
     }
         
-    x <- SummarizedExperiment(assays = assays,
-        rowRanges = rowRanges, colData = DataFrame(colData))
+    x <- SummarizedExperiment(
+        assays = assays,
+        rowRanges = rowRanges,
+        colData = DataFrame(colData))
     colnames(x) <- colData$sample_name
     x <- getVariantFreq(x)
     x <- SGVariantCounts(x)

@@ -144,7 +144,7 @@ readGap <- function(file, paired_end, which = NULL)
 
     gap <- filterGap(gap)
     
-    strand(gap) <- XS2strand(mcols(gap)$XS)
+    mcols(gap)$strand <- XS2strand(mcols(gap)$XS)
 
     return(gap)
 
@@ -181,7 +181,7 @@ filterGap <- function(gap)
     }    
     if (is(gap, "GAlignmentPairs")) {
         
-        exclude <- filterGa(left(gap)) | filterGa(right(gap))
+        exclude <- filterGa(first(gap)) | filterGa(last(gap))
 
     }
     
@@ -563,5 +563,76 @@ generateCompleteMessage <- function(item)
 {
 
     message(makeCompleteMessage(item))
+
+}
+
+getCoverage <- function(sample_info, which, sizefactor, cores)
+{
+
+  if (!is(which, "GRanges") || length(which) > 1) {
+
+      stop("which must be a GRanges object of length 1")
+
+  }
+  
+  list_cov <- mcmapply(
+      getCoveragePerSample,
+      file_bam = sample_info$file_bam,
+      paired_end = sample_info$paired_end,
+      sizefactor = sizefactor,
+      MoreArgs = list(which = which),
+      SIMPLIFY = FALSE,
+      USE.NAMES = FALSE,
+      mc.preschedule = FALSE,
+      mc.cores = cores) 
+
+  return(list_cov)
+
+}
+
+getCoveragePerSample <- function(file_bam, paired_end, sizefactor, which)
+{
+
+  sl <- as.character(seqnames(which))
+  st <- as.character(strand(which))  
+  gap <- readGap(file_bam, paired_end, which)
+  gap <- gap[mcols(gap)$strand %in% c(st, "*")]
+  irl <- ranges(grglist(gap, drop.D.ranges = TRUE))
+  ir <- unlist(reduce(irl))
+  cov <- coverage(ir, width = end(which)) / sizefactor
+  cov <- RleList(cov)
+  names(cov) <- sl
+  
+  return(cov)
+  
+}
+
+calculateSizeFactor <- function(sample_info)
+{
+        
+    E <- rep(NA, nrow(sample_info))
+
+    i_PE <- which(sample_info$paired_end)
+    
+    if (length(i_PE) > 0) {
+
+        R_PE <- sample_info$read_length[i_PE]
+        F_PE <- sample_info$frag_length[i_PE]
+        I_PE <- F_PE - 2 * R_PE
+        E[i_PE] <- F_PE - pmax(I_PE, 0)
+    
+    }
+
+    i_SE <- which(!sample_info$paired_end)
+        
+    if (length(i_SE) > 0) {
+
+        E[i_SE] <- sample_info$read_length[i_SE]
+    
+    }
+
+    sizefactor <- sample_info$lib_size * E
+
+    return(sizefactor)
 
 }

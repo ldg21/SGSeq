@@ -1254,8 +1254,10 @@ expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
     mcols(rd) <- mcols(paths_expanded)
     rd <- SGVariants(rd)
     
-    object_expanded <- SummarizedExperiment(assays = list("variantFreq" = X),
-        rowRanges = rd, colData = colData(object))
+    object_expanded <- SummarizedExperiment(
+        assays = list("variantFreq" = X),
+        rowRanges = rd,
+        colData = colData(object))
 
     colnames(object_expanded) <- colnames(object)
     rownames(object_expanded) <- NULL

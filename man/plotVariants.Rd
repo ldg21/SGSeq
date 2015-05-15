@@ -6,11 +6,11 @@
 \usage{
 plotVariants(x, eventID = NULL, toscale = c("exon", "none", "gene"),
   color = "gray", color_novel = color, color_alpha = 0.8,
-  color_labels = FALSE, border = "fill", cexLab = 1, cexExon = 1,
-  ypos = 0.5, score = NULL, score_color = "darkblue", score_ylim = NULL,
-  score_ypos = c(0.3, 0.1), score_nbin = 400, ranges = NULL,
-  ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1), main = NULL,
-  cexMain = 1, tx_view = FALSE, tx_dist = 0.1, tx_cex = 1,
+  color_labels = FALSE, border = "fill", cexLab = 1, ypos = c(0.5, 0.1),
+  score = NULL, score_color = "darkblue", score_ylim = NULL,
+  score_ypos = c(0.3, 0.1), score_nbin = 200, score_label = NULL,
+  ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
+  main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.1,
   transform = function(x) {     x }, Rowv = NULL, distfun = dist,
   hclustfun = hclust, margin = 0.2, RowSideColors = NULL,
   square = FALSE, cexRow = 1, cexCol = 1, labRow = colnames(x),
@@ -44,10 +44,9 @@ be the same as feature colors}
 
 \item{cexLab}{Scale factor for feature labels}
 
-\item{cexExon}{Scale factor for exon height}
-
-\item{ypos}{Numeric value indicating vertical position of splice graph
-(exon bins) specified as fraction of height of the plotting region
+\item{ypos}{Numeric vector of length two, indicating the vertical
+position and height of the exon bins in the splice graph,
+specificed as fraction of the height of the plotting region
 (not supported for \code{tx_view = TRUE})}
 
 \item{score}{\code{RLeList} containing nucleotide-level scores
@@ -62,6 +61,8 @@ position and height of the score panel, specificed as fraction of the
 height of the plotting region}
 
 \item{score_nbin}{Number of bins for plotting scores}
+
+\item{score_label}{Label used to annotate score panel}
 
 \item{ranges}{\code{GRangesList} to be plotted with the splice graph}
 
@@ -79,8 +80,6 @@ height of the plotting region}
 
 \item{tx_dist}{Vertical distance between transcripts as fraction of height
 of plotting region}
-
-\item{tx_cex}{Scale factor for transcript labels}
 
 \item{transform}{Transformation applied to splice variant frequencies}
 
