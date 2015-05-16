@@ -6,16 +6,16 @@
 \usage{
 plotVariants(x, eventID = NULL, toscale = c("exon", "none", "gene"),
   color = "gray", color_novel = color, color_alpha = 0.8,
-  color_labels = FALSE, border = "fill", cexLab = 1, ypos = c(0.5, 0.1),
-  score = NULL, score_color = "darkblue", score_ylim = NULL,
-  score_ypos = c(0.3, 0.1), score_nbin = 200, score_label = NULL,
-  ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-  main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.1,
-  transform = function(x) {     x }, Rowv = NULL, distfun = dist,
-  hclustfun = hclust, margin = 0.2, RowSideColors = NULL,
-  square = FALSE, cexRow = 1, cexCol = 1, labRow = colnames(x),
-  col = colorRampPalette(c("black", "gold"))(256), zlim = c(0, 1),
-  heightTopPanel = 0.3, expand_variants = FALSE)
+  color_labels = FALSE, border = "fill", preserve_curvature = TRUE,
+  curvature = NULL, ypos = c(0.5, 0.1), score = NULL,
+  score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.3, 0.1),
+  score_nbin = 200, score_label = NULL, ranges = NULL,
+  ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1), main = NULL,
+  tx_view = FALSE, tx_dist = 0.1, cex = 1, transform = function(x) {    
+  x }, Rowv = NULL, distfun = dist, hclustfun = hclust, margin = 0.2,
+  RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
+  labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
+  zlim = c(0, 1), heightPanels = c(1, 2), expand_variants = FALSE)
 }
 \arguments{
 \item{x}{\code{SGVariantCounts} object}
@@ -42,7 +42,11 @@ be the same as feature colors}
 \item{border}{Determines the color of exon borders, can be \dQuote{fill}
 (same as exon color), \dQuote{none} (no border) or a valid color name}
 
-\item{cexLab}{Scale factor for feature labels}
+\item{preserve_curvature}{Logical indicating whether curvature of
+plotted splice junction should be preserved, regardless of the
+dimensions of the plotting region.}
+
+\item{curvature}{Numeric determining curvature of plotted splice junctions.}
 
 \item{ypos}{Numeric vector of length two, indicating the vertical
 position and height of the exon bins in the splice graph,
@@ -54,7 +58,8 @@ to be plotted with the splice graph}
 
 \item{score_color}{Color used for plotting scores}
 
-\item{score_ylim}{y-axis range used for plotting scores}
+\item{score_ylim}{Numeric vector of length two, determining y-axis range
+for plotting scores}
 
 \item{score_ypos}{Numeric vector of length two, indicating the vertical
 position and height of the score panel, specificed as fraction of the
@@ -74,12 +79,12 @@ height of the plotting region}
 
 \item{main}{Plot title}
 
-\item{cexMain}{Scale factor for plot title}
-
 \item{tx_view}{Plot transcripts instead of splice graph (experimental)}
 
 \item{tx_dist}{Vertical distance between transcripts as fraction of height
 of plotting region}
+
+\item{cex}{Scale parameter for feature labels and annotation}
 
 \item{transform}{Transformation applied to splice variant frequencies}
 
@@ -114,8 +119,8 @@ cells in the heatmap are square}
 \item{zlim}{Range of values for which colors should be plotted,
 if \code{NULL} range of finite values}
 
-\item{heightTopPanel}{Height of top panel as fraction of height of the
-graphics device}
+\item{heightPanels}{Numeric vector of length two indicating height of
+the top and bottom panels.}
 
 \item{expand_variants}{Experimental option - leave set to \code{FALSE}}
 }

@@ -5,11 +5,9 @@ import(BiocGenerics)
 import(S4Vectors)
 import(IRanges)
 import(GenomicRanges)
-import(SummarizedExperiment)
-import(Rsamtools)
 import(GenomicAlignments)
 import(SummarizedExperiment)
-import(S4Vectors)
+import(Rsamtools)
 
 ## IMPORT FUNCTIONS
 

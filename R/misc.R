@@ -593,15 +593,12 @@ getCoverage <- function(sample_info, which, sizefactor, cores)
 getCoveragePerSample <- function(file_bam, paired_end, sizefactor, which)
 {
 
-  sl <- as.character(seqnames(which))
   st <- as.character(strand(which))  
   gap <- readGap(file_bam, paired_end, which)
   gap <- gap[mcols(gap)$strand %in% c(st, "*")]
   irl <- ranges(grglist(gap, drop.D.ranges = TRUE))
   ir <- unlist(reduce(irl))
   cov <- coverage(ir, width = end(which)) / sizefactor
-  cov <- RleList(cov)
-  names(cov) <- sl
   
   return(cov)
   
@@ -631,8 +628,8 @@ calculateSizeFactor <- function(sample_info)
     
     }
 
-    sizefactor <- sample_info$lib_size * E
-
+    sizefactor <- sample_info$lib_size * E * 1e-9
+    
     return(sizefactor)
 
 }

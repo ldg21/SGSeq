@@ -2,86 +2,72 @@
 % Please edit documentation in R/plots.R
 \name{plotCoverage}
 \alias{plotCoverage}
-\title{Plot per-base read coverage and splice junction read counts}
+\title{Plot read coverage and splice junction read counts}
 \usage{
-plotCoverage(x, sample_info = NULL, f = sample_info$sample_name,
-  sizefactor = NULL, toscale = c("exon", "none", "gene"),
-  label = c("none", "id", "name", "label"), color = "gray",
-  color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-  border = "fill", cexLab = 1, score_color = "darkblue",
-  score_ylim = NULL, score_nbin = 200, score_summary = mean,
-  main = NULL, cexMain = 1, cores = 1)
+plotCoverage(x, sample_info = NULL, sizefactor = NA, toscale = c("exon",
+  "none", "gene"), color = "darkblue", ylim = NULL, label = NULL,
+  nbin = 200, summary = mean, preserve_curvature = TRUE, curvature = 1,
+  main = NULL, cores = 1)
 }
 \arguments{
-\item{x}{\code{SGFeatureCounts} or \code{SGFeatures} object}
+\item{x}{\code{SGFeatureCounts} or \code{SGFeatures} object.
+If \code{x} is an \code{SGFeatureCounts} object that includes
+multiple samples, average coverage and splice junction counts
+are obtained.}
 
 \item{sample_info}{Data frame with sample information.
 If \code{x} is an \code{SGFeatureCounts} object, sample information
-is obtained from \code{colData(x)}.}
-
-\item{f}{Factor variable with length equal to the number of samples in
-\code{sample_info} indicating groups of samples for which
-average profiles should be plotted.}
+is obtained from \code{colData(x)}. If \code{sample_info} includes
+multiple samples, average coverage and splice junction counts
+are obtained.}
 
 \item{sizefactor}{Numeric vector with length equal to the number of
-samples in \code{sample_info}. Used to scale samples before plotting
-and before average profiles are obtained. If \code{NULL}, size factors
-are proportional to the product of library size and read length (or
-number of nucleotides sequenced per fragment for paired-end samples).}
+samples in \code{sample_info}. Used to scale coverages and splice
+junction counts before plotting, or before averaging across samples.
+Set to \code{NA} to disable scaling. If \code{NULL}, size factors
+are calculated as the number of bases sequenced (the product of library
+size and average number of bases sequenced per read or fragment),
+plotted coverages and splice junction counts are per 1 billion
+sequenced bases.}
 
 \item{toscale}{Controls which parts of the splice graph are drawn to
 scale. Possible values are \dQuote{none} (exonic and intronic regions
 have constant length), \dQuote{exon} (exonic regions are drawn to scale)
 and \dQuote{gene} (both exonic and intronic regions are drawn to scale).}
 
-\item{label}{Format of exon/splice junction labels,
-possible values are \dQuote{id} (format E1,... J1,...), \dQuote{name}
-(format type:chromosome:start-end:strand), \dQuote{label} for labels
-specified in elementMetadata column \dQuote{label}, or \dQuote{none}
-for no labels.}
+\item{color}{Color used for plotting coverages}
 
-\item{color}{Color used for plotting the splice graph. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+\item{ylim}{Numeric vector of length two, determining y-axis range used
+for plotting coverages.}
 
-\item{color_novel}{Features with missing annotation are
-highlighted in \code{color_novel}. Ignored if features
-elementMetadata column \dQuote{color} is not \code{NULL}.}
+\item{label}{Optional y-axis label}
 
-\item{color_alpha}{Controls color transparency}
+\item{nbin}{Number of bins for plotting coverages}
 
-\item{color_labels}{Logical indicating whether label colors should
-be the same as feature colors}
+\item{summary}{Function used to calculate per-bin coverage summaries}
 
-\item{border}{Determines the color of exon borders, can be \dQuote{fill}
-(same as exon color), \dQuote{none} (no border) or a valid color name}
+\item{preserve_curvature}{Logical indicating whether curvature of
+plotted splice junction should be preserved, regardless of the
+dimensions of the plotting region.}
 
-\item{cexLab}{Scale factor for feature labels}
-
-\item{score_color}{Color used for plotting scores}
-
-\item{score_ylim}{y-axis range used for plotting scores}
-
-\item{score_nbin}{Number of bins for plotting scores}
-
-\item{score_summary}{Function used to calculate per-bin score summaries}
+\item{curvature}{Numeric determining curvature of plotted splice junctions.}
 
 \item{main}{Plot title}
-
-\item{cexMain}{Scale factor for plot title}
 
 \item{cores}{Number of cores available for parallel processing.}
 }
 \value{
-\code{data.frame} with information on exon bins included in
-  the splice graph
+\code{data.frame} with information on splice junctions included
+  in the splice graph
 }
 \description{
-Plot per-base read coverage and splice junction read counts for
-individual samples or averaged across samples.
+Plot read coverage and splice junction read counts for an individual
+sample or averaged across samples.
 }
 \examples{
 \dontrun{
-plotCoverage(sgfc[, 1:4])
+par(mfrow = c(4, 1))
+for (j in seq_len(4)) plotCoverage(sgfc[, j])
 }
 }
 \author{

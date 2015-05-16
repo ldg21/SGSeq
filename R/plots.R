@@ -222,7 +222,10 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   be the same as feature colors
 ##' @param border Determines the color of exon borders, can be \dQuote{fill}
 ##'   (same as exon color), \dQuote{none} (no border) or a valid color name
-##' @param cexLab Scale factor for feature labels
+##' @param preserve_curvature Logical indicating whether curvature of
+##'   plotted splice junction should be preserved, regardless of the
+##'   dimensions of the plotting region.
+##' @param curvature Numeric determining curvature of plotted splice junctions.
 ##' @param ypos Numeric vector of length two, indicating the vertical
 ##'   position and height of the exon bins in the splice graph,
 ##'   specificed as fraction of the height of the plotting region
@@ -230,7 +233,8 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' @param score \code{RLeList} containing nucleotide-level scores
 ##'   to be plotted with the splice graph
 ##' @param score_color Color used for plotting scores
-##' @param score_ylim y-axis range used for plotting scores
+##' @param score_ylim Numeric vector of length two, determining y-axis range
+##'   for plotting scores
 ##' @param score_ypos Numeric vector of length two, indicating the vertical
 ##'   position and height of the score panel, specificed as fraction of the
 ##'   height of the plotting region
@@ -243,11 +247,9 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   position and height of the ranges panel, specificed as fraction of the
 ##'   height of the plotting region
 ##' @param main Plot title
-##' @param cexMain Scale factor for plot title
 ##' @param tx_view Plot transcripts instead of splice graph (experimental)
 ##' @param tx_dist Vertical distance between transcripts as fraction of height
 ##'   of plotting region
-##' @param asp Aspect ratio of graphics region
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -265,12 +267,12 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     eventID = NULL, which = NULL, toscale = c("exon", "none", "gene"),
     label = c("id", "name", "label", "none"), color = "gray",
     color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", cexLab = 1, ypos = c(0.5, 0.1),
-    score = NULL, score_color = "darkblue", score_ylim = NULL,
-    score_ypos = c(0.3, 0.1), score_nbin = 200, score_summary = mean,
-    score_label = NULL, ranges = NULL, ranges_color = "darkblue",
-    ranges_ypos = c(0.1, 0.1), main = NULL, cexMain = 1,
-    tx_view = FALSE, tx_dist = 0.2, asp = 1)
+    border = "fill", preserve_curvature = TRUE, curvature = NULL,
+    ypos = c(0.5, 0.1), score = NULL, score_color = "darkblue",
+    score_ylim = NULL, score_ypos = c(0.3, 0.1), score_nbin = 200,
+    score_summary = mean, score_label = NULL, ranges = NULL,
+    ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
+    main = NULL, tx_view = FALSE, tx_dist = 0.2)
 {
 
     toscale <- match.arg(toscale)
@@ -314,7 +316,8 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
         axes = FALSE, xlab = NA, ylab = NA)
     
     df <- plotExonGraph(g, exon_coordinates, ypos, label, border,
-        color_labels, cexLab, tx_view, tx_dist, asp, "both")
+        color_labels, tx_view, tx_dist, "both", preserve_curvature,
+        curvature)
 
     if (!is.null(score)) {
       
@@ -330,15 +333,14 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
 
     }
     
-    text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2,
-        cex = cexMain)
+    text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2)
 
     invisible(df)
     
 }
 
 plotExonGraph <- function(g, exon_coordinates, ypos, label, border,
-    color_labels, cexLab, tx_view, tx_dist, asp, include, curved = NULL) 
+    color_labels, tx_view, tx_dist, include, preserve_curvature, curvature)
 {
     
     ## data frames of nodes and edges
@@ -361,25 +363,27 @@ plotExonGraph <- function(g, exon_coordinates, ypos, label, border,
         vertex_y <- rep(-1 + 2 * ypos[1], nrow(gv))
         edge_curved <- as.numeric(rank(exon_coordinates$vertex_x)[i_to] >
             rank(exon_coordinates$vertex_x)[i_from] + 1)
+        edge_curved <- edge_curved
+
+    }
+
+    if (!is.null(curvature)) {
+
+        edge_curved <- rep(curvature, nrow(gd))
+
+    }
+
+    if (preserve_curvature) {
+
+        pin <- par()$pin
+        asp <- pin[2] / pin[1]
         edge_curved <- edge_curved / asp
 
     }
 
-    if (!is.null(curved)) {
-
-        edge_curved <- rep(curved, nrow(gd))
-
-    }
-
-    ## vertex plotting parameters
-    vertex_shape <- ifelse(!is.na(gv$type), "rectangle", "none")
-    vertex_color <- gv$color
     vertex_frame_color <- switch(border, fill = gv$color, none = NA, border)
-    
-    ## edge plotting parameters
-    edge_color <- gd$color
+    vertex_shape <- ifelse(!is.na(gv$type), "rectangle", "none")    
     edge_lty <- rep(1, nrow(gd))
-    edge_arrow_mode <- rep(0, nrow(gd))
     
     if (include == "exons") {
 
@@ -397,18 +401,16 @@ plotExonGraph <- function(g, exon_coordinates, ypos, label, border,
         layout = cbind(exon_coordinates$vertex_x, vertex_y),
         vertex.size = exon_coordinates$vertex_width * 100,
         vertex.size2 = 2 * ypos[2] * 100,
-        vertex.color = vertex_color,
+        vertex.color = gv$color,
         vertex.frame.color = vertex_frame_color,
         vertex.shape = vertex_shape,
         vertex.label = NA,
-        edge.color = edge_color,
+        edge.color = gd$color,
         edge.width = 2,
-        edge.arrow.size = 0.5,
         edge.lty = edge_lty,
         edge.curved = edge_curved,
         edge.label = NA,
-        edge.arrow.mode = edge_arrow_mode,
-        asp = asp)
+        edge.arrow.mode = rep(0, nrow(gd)))
 
     df <- getGraphInfo(g, exon_coordinates$vertex_x, vertex_y,
         exon_coordinates$vertex_width, edge_curved, color_labels, tx_view)
@@ -434,7 +436,6 @@ plotExonGraph <- function(g, exon_coordinates, ypos, label, border,
             labels = df_tmp[, label],
             pos = c(E = 1, J = 3)[df_tmp$type],
             offset = c(E = 0.5, J = 1)[df_tmp$type],
-            cex = cexLab,
             col = df_tmp$color)
         
     }
@@ -443,15 +444,15 @@ plotExonGraph <- function(g, exon_coordinates, ypos, label, border,
 
         df_collapsed <- unique(df[, c("y", "tx_name")])
         mtext(side = 4, at = df_collapsed$y, text = df_collapsed$tx_name,
-            cex = 0.8 * cexLab, line = 0.5, las = 1)
+            cex = par()$cex, line = 0.5, las = 1)
 
     }
     
-    out_cols <- c("id", "name", "type", "featureID", "label", "color")
-    out_cols <- out_cols[out_cols %in% names(df)]
-    out_df <- df[!is.na(df$featureID), out_cols]
+    cols <- c("id", "name", "type", "featureID", "label", "color")
+    cols <- cols[cols %in% names(df)]
+    df <- df[!is.na(df$featureID), cols]
     
-    return(out_df)
+    return(df)
     
 }
 
@@ -502,7 +503,11 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
 
     n_exon <- length(exon_coordinates$vertex_x)    
 
-    score <- score[[exon_coordinates$gene_chrom]]
+    if (is(score, "RleList")) {
+    
+        score <- score[[exon_coordinates$gene_chrom]]
+
+    }
     
     tmp <- lapply(seq_len(n_exon), scorePerExon, exon_coordinates, score)
 
@@ -551,11 +556,11 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
         xright = bin_breaks[-1], ytop = bin_y,
         MoreArgs = list(ybottom = ypos_2[1], col = color, border = NA))
 
-    axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]),
-        labels = ylim, mgp = c(3, 0.5, 0.5), tcl = -0.25, las = 1)
+    axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]), labels = ylim,
+        mgp = c(3, 0.5, 0.5), tcl = -0.25, las = 1)
     
     mtext(side = 2, at = ypos_2[1] + 0.5 * ypos_2[2],
-        text = label, line = 3, las = 1)
+        cex = par()$cex, text = label, line = 3, las = 1)
     
 }
 
@@ -853,7 +858,8 @@ addAlpha <- function(col, alpha)
 
 ##' @title Plot splice graph and heatmap of expression values
 ##' @inheritParams plotSpliceGraph
-##' @param x \code{SGFeatureCounts} object 
+##' @param x \code{SGFeatureCounts} object
+##' @param cex Scale parameter for feature labels and annotation
 ##' @param assay Name of assay to be plotted in the heatmap
 ##' @param include Include \dQuote{exons}, \dQuote{junctions} or
 ##'   \dQuote{both} in the heatmap
@@ -878,8 +884,8 @@ addAlpha <- function(col, alpha)
 ##' @param col Heatmap colors
 ##' @param zlim Range of values for which colors should be plotted,
 ##'   if \code{NULL} range of finite values
-##' @param heightTopPanel Height of top panel as fraction of height of the
-##'   graphics device
+##' @param heightPanels Numeric vector of length two indicating height of
+##'   the top and bottom panels.
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -892,18 +898,18 @@ addAlpha <- function(col, alpha)
 plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     which = NULL, toscale = c("exon", "none", "gene"), color = "gray",
     color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", cexLab = 1, ypos = c(0.5, 0.1),
-    score = NULL, score_color = "darkblue", score_ylim = NULL,
-    score_ypos = c(0.3, 0.1), score_nbin = 200, score_summary = mean,
-    score_label = NULL, ranges = NULL, ranges_color = "darkblue",
-    ranges_ypos = c(0.1, 0.1), main = NULL, cexMain = 1,
-    tx_view = FALSE, tx_dist = 0.1,
+    border = "fill", preserve_curvature = TRUE, curvature = NULL,
+    ypos = c(0.5, 0.1), score = NULL, score_color = "darkblue",
+    score_ylim = NULL, score_ypos = c(0.3, 0.1), score_nbin = 200,
+    score_summary = mean, score_label = NULL, ranges = NULL,
+    ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
+    main = NULL, tx_view = FALSE, tx_dist = 0.1, cex = 1,
     assay = "FPKM", include = c("junctions", "exons", "both"),
     transform = function(x) { log2(x + 1) }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
-    zlim = NULL, heightTopPanel = 0.3)
+    zlim = NULL, heightPanels = c(1, 2))
 {
 
     toscale <- match.arg(toscale)
@@ -933,23 +939,22 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
         both = c("E", "J"))
     n_feature <- length(which(type(features) %in% include_type))
     
-    pars <- getLayoutParameters(n_sample, n_feature, margin, heightTopPanel,
+    pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
-
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
-
-    par(mai = pars$mai)
+    par(cex = cex, mai = pars$mai)
 
     df <- plotSpliceGraph(x = features, toscale = toscale,
         label = "id", color = color, color_novel = color_novel,
         color_alpha = color_alpha, color_labels = color_labels,
-        border = border, cexLab = cexLab, ypos = ypos,
-        score = score, score_color = score_color, score_ylim = score_ylim,
+        border = border, preserve_curvature = preserve_curvature,
+        curvature = curvature, ypos = ypos, score = score,
+        score_color = score_color, score_ylim = score_ylim,
         score_ypos = score_ypos, score_nbin = score_nbin,
         score_summary = score_summary, score_label = score_label,
         ranges = ranges, ranges_color = ranges_color,
-        ranges_ypos = ranges_ypos, main = main, cexMain = cexMain,
-        tx_view = tx_view, tx_dist = tx_dist, asp = pars$asp)
+        ranges_ypos = ranges_ypos, main = main, 
+        tx_view = tx_view, tx_dist = tx_dist)
 
     i_df <- switch(include,
         exons = which(df$type == "E"),
@@ -975,7 +980,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' @title Plot splice graph and heatmap of splice variant frequencies
 ##' @inheritParams plotSpliceGraph
 ##' @inheritParams plotFeatures
-##' @param x \code{SGVariantCounts} object 
+##' @param x \code{SGVariantCounts} object
+##' @param cex Scale parameter for feature labels and annotation
 ##' @param transform Transformation applied to splice variant frequencies
 ##' @param expand_variants Experimental option - leave set to \code{FALSE}
 ##' @return \code{data.frame} with information on exon bins and
@@ -990,16 +996,16 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 plotVariants <- function(x, eventID = NULL,
     toscale = c("exon", "none", "gene"), color = "gray",
     color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", cexLab = 1, ypos = c(0.5, 0.1),
-    score = NULL, score_color = "darkblue", score_ylim = NULL,
-    score_ypos = c(0.3, 0.1), score_nbin = 200, score_label = NULL,
-    ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-    main = NULL, cexMain = 1, tx_view = FALSE, tx_dist = 0.1, 
-    transform = function(x) { x }, Rowv = NULL,
+    border = "fill", preserve_curvature = TRUE, curvature = NULL,
+    ypos = c(0.5, 0.1), score = NULL, score_color = "darkblue",
+    score_ylim = NULL, score_ypos = c(0.3, 0.1), score_nbin = 200,
+    score_label = NULL, ranges = NULL, ranges_color = "darkblue",
+    ranges_ypos = c(0.1, 0.1), main = NULL, tx_view = FALSE, tx_dist = 0.1, 
+    cex = 1, transform = function(x) { x }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
-    zlim = c(0, 1), heightTopPanel = 0.3, expand_variants = FALSE)
+    zlim = c(0, 1), heightPanels = c(1, 2), expand_variants = FALSE)
 {
 
     toscale <- match.arg(toscale)
@@ -1054,23 +1060,21 @@ plotVariants <- function(x, eventID = NULL,
     n_sample <- ncol(x)
     n_feature <- nrow(x)
     
-    pars <- getLayoutParameters(n_sample, n_feature, margin, heightTopPanel,
+    pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
-
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
-
-    par(mai = pars$mai)
+    par(cex = cex, mai = pars$mai)
     
     df <- plotSpliceGraph(x = rowRanges(x), toscale = toscale,
         label = "label", color = color, color_novel = color_novel,
         color_alpha = color_alpha, color_labels = color_labels,
-        border = border, cexLab = cexLab, ypos = ypos, 
-        score = score, score_color = score_color, score_ylim = score_ylim,
+        border = border, preserve_curvature = preserve_curvature,
+        curvature = curvature, ypos = ypos, score = score,
+        score_color = score_color, score_ylim = score_ylim,
         score_nbin = score_nbin, score_ypos = score_ypos,
         score_label = score_label, ranges = ranges,
         ranges_color = ranges_color, ranges_ypos = ranges_ypos,
-        main = main, cexMain = cexMain, tx_view = tx_view,
-        tx_dist = tx_dist, asp = pars$asp)
+        main = main, tx_view = tx_view, tx_dist = tx_dist)
     
     labCol <- seq_len(nrow(X))
     colLabCol <- "black"
@@ -1099,7 +1103,7 @@ extractFeaturesFromVariants <- function(variants)
     
 }
 
-getLayoutParameters <- function(n_sample, n_feature, margin, heightTopPanel,
+getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
     RowSideColors, square, tx_view)
 {
 
@@ -1118,7 +1122,8 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightTopPanel,
         
     }
 
-    heightBottomPanel <- 1 - heightTopPanel
+    heightTopPanel <- heightPanels[1] / sum(heightPanels)
+    heightBottomPanel <- heightPanels[2] / sum(heightPanels)
     
     mar_wid <- c(0.05, margin)
     mar_hei <- c(0.05, 0.15) * heightBottomPanel
@@ -1177,9 +1182,8 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightTopPanel,
     }
 
     mai <- c(mai_hei[1], mai_wid[1], mai_hei[2], mai_wid[2])
-    asp <- (dev_hei * heightTopPanel - sum(mai_hei)) / (dev_wid - sum(mai_wid))
     
-    list(mat = mat, wid = wid, hei = hei, mai = mai, asp = asp)
+    list(mat = mat, wid = wid, hei = hei, mai = mai)
     
 }
 
@@ -1254,9 +1258,9 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
 
     if (!is.null(labCol)) {
     
-        mtext(side = 3,
-            at = seq(from = 0, to = 1, length.out = length(labCol)),
-            text = labCol, cex = 0.8 * cexCol, col = colLabCol,
+        mtext(side = 3, at = seq(from = 0, to = 1,
+            length.out = length(labCol)), text = labCol,
+            cex = par()$cex * cexCol, col = colLabCol,
             line = 0.25, las = 3)
 
     }
@@ -1264,7 +1268,8 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
     if (!is.null(labRow)) {
 
         mtext(side = 4, at = seq(from = 0, to = 1, length.out = ncol(x)),
-            text = labRow[j], cex = 0.8 * cexRow, line = 0.5, las = 1)
+            text = labRow[j], cex = par()$cex * cexRow,
+            line = 0.5, las = 1)
 
     }
 
@@ -1274,14 +1279,14 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
         image(matrix(seq_len(ncol(x)), nrow = 1),
             col = RowSideColors[[r]], axes = FALSE)
         mtext(side = 3, text = names(RowSideColors)[r],
-            cex = 0.8 * cexCol, line = 0.25, las = 3)
+            cex = par()$cex * cexCol, line = 0.25, las = 3)
         
     }
 
     par(mai = c(0, 0, 0, 0))
     image(matrix(seq_along(col), ncol = 1), col = col, axes = FALSE)
     mtext(side = 1, at = c(0, 1), text = format(zlim, digits = 2),
-        cex = 0.8, line = 0.5, las = 1)
+        cex = par()$cex, line = 0.5, las = 1)
     
 }
 
@@ -1379,44 +1384,50 @@ subsetFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 
 }
 
-##' Plot per-base read coverage and splice junction read counts for
-##' individual samples or averaged across samples.
-##' @title Plot per-base read coverage and splice junction read counts
+##' Plot read coverage and splice junction read counts for an individual
+##' sample or averaged across samples.
+##' @title Plot read coverage and splice junction read counts
 ##' @inheritParams plotSpliceGraph
-##' @param x \code{SGFeatureCounts} or \code{SGFeatures} object
+##' @param x \code{SGFeatureCounts} or \code{SGFeatures} object.
+##'   If \code{x} is an \code{SGFeatureCounts} object that includes
+##'   multiple samples, average coverage and splice junction counts
+##'   are obtained.
 ##' @param sample_info Data frame with sample information.
 ##'   If \code{x} is an \code{SGFeatureCounts} object, sample information 
-##'   is obtained from \code{colData(x)}.
-##' @param f Factor variable with length equal to the number of samples in
-##'   \code{sample_info} indicating groups of samples for which
-##'   average profiles should be plotted.
+##'   is obtained from \code{colData(x)}. If \code{sample_info} includes
+##'   multiple samples, average coverage and splice junction counts
+##'   are obtained.
 ##' @param sizefactor Numeric vector with length equal to the number of
-##'   samples in \code{sample_info}. Used to scale samples before plotting
-##'   and before average profiles are obtained. If \code{NULL}, size factors
-##'   are proportional to the product of library size and read length (or
-##'   number of nucleotides sequenced per fragment for paired-end samples).
+##'   samples in \code{sample_info}. Used to scale coverages and splice
+##'   junction counts before plotting, or before averaging across samples.
+##'   Set to \code{NA} to disable scaling. If \code{NULL}, size factors
+##'   are calculated as the number of bases sequenced (the product of library
+##'   size and average number of bases sequenced per read or fragment),
+##'   plotted coverages and splice junction counts are per 1 billion
+##'   sequenced bases.
+##' @param color Color used for plotting coverages
+##' @param ylim Numeric vector of length two, determining y-axis range used
+##'   for plotting coverages.
+##' @param nbin Number of bins for plotting coverages
+##' @param summary Function used to calculate per-bin coverage summaries
+##' @param label Optional y-axis label
 ##' @param cores Number of cores available for parallel processing.
-##' @return \code{data.frame} with information on exon bins included in 
-##'   the splice graph
+##' @return \code{data.frame} with information on splice junctions included
+##'   in the splice graph
 ##' @examples
 ##' \dontrun{
-##' plotCoverage(sgfc[, 1:4])
+##' par(mfrow = c(4, 1))
+##' for (j in seq_len(4)) plotCoverage(sgfc[, j])
 ##' }
 ##' @author Leonard Goldstein - Regular
 
-plotCoverage <- function(x, sample_info = NULL,
-    f = sample_info$sample_name, sizefactor = NULL,
-    toscale = c("exon", "none", "gene"),
-    label = c("none", "id", "name", "label"), 
-    color = "gray", color_novel = color, color_alpha = 0.8,
-    color_labels = FALSE, border = "fill",
-    cexLab = 1, score_color = "darkblue", score_ylim = NULL,
-    score_nbin = 200, score_summary = mean,
-    main = NULL, cexMain = 1, cores = 1)
+plotCoverage <- function(x, sample_info = NULL, sizefactor = NA,
+    toscale = c("exon", "none", "gene"), color = "darkblue",
+    ylim = NULL, label = NULL, nbin = 200, summary = mean,
+    preserve_curvature = TRUE, curvature = 1, main = NULL, cores = 1)
 {
   
     toscale <- match.arg(toscale)
-    label <- match.arg(label)
 
     if (is(x, "SGFeatures") && !is.null(sample_info)) {
       
@@ -1434,54 +1445,41 @@ plotCoverage <- function(x, sample_info = NULL,
         stop("either x must be an SGFeatureCounts object,
             or an SGFeatures object and sample_info not NULL")
 
-    }
-    
-    if (is.null(sizefactor)) sizefactor <- calculateSizeFactor(sample_info)
+    } 
 
-    sizefactor <- sizefactor / median(sizefactor)
+    if (is.na(sizefactor)) {
+
+        sizefactor <- rep(1, nrow(sample_info))
+            
+    } else if (is.null(sizefactor)) {
+
+        sizefactor <- calculateSizeFactor(sample_info)
+
+    } else if (length(sizefactor) != nrow(sample_info)) {
+
+        stop("sizefactor must have length equal to the number of samples")
+
+    }
 
     scaled_cov <- getCoverage(sample_info, range(sgf), sizefactor, cores)
+    average_cov <- Reduce("+", scaled_cov) / length(scaled_cov)
+    
     scaled_counts <- sweep(counts(sgfc), 2, sizefactor, FUN = "/")
-    
-    f <- as.factor(f)
-    l <- levels(f)
-    
-    panel_height <- 1 / ((length(l) + 1) * 2 + 1)
+    average_counts <- rowSums(scaled_counts) / ncol(scaled_counts)
 
-    plot(NA, xlim = c(-1, 1), ylim = c(-1, 1),
-        xaxs = "i", yaxs = "i", axes = FALSE, xlab = NA, ylab = NA)
-    
-    sgf <- setFeatureColors(sgf, color, color_novel, color_alpha)
+    sgf <- setFeatureColors(sgf, color, color, 1)
+    sgf$label <- round(average_counts)
     g <- exonGraph(sgf, FALSE)
     exon_coordinates <- getExonCoordinates(g, toscale)
-    ypos <- c(1 - (1 + 0.5) * panel_height, panel_height)
-    out_df <- plotExonGraph(g, exon_coordinates, ypos, label, border,
-        color_labels, cexLab, FALSE, NA, 1, "both")
 
-    track_pos <- 1 - (1 + 2 * seq_along(l) + 0.5) * panel_height
+    plot(NA, xlim = c(-1, 1), ylim = c(-1, 1), xaxs = "i", yaxs = "i",
+        axes = FALSE, xlab = NA, ylab = NA)
+    plotTrackScore(exon_coordinates, average_cov, color, ylim, c(0.5, 1),
+        nbin, summary, label)
+    df <- plotExonGraph(g, exon_coordinates, c(0, 1), "label", "none",
+        FALSE, FALSE, NA, "junctions", preserve_curvature, curvature)
+    text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2)
 
-    for (i in seq_along(l)) {
-
-        x <- l[i]
-        j <- which(f == x)
-        score <- Reduce("+", scaled_cov[j]) / length(j)
-        counts <- rowSums(scaled_counts[, j, drop = FALSE]) / length(j)
-        sgf$color <- score_color
-        sgf$label <- round(counts)
-        g <- exonGraph(sgf, FALSE)
-        exon_coordinates <- getExonCoordinates(g, toscale)
-        ypos <- c(1 - (1 + 2 * i + 0.5) * panel_height, panel_height)  
-        plotTrackScore(exon_coordinates, score, score_color, score_ylim,
-            ypos, score_nbin, score_summary, x)
-        ypos <- c(1 - (1 + 2 * i + 1) * panel_height, panel_height)  
-        df <- plotExonGraph(g, exon_coordinates, ypos, "label", "none",
-            FALSE, cexLab, FALSE, NA, 1, "junctions", 0.75)
-
-    }
-
-    text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2,
-        cex = cexMain)
-
-    invisible(out_df)
+    invisible(df)
     
 }
