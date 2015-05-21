@@ -4,16 +4,24 @@
 \alias{plotCoverage}
 \title{Plot read coverage and splice junction read counts}
 \usage{
-plotCoverage(x, sample_info = NULL, sizefactor = NA, toscale = c("exon",
+plotCoverage(x, geneID = NULL, geneName = NULL, eventID = NULL,
+  which = NULL, sample_info = NULL, sizefactor = NA, toscale = c("exon",
   "none", "gene"), color = "darkblue", ylim = NULL, label = NULL,
-  nbin = 200, summary = mean, preserve_curvature = TRUE, curvature = 1,
-  main = NULL, cores = 1)
+  nbin = 200, summary = mean, curvature = 1, main = NULL, cores = 1)
 }
 \arguments{
 \item{x}{\code{SGFeatureCounts} or \code{SGFeatures} object.
 If \code{x} is an \code{SGFeatureCounts} object that includes
 multiple samples, average coverage and splice junction counts
 are obtained.}
+
+\item{geneID}{Single gene identifier used to subset \code{x}}
+
+\item{geneName}{Single gene name used to subset \code{x}}
+
+\item{eventID}{Single event identifier used to subset \code{x}}
+
+\item{which}{\code{GRanges} used to subset \code{x}}
 
 \item{sample_info}{Data frame with sample information.
 If \code{x} is an \code{SGFeatureCounts} object, sample information
@@ -45,10 +53,6 @@ for plotting coverages.}
 \item{nbin}{Number of bins for plotting coverages}
 
 \item{summary}{Function used to calculate per-bin coverage summaries}
-
-\item{preserve_curvature}{Logical indicating whether curvature of
-plotted splice junction should be preserved, regardless of the
-dimensions of the plotting region.}
 
 \item{curvature}{Numeric determining curvature of plotted splice junctions.}
 

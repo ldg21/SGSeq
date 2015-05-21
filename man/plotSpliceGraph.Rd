@@ -8,12 +8,11 @@ plotSpliceGraph(x, geneID = NULL, geneName = NULL, eventID = NULL,
   which = NULL, toscale = c("exon", "none", "gene"), label = c("id",
   "name", "label", "none"), color = "gray", color_novel = color,
   color_alpha = 0.8, color_labels = FALSE, border = "fill",
-  preserve_curvature = TRUE, curvature = NULL, ypos = c(0.5, 0.1),
-  score = NULL, score_color = "darkblue", score_ylim = NULL,
-  score_ypos = c(0.3, 0.1), score_nbin = 200, score_summary = mean,
-  score_label = NULL, ranges = NULL, ranges_color = "darkblue",
-  ranges_ypos = c(0.1, 0.1), main = NULL, tx_view = FALSE,
-  tx_dist = 0.2)
+  curvature = NULL, ypos = c(0.5, 0.1), score = NULL,
+  score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.3, 0.1),
+  score_nbin = 200, score_summary = mean, score_label = NULL,
+  ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
+  main = NULL, tx_view = FALSE, tx_dist = 0.2)
 }
 \arguments{
 \item{x}{\code{SGFeatures} or \code{SGVariants} object}
@@ -51,10 +50,6 @@ be the same as feature colors}
 
 \item{border}{Determines the color of exon borders, can be \dQuote{fill}
 (same as exon color), \dQuote{none} (no border) or a valid color name}
-
-\item{preserve_curvature}{Logical indicating whether curvature of
-plotted splice junction should be preserved, regardless of the
-dimensions of the plotting region.}
 
 \item{curvature}{Numeric determining curvature of plotted splice junctions.}
 
