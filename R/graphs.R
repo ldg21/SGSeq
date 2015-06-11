@@ -960,7 +960,8 @@ annotateSGVariants <- function(variants)
 
 }
 
-expandString <- function(x, return_full = FALSE)
+expandString <- function(x, event = NULL, maxnvariant = NA,
+    return_full = FALSE)
 {
 
     if (length(grep("(\\[|\\]|:)", x)) > 0) {
@@ -968,11 +969,13 @@ expandString <- function(x, return_full = FALSE)
         stop("x contains characters '[', ']' or ':'")
       
     }
-  
-    x_f <- seq_along(x)
-    x_d <- as(x, "CompressedCharacterList")    
+
+    x_index <- seq_along(x)
+    x_nesting <- as(x, "CompressedCharacterList")    
 
     i <- grep("(", x, fixed = TRUE)
+
+    skipped <- 0
     
     while (length(i) > 0) {
 
@@ -992,27 +995,52 @@ expandString <- function(x, return_full = FALSE)
         n <- elementLengths(b)
         y <- paste0(rep(u, n), unlist(b), rep(v, n))
         y <- unmaskEvents(y)
-        y_f <- x_f[i][togroup(b)]
-        y_d <- pc(x_d[i][togroup(b)], unlist(b))
-        y_d <- as(y_d, "CompressedCharacterList")
+        y_index <- x_index[i][togroup(b)]
+        y_nesting <- pc(x_nesting[i][togroup(b)], unlist(b))
+        y_nesting <- as(y_nesting, "CompressedCharacterList")
         
-        ## update x, x_f
+        ## update x, x_index, x_nesting
         x <- c(x[-i], y)
-        x_f <- c(x_f[-i], y_f)
-        x_d <- c(x_d[-i], y_d)
+        x_index <- c(x_index[-i], y_index)
+        x_nesting <- c(x_nesting[-i], y_nesting)
+
+        if (!is.null(event) && !is.na(maxnvariant)) {
+
+            event_n <- table(event[x_index])
+            excl_events <- as.integer(names(which(event_n > maxnvariant)))
+            excl <- which(x_index %in% which(event %in% excl_events))
+
+            if (length(excl) > 0) {
+            
+                x <- x[-excl]
+                x_index <- x_index[-excl]
+                x_nesting <- x_nesting[-excl]
+
+            }
+            
+            skipped <- skipped + length(unique(excl_events))
+            
+        }
 
         i <- grep("(", x, fixed = TRUE)
-        
+
     }
 
+    if (skipped > 0) {
+
+        warning(paste("skipped", skipped, "events exceeding maxnvariant"),
+            call. = FALSE, immediate. = TRUE)
+
+    }
+    
     if (return_full) {
 
-        out <- DataFrame(f = x_f, x = x,
-            d = as(x_d, "CompressedCharacterList"))
+        out <- DataFrame(index = x_index, expanded = x,
+            nesting = as(x_nesting, "CompressedCharacterList"))
 
     } else {
     
-        out <- split(x, x_f)
+        out <- split(x, x_index)
 
     }
     
@@ -1218,10 +1246,11 @@ unmaskEvents <- function(x)
   
 }
 
-expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
+expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
+    cores = 1)
 {
     
-    variants <- rowRanges(object)
+    variants <- rowRanges(sgvc)
     features <- unlist(variants)
 
     if (is.null(eventID)) {
@@ -1233,36 +1262,58 @@ expandSGVariantCounts <- function(object, eventID = NULL, cores = 1)
         variants_selected <- variants[eventID(variants) %in% eventID]
 
     }
-    
-    expanded <- expandString(featureID(variants_selected), TRUE)
-    expandedIDs <- strsplit(expanded$x, ",", fixed = TRUE)    
-    expanded_i <- relist(match(unlist(expandedIDs),
-        featureID(features)), expandedIDs)
-    
-    paths_expanded <- variants_selected[expanded$f]
-    type(paths_expanded) <- unlist(expandString(type(variants_selected)))
-    featureID(paths_expanded) <- expanded$x
 
-    f <- togroup(expanded$d)
-    i <- match(unlist(expanded$d), featureID(variants))
+    ## expand nested variants
+    expanded <- expandString(featureID(variants_selected),
+        eventID(variants_selected), maxnvariant, TRUE)
+    
+    ## create new SGVariants object
+    expanded_featureIDs <- strsplit(expanded$expanded, ",", fixed = TRUE)    
+    expanded_i <- relist(match(unlist(expanded_featureIDs),
+        featureID(features)), expanded_featureIDs)
+    rd <- split(features[unlist(expanded_i)], togroup(expanded_i))
+    mcols(rd) <- mcols(variants_selected[expanded$index])
+    rd <- SGVariants(rd)
 
-    X <- variantFreq(object)[i, , drop = FALSE]
+    ## update SGVariants object
+    rd_gr <- unlist(range(rd))
+    x <- flank(rd_gr, -1, TRUE)
+    i <- which(substr(from(rd), 1, 1) == "S")
+    if (length(i) > 0) { from(rd)[i] <- paste0("S:", gr2pos(x[i])) }
+    x <- flank(rd_gr, -1, FALSE)
+    i <- which(substr(to(rd), 1, 1) == "E")
+    if (length(i) > 0) { to(rd)[i] <- paste0("E:", gr2pos(x[i])) }
+    type(rd) <- expandString(type(variants_selected),
+        eventID(variants_selected), maxnvariant, TRUE)$expanded
+    featureID(rd) <- expanded$expanded
+    segmentID(rd) <- expandString(segmentID(variants_selected),
+        eventID(variants_selected), maxnvariant, TRUE)$expanded
+    i <- which(elementLengths(expanded$nesting) > 1)
+    featureID5p(rd) <- as(vector("list", length(rd)), "CompressedIntegerList")
+    featureID3p(rd) <- as(vector("list", length(rd)), "CompressedIntegerList")
+    rd <- annotateSGVariants(rd)
+    variantName(rd) <- makeVariantNames(rd)
+    rd <- annotatePaths(rd)
+    
+    ## update counts
+    f <- togroup(expanded$nesting)
+    i <- match(unlist(expanded$nesting), featureID(variants))
+    X <- variantFreq(sgvc)[i, , drop = FALSE]
     X <- do.call(cbind, mclapply(seq_len(ncol(X)),
         function(j) { tapply(X[, j], f, prod) }, mc.cores = cores))
 
-    rd <- split(features[unlist(expanded_i)], togroup(expanded_i))
-    mcols(rd) <- mcols(paths_expanded)
-    rd <- SGVariants(rd)
-    
-    object_expanded <- SummarizedExperiment(
-        assays = list("variantFreq" = X),
+    ## create new SGVariantCounts object
+    M <- matrix(NA_integer_, ncol = ncol(X), nrow = nrow(X))
+    sgvc_expanded <- SummarizedExperiment(
+        assays = list("countsVariant5p" = M, "countsTotal5p" = M,
+            "countsVariant3p" = M, "countsTotal3p" = M, "variantFreq" = X),
         rowRanges = rd,
-        colData = colData(object))
-
-    colnames(object_expanded) <- colnames(object)
-    rownames(object_expanded) <- NULL
-
-    return(object_expanded)
+        colData = colData(sgvc))
+    colnames(sgvc_expanded) <- colnames(sgvc)
+    rownames(sgvc_expanded) <- NULL
+    sgvc_expanded <- SGVariantCounts(sgvc_expanded)
+    
+    return(sgvc_expanded)
     
 }
 

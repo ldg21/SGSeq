@@ -68,7 +68,7 @@ convertToTxFeatures <- function(x)
 
         stop("x includes transcripts with overlapping exons")
 
-    } else if (!identical(tx, tx_reduced)) {
+    } else if (any(elementLengths(tx) != elementLengths(tx_reduced))) {
 
         warning("Merged adjacent exons")
       

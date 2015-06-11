@@ -157,8 +157,8 @@ annotateSGSegments <- function(ids, features)
     }
     
     segment_ann_n <- table(paste0(ann_segment, ":", ann))
-    x_segment <- sub(":\\S+$", "", names(segment_ann_n))
-    x_ann <- sub("^\\S+:", "", names(segment_ann_n))
+    x_segment <- sapply(strsplit(names(segment_ann_n), ":"), "[", 1)
+    x_ann <- sub("^\\d+:", "", names(segment_ann_n))
 
     i <- which(segment_ann_n == segment_n[as.integer(x_segment)])
 
@@ -179,6 +179,11 @@ annotatePaths <- function(paths)
 {
 
     features <- unlist(paths)
+
+    ## encode txName
+    txName_unique <- unique(unlist(txName(features)))
+    txName(features) <- relist(as.character(match(unlist(txName(features)),
+        txName_unique)), txName(features))
     
     x <- featureID(paths)
     i <- grep("(", x, fixed = TRUE)
@@ -221,6 +226,10 @@ annotatePaths <- function(paths)
 
     out <- annotateSGSegments(x, features)
     out <- as(out, "CompressedCharacterList")
+
+    ## decode txName
+    out <- relist(txName_unique[as.integer(unlist(out))], out)
+
     txName(paths) <- out
     geneName(paths) <- geneName(features)[match(seq_along(paths),
         togroup(paths))]
