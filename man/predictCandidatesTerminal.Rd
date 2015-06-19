@@ -4,24 +4,25 @@
 \alias{predictCandidatesTerminal}
 \title{Identify candidate terminal exons}
 \usage{
-predictCandidatesTerminal(junctions, islands, type = c("exon_L", "exon_R"))
+predictCandidatesTerminal(islands, splicesites, type = c("exon_L", "exon_R"))
 }
 \arguments{
-\item{junctions}{\code{IRanges} of splice junctions}
-
 \item{islands}{\code{IRanges} of genomic regions with minimal read
 coverage required for internal exon prediction}
 
+\item{splicesites}{\code{IRanges} of splice sites with metadata
+columns \dQuote{type} and \dQuote{N}}
+
 \item{type}{Character string indicating whether terminal exons
 should be identified to the left (\dQuote{exon_L}) or right
-(\dQuote{exon_R}) of provided splice junctions}
+(\dQuote{exon_R}) of provided splice sites}
 }
 \value{
 \code{IRanges} of candidate terminal exons
 }
 \description{
 Identify candidate terminal exons based on previously identified
-splice junctions and regions with sufficient read coverage.
+splice sites and regions with sufficient read coverage.
 }
 \author{
 Leonard Goldstein

@@ -206,16 +206,11 @@ dropMcols <- function(x)
     
 }
 
-completeMcols <- function(x, include_counts, retain_coverage)
+completeMcols <- function(x, retain_coverage)
 {
 
-    mcol <- "type"
+    mcol <- c("type", "N")
     
-    if (include_counts) {
-
-        mcol <- c(mcol, "N")
-
-    }
     if (retain_coverage) {
 
         mcol <- c(mcol, "N_splicesite", "coverage")
@@ -510,10 +505,10 @@ rbindListOfDFs <- function(x, cores)
   
 }
 
-checkApplyResultsForErrors <- function(out, fun_name, items)
+checkApplyResultsForErrors <- function(out, fun_name, items, error_class)
 {
   
-    failed <- sapply(out, is, "try-error")
+    failed <- sapply(out, is, error_class)
 
     if (any(failed)) {
   
@@ -596,9 +591,8 @@ getCoveragePerSample <- function(file_bam, paired_end, sizefactor, which)
   st <- as.character(strand(which))  
   gap <- readGap(file_bam, paired_end, which)
   gap <- gap[mcols(gap)$strand %in% c(st, "*")]
-  irl <- ranges(grglist(gap, drop.D.ranges = TRUE))
-  ir <- unlist(reduce(irl))
-  cov <- coverage(ir, width = end(which)) / sizefactor
+  irl <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
+  cov <- coverage(unlist(irl), width = end(which)) / sizefactor
   
   return(cov)
   

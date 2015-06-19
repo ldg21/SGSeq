@@ -19,7 +19,7 @@ alignments}
 
 \item{type}{Character string indicating whether terminal exons
 should be identified to the left (\dQuote{exon_L}) or right
-(\dQuote{exon_R}) of provided splice junctions}
+(\dQuote{exon_R}) of provided splice sites}
 
 \item{include_counts}{Logical indicating whether counts of
 compatible fragments should be included in metadata column

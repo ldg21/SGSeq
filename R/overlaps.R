@@ -230,8 +230,6 @@ splicesiteCounts <- function(x, frag_exonic, frag_intron,
 exonCoverage <- function(exons, exons_i_frag, frag_exonic)
 {
 
-    frag_exonic <- reduce(frag_exonic)
-
     expanded_exon <- factor(togroup(exons_i_frag), seq_along(exons))
     expanded_frag_exonic <- frag_exonic[unlist(exons_i_frag)]
 

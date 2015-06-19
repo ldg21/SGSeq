@@ -150,7 +150,8 @@ predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
     checkApplyResultsForErrors(
         list_features,
         "predictTxFeaturesPerStrand",
-        gr2co(unlist(range(list_which))))
+        gr2co(unlist(range(list_which))),
+        "try-error")
 
     list_features <- list_features[!sapply(list_features, is.null)]
 
@@ -198,7 +199,7 @@ predictTxFeaturesPerStrand <- function(file_bam, paired_end, which,
 
     } else {
 
-        frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
+        frag_exonic <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
         frag_intron <- ranges(junctions(gap))
     
         ir <- predictSpliced(frag_exonic, frag_intron, min_junction_count,
@@ -240,14 +241,14 @@ predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
 {
 
     junctions <- predictJunctions(frag_exonic, frag_intron, min_junction_count,
-        psi, include_counts, retain_coverage)
+        psi, retain_coverage)
     if (is.null(junctions)) { return() }
 
     if (!junctions_only) {
     
         lower <- max(min_junction_count * beta, 1)
-        islands <- slice(coverage(unlist(frag_exonic)), lower,
-            rangesOnly = TRUE)
+        frag_coverage <- coverage(unlist(frag_exonic))
+        islands <- slice(frag_coverage, lower, rangesOnly = TRUE)
 
         ## skip problematic regions
 
@@ -278,17 +279,22 @@ predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
         
         features <- junctions
 
-        candidates <- predictCandidatesInternal(junctions, islands)
+        splicesites_L <- extractSplicesitesFromJunctions(junctions, "L")
+        splicesites_R <- extractSplicesitesFromJunctions(junctions, "R")
+        splicesites <- c(splicesites_L, splicesites_R)
+        
+        candidates <- predictCandidatesInternal(islands, splicesites,
+            frag_coverage, beta)
         exons_I <- predictExonsInternal(candidates, frag_exonic,
             frag_intron, beta, include_counts, retain_coverage)
         if (!is.null(exons_I)) { features <- c(features, exons_I) }
         
-        candidates <- predictCandidatesTerminal(junctions, islands, "exon_L")
+        candidates <- predictCandidatesTerminal(islands, splicesites, "exon_L")
         exons_L <- predictExonsTerminal(candidates, frag_exonic, frag_intron,
             gamma, "exon_L", include_counts, retain_coverage)
         if (!is.null(exons_L)) { features <- c(features, exons_L) }
 
-        candidates <- predictCandidatesTerminal(junctions, islands, "exon_R")
+        candidates <- predictCandidatesTerminal(islands, splicesites, "exon_R")
         exons_R <- predictExonsTerminal(candidates, frag_exonic, frag_intron,
             gamma, "exon_R", include_counts, retain_coverage)
         if (!is.null(exons_R)) { features <- c(features, exons_R) }
@@ -296,6 +302,12 @@ predictSpliced <- function(frag_exonic, frag_intron, min_junction_count,
     } else {
 
         features <- junctions
+
+    }
+
+    if (!include_counts) {
+
+        mcols(features)$N <- NULL
 
     }
         
@@ -354,14 +366,13 @@ constructGRangesFromRanges <- function(x, seqname, strand, seqinfo)
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams predictSpliced
 ##' @return \code{IRanges} of splice junctions with metadata
-##'   column \dQuote{type} and optionally \dQuote{N} for
-##'   \code{include_counts = TRUE}, \dQuote{N_splicesite} for
-##'   \code{retain_coverage = TRUE}
+##'   columns \dQuote{type} and \dQuote{N}, and optionally
+##'   \dQuote{N_splicesite} for \code{retain_coverage = TRUE}
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
 predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
-    psi, include_counts, retain_coverage)
+    psi, retain_coverage)
 {
 
     ## extract all splice junctions
@@ -393,56 +404,68 @@ predictJunctions <- function(frag_exonic, frag_intron, min_junction_count,
 
     }
 
-    if (!include_counts) {
-
-        mcols(junctions)$N <- NULL
-
-    }
-
     if (!retain_coverage) {
 
         mcols(junctions)$N_splicesite <- NULL
 
     }
     
-    junctions <- completeMcols(junctions, include_counts, retain_coverage)
+    junctions <- completeMcols(junctions, retain_coverage)
     
     return(junctions)
 
 }
 
 ##' Identify candidate internal exons based on previously identified
-##' splice junctions and regions with sufficient read coverage.
+##' splice sites and regions with sufficient read coverage.
 ##' 
 ##' @title Identify candidate internal exons
-##' @param junctions \code{IRanges} of splice junctions
 ##' @param islands \code{IRanges} of genomic regions with minimal read
 ##'   coverage required for internal exon prediction
+##' @param splicesites \code{IRanges} of splice sites with metadata 
+##'   columns \dQuote{type} and \dQuote{N}
+##' @param frag_coverage \code{Rle} object with fragment coverage
+##' @param relCov Minimum relative coverage required for exon prediction
 ##' @return \code{IRanges} of candidate internal exons 
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-predictCandidatesInternal <- function(junctions, islands)
+predictCandidatesInternal <- function(islands, splicesites, frag_coverage,
+    relCov)
 {
 
-    ## for each island, identify overlapping splice junctions
+    ## for each island, identify overlapping splice sites
 
-    island_junction <- as.list(findOverlaps(islands, junctions))
+    island_splicesite <- as.list(findOverlaps(islands, splicesites))
 
-    ## for each island, obtain all pairs of overlapping splice junctions
+    ## for each island, obtain all pairs of overlapping splice sites
 
-    island_junction_pairs <- mapply(expand.grid,
-        island_junction, island_junction, SIMPLIFY = FALSE)
-    junction_pairs <- unique(do.call(rbind, island_junction_pairs))
+    island_splicesite_pairs <- mapply(expand.grid,
+        island_splicesite, island_splicesite, SIMPLIFY = FALSE)
+    splicesite_pairs <- unique(do.call(rbind, island_splicesite_pairs))
 
-    ## retain pairs of splice junctions that are consistent with
+    ## retain pairs of splice sites that are consistent with
     ## flanking an internal exon
 
-    candidate_start <- end(junctions)[junction_pairs[, 1]]
-    candidate_end <- start(junctions)[junction_pairs[, 2]]
-    i <- which(candidate_start <= candidate_end)
-    candidates <- unique(IRanges(candidate_start[i], candidate_end[i]))
-
+    N_1 <- mcols(splicesites)$N[splicesite_pairs[, 1]]
+    N_2 <- mcols(splicesites)$N[splicesite_pairs[, 2]]
+    type_1 <- mcols(splicesites)$type[splicesite_pairs[, 1]]
+    type_2 <- mcols(splicesites)$type[splicesite_pairs[, 2]]
+    pos_1 <- start(splicesites)[splicesite_pairs[, 1]]
+    pos_2 <- start(splicesites)[splicesite_pairs[, 2]]
+    i <- which(type_1 == "R" & type_2 == "L" & pos_1 <= pos_2)
+    candidates <- IRanges(pos_1[i], pos_2[i])
+    mcols(candidates) <- DataFrame(N = IntegerList(
+        mapply(c, N_1[i], N_2[i], SIMPLIFY = FALSE)))
+    
+    ## retain candidate internal exons with sufficient read coverage
+    
+    candidates_frag_coverage <- split(frag_coverage[candidates],
+        togroup(candidates))
+    i <- which(min(candidates_frag_coverage) >=
+        relCov * min(mcols(candidates)$N))
+    candidates <- candidates[i]
+    
     return(candidates)
 
 }
@@ -453,8 +476,8 @@ predictCandidatesInternal <- function(junctions, islands)
 ##' @title Identify internal exons
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams predictSpliced
+##' @inheritParams predictCandidatesInternal
 ##' @param candidates \code{IRanges} of candidate internal exons
-##' @param relCov Minimum relative coverage required for exon prediction
 ##' @return \code{IRanges} of internal exons with metadata column
 ##'   \dQuote{type} and optionally \dQuote{N} for
 ##'   \code{include_counts = TRUE}, \dQuote{N_splicesite},
@@ -474,6 +497,7 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
         frag_exonic)
     candidate_N_splicesite <- splicesiteCounts(candidates, frag_exonic,
         frag_intron, "exon")
+    
     index <- which(min(candidate_coverage) >=
         relCov * min(candidate_N_splicesite))
     if (length(index) == 0) { return() }
@@ -495,34 +519,34 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
         
     }
 
-    exons <- completeMcols(exons, include_counts, retain_coverage)
+    exons <- completeMcols(exons, retain_coverage)
     
     return(exons)
     
 }
 
 ##' Identify candidate terminal exons based on previously identified
-##' splice junctions and regions with sufficient read coverage.
+##' splice sites and regions with sufficient read coverage.
 ##' 
 ##' @title Identify candidate terminal exons
 ##' @inheritParams predictCandidatesInternal
 ##' @param type Character string indicating whether terminal exons
 ##'   should be identified to the left (\dQuote{exon_L}) or right
-##'   (\dQuote{exon_R}) of provided splice junctions 
+##'   (\dQuote{exon_R}) of provided splice sites
 ##' @return \code{IRanges} of candidate terminal exons
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
-predictCandidatesTerminal <- function(junctions, islands,
+predictCandidatesTerminal <- function(islands, splicesites,
     type = c("exon_L", "exon_R"))
 {
 
     type <- match.arg(type)
-    
-    splicesite <- unique(flank(junctions, -1,
-        start = switch(type, "exon_L" = TRUE, "exon_R" = FALSE)))
-    hits <- findOverlaps(splicesite, islands)
-    spliced_boundary <- splicesite[queryHits(hits)]
+
+    splicesites <- splicesites[mcols(splicesites)$type ==
+        switch(type, "exon_L" = "L", "exon_R" = "R")]
+    hits <- findOverlaps(splicesites, islands)
+    spliced_boundary <- splicesites[queryHits(hits)]
     island <- islands[subjectHits(hits)]
 
     if (type == "exon_L") {
@@ -535,6 +559,8 @@ predictCandidatesTerminal <- function(junctions, islands,
         candidates <- IRanges(start(spliced_boundary), end(island))
 
     }
+
+    mcols(candidates) <- DataFrame(N = mcols(splicesites)$N[queryHits(hits)])
     
     return(candidates)
     
@@ -570,11 +596,13 @@ predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,
     index <- exonCompatible(candidates, spliceL, spliceR,
         frag_exonic, frag_intron, FALSE)
     coverage <- exonCoverage(candidates, index, frag_exonic)
+
     splicesite <- flank(candidates, -1,
         start = switch(type, "exon_L" = FALSE, "exon_R" = TRUE))
     N_splicesite <- splicesiteOverlap(splicesite,
         switch(type, "exon_L" = "R", "exon_R" = "L"),
         frag_exonic, frag_intron, "spliced")
+    
     ranges <- (coverage >= relCov * N_splicesite)
     el <- elementLengths(ranges)
     rl <- runLength(ranges)
@@ -610,8 +638,25 @@ predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,
             
     }
         
-    exons <- completeMcols(exons, include_counts, retain_coverage)
+    exons <- completeMcols(exons, retain_coverage)
 
     return(exons)
+    
+}
+
+extractSplicesitesFromJunctions <- function(junctions, type = c("L", "R"))
+{
+
+    type <- match.arg(type)
+    S <- flank(junctions, -1, switch(type, "L" = TRUE, "R" = FALSE))
+    S_pos <- as.character(start(S))
+    pos_N <- tapply(mcols(junctions)$N, S_pos, sum)
+    pos_N <- setNames(as.integer(pos_N), names(pos_N))
+    i <- which(!duplicated(S_pos))
+    S <- S[i]
+    S_pos <- S_pos[i]
+    mcols(S) <- DataFrame(type = rep(type, length(S)),
+        N = pos_N[match(S_pos, names(pos_N))])
+    return(S)
     
 }

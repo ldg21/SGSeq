@@ -171,7 +171,8 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
     checkApplyResultsForErrors(
         list_bamInfo,
         "getBamInfoPerSample",
-        sample_info$sample_name)
+        sample_info$sample_name,
+        "character")
 
     bamInfo <- do.call(rbind, list_bamInfo)
 
@@ -259,7 +260,8 @@ predictTxFeatures <- function(sample_info, which = NULL,
     checkApplyResultsForErrors(
         list_features,
         "predictTxFeaturesPerSample",
-        sample_info$sample_name)
+        sample_info$sample_name,
+        "character")
 
     features <- mergeTxFeatures(list_features, min_n_sample = min_n_sample)
 
@@ -322,7 +324,8 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
     checkApplyResultsForErrors(
         list_counts,
         "getSGFeatureCountsPerSample",
-        sample_info$sample_name)
+        sample_info$sample_name,
+        "character")
 
     counts <- do.call(cbind, list_counts)
 

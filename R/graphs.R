@@ -275,7 +275,8 @@ findSGSegments <- function(features, cores = 1)
     checkApplyResultsForErrors(
         list_segments_2,
         "findSGSegmentsPerGene",
-        geneIDs_2)
+        geneIDs_2,
+        "try-error")
 
     segments_2 <- IntegerList(do.call(c, list_segments_2))
 
@@ -434,7 +435,8 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     checkApplyResultsForErrors(
         list_variant_info,
         "findVariantsPerGene",
-        geneIDs)
+        geneIDs,
+        "try-error")
 
     variant_info <- rbindListOfDFs(list_variant_info, cores)
 

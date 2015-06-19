@@ -30,7 +30,8 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
     checkApplyResultsForErrors(
         list_counts,
         "getSGFeatureCountsPerStrand",
-        gr2co(list_range))
+        gr2co(list_range),
+        "try-error")
 
     if (retain_coverage) {
 
@@ -72,7 +73,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
     gap <- gap[mcols(gap)$strand %in% c(strand, "*")]
     
     ## get exons and introns
-    frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
+    frag_exonic <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
     frag_intron <- ranges(junctions(gap))
     
     ## extract feature type and spliced boundaries
@@ -508,7 +509,8 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
     checkApplyResultsForErrors(
         list_counts,
         "getSGVariantCountsPerSample",
-        sample_info$sample_name)
+        sample_info$sample_name,
+        "character")
 
     if (counts_only) return(list_counts)
 
@@ -550,7 +552,8 @@ getSGVariantCountsPerSample <- function(variants, features,
     checkApplyResultsForErrors(
         list_counts,
         "getSGVariantCountsPerStrand",
-        gr2co(list_range))
+        gr2co(list_range),
+        "character")
 
     counts <- do.call(rbind, list_counts)
     counts <- counts[order(unlist(list_index)), ]
@@ -600,7 +603,7 @@ getSGVariantCountsPerStrand <- function(variants, features,
     gap <- gap[mcols(gap)$strand %in% c(strand, "*")]
     
     ## get exons and introns
-    frag_exonic <- ranges(grglist(gap, drop.D.ranges = TRUE))
+    frag_exonic <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
     frag_intron <- ranges(junctions(gap))
     
     ## extract feature type and spliced boundaries

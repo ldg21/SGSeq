@@ -5,7 +5,7 @@
 \title{Identify splice junctions}
 \usage{
 predictJunctions(frag_exonic, frag_intron, min_junction_count, psi,
-  include_counts, retain_coverage)
+  retain_coverage)
 }
 \arguments{
 \item{frag_exonic}{\code{IRangesList} with exonic regions from alignments}
@@ -19,10 +19,6 @@ junction to be included. If specified, argument \code{alpha} is ignored.}
 \item{psi}{Minimum splice frequency required for a splice junction
 to be included}
 
-\item{include_counts}{Logical indicating whether counts of
-compatible fragments should be included in metadata column
-\dQuote{N}}
-
 \item{retain_coverage}{Logical indicating whether coverages for each
 exon should be retained as an \code{IntegerList} in metadata
 column \dQuote{coverage}. This allows filtering of features
@@ -30,9 +26,8 @@ using more stringent criteria after the initial prediction.}
 }
 \value{
 \code{IRanges} of splice junctions with metadata
-  column \dQuote{type} and optionally \dQuote{N} for
-  \code{include_counts = TRUE}, \dQuote{N_splicesite} for
-  \code{retain_coverage = TRUE}
+  columns \dQuote{type} and \dQuote{N}, and optionally
+  \dQuote{N_splicesite} for \code{retain_coverage = TRUE}
 }
 \description{
 Identify splice junctions from genomic RNA-seq read alignments.

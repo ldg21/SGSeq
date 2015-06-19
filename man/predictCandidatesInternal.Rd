@@ -4,20 +4,25 @@
 \alias{predictCandidatesInternal}
 \title{Identify candidate internal exons}
 \usage{
-predictCandidatesInternal(junctions, islands)
+predictCandidatesInternal(islands, splicesites, frag_coverage, relCov)
 }
 \arguments{
-\item{junctions}{\code{IRanges} of splice junctions}
-
 \item{islands}{\code{IRanges} of genomic regions with minimal read
 coverage required for internal exon prediction}
+
+\item{splicesites}{\code{IRanges} of splice sites with metadata
+columns \dQuote{type} and \dQuote{N}}
+
+\item{frag_coverage}{\code{Rle} object with fragment coverage}
+
+\item{relCov}{Minimum relative coverage required for exon prediction}
 }
 \value{
 \code{IRanges} of candidate internal exons
 }
 \description{
 Identify candidate internal exons based on previously identified
-splice junctions and regions with sufficient read coverage.
+splice sites and regions with sufficient read coverage.
 }
 \author{
 Leonard Goldstein
