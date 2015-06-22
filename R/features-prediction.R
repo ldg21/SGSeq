@@ -457,14 +457,18 @@ predictCandidatesInternal <- function(islands, splicesites, frag_coverage,
     candidates <- IRanges(pos_1[i], pos_2[i])
     mcols(candidates) <- DataFrame(N = IntegerList(
         mapply(c, N_1[i], N_2[i], SIMPLIFY = FALSE)))
+
+    if (length(candidates) > 0) {
     
-    ## retain candidate internal exons with sufficient read coverage
+        ## retain candidate internal exons with sufficient read coverage
     
-    candidates_frag_coverage <- split(frag_coverage[candidates],
-        togroup(candidates))
-    i <- which(min(candidates_frag_coverage) >=
-        relCov * min(mcols(candidates)$N))
-    candidates <- candidates[i]
+        candidates_frag_coverage <- split(frag_coverage[candidates],
+            togroup(candidates))
+        i <- which(min(candidates_frag_coverage) >=
+            relCov * min(mcols(candidates)$N))
+        candidates <- candidates[i]
+
+    }
     
     return(candidates)
 
