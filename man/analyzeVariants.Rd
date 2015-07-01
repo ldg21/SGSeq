@@ -10,8 +10,8 @@ analyzeVariants(object, maxnvariant = 20, cores = 1)
 \item{object}{\code{SGFeatureCounts} object}
 
 \item{maxnvariant}{If more than \code{maxnvariant} variants are
-identified in an event, the gene is skipped, resulting in a warning.
-Set to \code{NA} to include all genes.}
+identified in an event, the event is skipped, resulting in a warning.
+Set to \code{NA} to include all events.}
 
 \item{cores}{Number of cores available for parallel processing}
 }

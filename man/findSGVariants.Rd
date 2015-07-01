@@ -11,8 +11,8 @@ findSGVariants(features, maxnvariant = 20, annotate_events = TRUE,
 \item{features}{\code{SGFeatures} object}
 
 \item{maxnvariant}{If more than \code{maxnvariant} variants are
-identified in an event, the gene is skipped, resulting in a warning.
-Set to \code{NA} to include all genes.}
+identified in an event, the event is skipped, resulting in a warning.
+Set to \code{NA} to include all events.}
 
 \item{annotate_events}{Logical indicating whether identified
 splice variants should be annotated in terms of canonical events.

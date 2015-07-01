@@ -368,9 +368,18 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, object, cores)
         featureID(features)), featureID3p(variants))
 
     event_i_start <- tapply(unlist(variant_i_start),
-        eventID(variants)[togroup(variant_i_start)], unique)
+        eventID(variants)[togroup(variant_i_start)], unique, simplify = FALSE)
     event_i_end <- tapply(unlist(variant_i_end),
-        eventID(variants)[togroup(variant_i_end)], unique)
+        eventID(variants)[togroup(variant_i_end)], unique, simplify = FALSE)
+
+    event_uninformative_start <- names(which(tapply(
+        elementLengths(variant_i_start) == 0, eventID(variants), any)))
+    i <- which(names(event_i_start) %in% event_uninformative_start)
+    event_i_start[i] <- vector("list", length(i))
+    event_uninformative_end <- names(which(tapply(
+        elementLengths(variant_i_end) == 0, eventID(variants), any)))
+    i <- which(names(event_i_end) %in% event_uninformative_end)
+    event_i_end[i] <- vector("list", length(i))
     
     x <- assay(object, "counts")
 
@@ -384,7 +393,7 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, object, cores)
     variant_x_start_total <- event_x_start[i, , drop = FALSE]
     i <- match(eventID(variants), names(event_i_end))
     variant_x_end_total <- event_x_end[i, , drop = FALSE]
-    
+
     assays <- list(
         "countsVariant5p" = variant_x_start,
         "countsTotal5p" = variant_x_start_total,
@@ -444,13 +453,16 @@ getVariantFreq <- function(SE)
     V_end <- assay(SE, "countsTotal3p")
 
     variants <- rowRanges(SE)
+    eid <- eventID(variants)
+    f5p <- featureID5p(variants)
+    f3p <- featureID3p(variants)
+    
+    eid_start <- names(which(tapply(elementLengths(f5p) > 0, eid, all)))
+    eid_end <- names(which(tapply(elementLengths(f3p) > 0, eid, all)))
 
-    informative_start <- elementLengths(featureID5p(variants)) > 0
-    informative_end <- elementLengths(featureID3p(variants)) > 0
-
-    i_both <- which(informative_start & informative_end)
-    i_start <- which(informative_start & !informative_end)
-    i_end <- which(!informative_start & informative_end)
+    i_both <- which(eid %in% eid_start & eid %in% eid_end)
+    i_start <- which(eid %in% eid_start & !eid %in% eid_end)
+    i_end <- which(!eid %in% eid_start & eid %in% eid_end)
 
     U <- matrix(NA_integer_, nrow = nrow(SE), ncol = ncol(SE))
     U[i_both, ] <- U_start[i_both, ] + U_end[i_both, ]
@@ -587,8 +599,12 @@ getSGVariantCountsPerStrand <- function(variants, features,
 
     all <- unique(pc(f5p, f3p))
 
-    ## in case of nested variants with representative features
-    ## at both 5' and 3' end, consider features at 3' end only
+    ## in the case of nested variants with representative features
+    ## at both 5' and 3' end, consider features at the 3' end only
+    ## (for nested variant, counts based on both ends can be
+    ## affected not only by changes in the relative usage of
+    ## the variant under consideration, but also by changes in
+    ## the relative usage of the intra-variant nested variants)
     i <- which(elementLengths(f5p) > 0 & elementLengths(f3p) > 0 &
         grep("(", featureID(variants), fixed = TRUE))
     if (length(i) > 0) all[i] <- f3p[i]
@@ -652,13 +668,14 @@ getSGVariantCountsPerStrand <- function(variants, features,
         tmp <- as(tapply(unlist(index[i]), vid[g][togroup(index[i])], unique,
             simplify = FALSE), "CompressedIntegerList")
         countsVariant <- elementLengths(tmp)[match(vid, names(tmp))]
-        countsVariant[elementLengths(f) == 0] <- NA_integer_
         counts[, paste0("countsVariant", s)] <- countsVariant
-
+        
         tmp <- as(tapply(unlist(index[i]), eid[g][togroup(index[i])], unique,
             simplify = FALSE), "CompressedIntegerList")
         countsTotal <- elementLengths(tmp)[match(eid, names(tmp))]
-        countsTotal[elementLengths(f) == 0] <- NA_integer_
+        eid_uninformative <- names(which(tapply(
+            elementLengths(f) == 0, eid, any)))
+        countsTotal[eid %in% eid_uninformative] <- NA_integer_
         counts[, paste0("countsTotal", s)] <- countsTotal
 
     }

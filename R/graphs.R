@@ -364,8 +364,8 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##' @title Find splice variants from splice graph
 ##' @param features \code{SGFeatures} object
 ##' @param maxnvariant If more than \code{maxnvariant} variants are
-##'   identified in an event, the gene is skipped, resulting in a warning.
-##'   Set to \code{NA} to include all genes.
+##'   identified in an event, the event is skipped, resulting in a warning.
+##'   Set to \code{NA} to include all events.
 ##' @param annotate_events Logical indicating whether identified
 ##'   splice variants should be annotated in terms of canonical events.
 ##'   For details see help page for \code{\link{annotateSGVariants}}.
@@ -447,13 +447,7 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     }
 
     ## obtain variants in terms of SGFeatures
-    variant_featureID <- variant_info$featureID
-    variant_featureID <- gsub("(", "", variant_featureID, fixed = TRUE)
-    variant_featureID <- gsub(")", "", variant_featureID, fixed = TRUE)
-    variant_featureID <- gsub("|", ",", variant_featureID, fixed = TRUE)
-    variant_featureID <- strsplit(variant_featureID, ",", fixed = TRUE)
-    variant_featureID <- as(variant_featureID, "CompressedIntegerList")
-    variant_featureID <- unique(variant_featureID)
+    variant_featureID <- extractIDs(variant_info$featureID)
     variants <- split(features[match(unlist(variant_featureID),
         featureID(features))], togroup(variant_featureID))
     variant_gr <- unlist(range(variants))
@@ -541,13 +535,15 @@ getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
     tmp_rep_id_unlisted <- featureID(features)[tmp_rep_id_unlisted_i]
     tmp_rep_id <- relist(tmp_rep_id_unlisted, tmp_rep_id)
     
-    ## exclude variants due to open events or ambiguous features
+    ## exclude open variants and variants with ambiguous terminal features
 
     event_dup <- tapply(unlist(tmp_rep_id),
         tmp_info$eventID[togroup(tmp_rep_id)],
-        function(x) { any(duplicated(x)) })
+        function(x) { unique(x[duplicated(x)]) }, simplify = FALSE)
+    tmp_dup <- event_dup[match(tmp_info$eventID, names(event_dup))]
     i <- which(!tmp_informative |
-        tmp_info$eventID %in% names(which(event_dup)))
+        elementLengths(mapply(intersect, tmp_rep_id, tmp_dup,
+            SIMPLIFY = FALSE)) > 0)
     tmp_rep_id[i] <- vector("list", length(i))    
 
     variant_rep_id[index] <- tmp_rep_id
@@ -581,6 +577,8 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
     ## Initialize data frame of recursively defined paths
     ref <- hd[, c("from", "to", "type", "featureID", "segmentID")]
     ref$segmentID <- as.character(ref$segmentID)
+
+    n_skipped <- 0
     
     for (k in seq_len(nrow(b))) {
 
@@ -589,45 +587,65 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
 
         paths_index_ref <- findAllPaths(from, to, NULL, ref, hv$name)
 
+        if (!is.na(maxnvariant) && (length(paths_index_ref) > maxnvariant || 
+            is.na(paths_index_ref))) {
+
+            n_skipped <- n_skipped + 1
+
+            if (k < nrow(b)) {
+
+                ## Include event in data frame of recursively defined events
+                ref <- rbind(ref, data.frame(
+                    from = from,
+                    to = to,
+                    type = "",
+                    featureID = "",
+                    segmentID = "",
+                    stringsAsFactors = FALSE))
+                
+            }
+
+            next()
+
+        }
+
         i <- unlist(paths_index_ref)
         f <- togroup(paths_index_ref)
 
         paths_type <- unstrsplit(split(ref$type[i], f), "")
         paths_featureID <- unstrsplit(split(ref$featureID[i], f), ",")
         paths_segmentID <- unstrsplit(split(ref$segmentID[i], f), ",")
-
-        if (!is.na(maxnvariant) && length(paths_index_ref) > maxnvariant) {
-
-            warning(paste("number of variants exceeds maxnvariant in gene",
-                geneID), call. = FALSE, immediate. = TRUE)
-            return()
-
-        }
-
+        
         o <- order(nchar(paths_type), paths_type)
 
         paths_type <- paths_type[o]
         paths_featureID <- paths_featureID[o]
         paths_segmentID <- paths_segmentID[o]
 
-        ## nodes within event (including start and end nodes)
-        bv <- intersect(subcomponent(h, b$start[k], "out"),
-            subcomponent(h, b$end[k], "in"))
-
-        ## nodes outside of event
-        ov <- setdiff(seq_len(nrow(hv)), bv)
-
-        ## nodes within event, excluding start and end nodes
-        bv <- setdiff(bv, c(b$start[k], b$end[k]))
-
-        ## find adjacent nodes for all nodes within event
-        bn_out <- unique(unlist(neighborhood(h, 1, bv, "out")))
-        bn_in <- unique(unlist(neighborhood(h, 1, bv, "in")))
-
-        closed3p <- length(intersect(bn_out, ov)) == 0
-        closed5p <- length(intersect(bn_in, ov)) == 0
+        ## determine whether variants are closed        
+        paths_segmentIDs <- extractIDs(paths_segmentID)
+        i <- match(unlist(paths_segmentIDs), hd$segmentID)
+        paths_all_from <- relist(hd$from[i], paths_segmentIDs)
+        paths_all_to <- relist(hd$to[i], paths_segmentIDs)
+        paths_all_nodes <- lapply(pc(paths_all_from, paths_all_to),
+            setdiff, hv$name[c(b$start[k], b$end[k])])
+        hme <- delete.vertices(h, b$end[k])
+        paths_nodes_out <- lapply(paths_all_nodes,
+            function(x) { unique(unlist(lapply(x,
+                function(y) { names(subcomponent(y,
+                    graph = hme, mode = "out")) }))) })
+        hms <- delete.vertices(h, b$start[k])
+        paths_nodes_in <- lapply(paths_all_nodes,
+            function(x) { unique(unlist(lapply(x,
+                function(y) { names(subcomponent(y,
+                    graph = hms, mode = "in")) }))) })
+        external_nodes <- setdiff(hv$name, unlist(paths_all_nodes))
+        closed3p <- elementLengths(lapply(paths_nodes_out, intersect,
+            external_nodes)) == 0
+        closed5p <- elementLengths(lapply(paths_nodes_in, intersect,
+            external_nodes)) == 0
         
-        if (k < nrow(b) && closed3p && closed5p) {
+        if (k < nrow(b) && all(closed3p) && all(closed5p)) {
           
             ## Include event in data frame of recursively defined paths
             ref <- rbind(ref, data.frame(
@@ -654,6 +672,19 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             closed5p = closed5p,
             stringsAsFactors = FALSE)
          
+    }
+
+    if (n_skipped > 0) {
+      
+        warning(paste(n_skipped, "events exceed maxnvariant in gene", geneID),
+            call. = FALSE, immediate. = TRUE)
+
+    }
+
+    if (all(elementLengths(list_path_info) == 0)) {
+
+        return()
+
     }
     
     path_info <- do.call(rbind, list_path_info)
@@ -797,17 +828,23 @@ sortEvents <- function(events, g)
 findAllPaths <- function(from, to, path, ref, nodes)
 {
 
-    if (from == to && !is.null(path)) {
+    if (from == to) {
 
         return(path)
-        
+      
     } else {
 
         i <- which(ref$from == from)
         i <- i[match(ref$to[i], nodes) <= match(to, nodes)]
 
         if (length(i) > 0) {
-        
+
+            if (any(!is.na(ref$type[i]) & ref$type[i] == "")) {
+
+                return(NA)
+
+            }
+          
             paths <- lapply(i, append, path, 0)
             
             paths <- mapply(findAllPaths,
@@ -827,9 +864,25 @@ findAllPaths <- function(from, to, path, ref, nodes)
             
             i <- which(elementLengths(paths) == 0)
             
-            if (length(i) > 0) { paths <- paths[-i] }
+            if (length(i) > 0) {
+
+                paths <- paths[-i]
+
+            }
+
+            if (any(is.na(paths))) {
+
+                return(NA)
+
+            } else {
             
-            return(paths)
+                return(paths)
+
+            }            
+
+        } else {
+
+            return()
 
         }
         
@@ -1185,7 +1238,7 @@ getTerminalFeatureIDs <- function(x, start = TRUE)
 
     }
 
-    out <- as(tapply(as.integer(x), x_f, unique, simplify = FALSE), "list")
+    out <- tapply(as.integer(x), x_f, unique, simplify = FALSE)
     
     return(out)
     
@@ -1385,4 +1438,17 @@ reindex <- function(f)
     i <- as.integer(IRanges(1, f_n))
     i[match(seq_along(f), o)]
         
+}
+
+extractIDs <- function(x)
+{
+
+    x <- gsub("(", "", x, fixed = TRUE)
+    x <- gsub(")", "", x, fixed = TRUE)
+    x <- gsub("|", ",", x, fixed = TRUE)
+    x <- strsplit(x, ",", fixed = TRUE)
+    x <- lapply(x, setdiff, "NA")
+    x <- as(x, "CompressedIntegerList")
+    return(x)
+  
 }

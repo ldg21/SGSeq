@@ -13,9 +13,9 @@ import(Rsamtools)
 
 importFrom(AnnotationDbi, select)
 importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate)
-importFrom(igraph, clusters, degree, edge.connectivity, get.data.frame,
- get.shortest.paths, graph.data.frame, induced.subgraph, neighborhood,
- plot.igraph, shortest.paths, subcomponent)
+importFrom(igraph, clusters, degree, delete.vertices, edge.connectivity,
+ get.data.frame, get.shortest.paths, graph.data.frame, induced.subgraph,
+ neighborhood, plot.igraph, shortest.paths, subcomponent)
 importFrom(GenomicFeatures, exonsBy, mapToTranscripts)
 importFrom(GenomeInfoDb, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply, mcmapply)
