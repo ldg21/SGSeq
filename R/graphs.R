@@ -14,69 +14,38 @@ spliceGraph <- function(features)
     if (is(features, "GRanges")) {
 
         edges <- features[mcols(features)$type %in% c("J", "E")]
+        i_J <- which(mcols(edges)$type == "J")
+        i_E <- which(mcols(edges)$type == "E")
         d <- cbind(from = NA, to = NA, as.data.frame(mcols(edges)))
-
-        nodes <- features[mcols(features)$type %in% c("D" ,"A")]
-        nodes_pos <- gr2pos(nodes)
-        nodes_name <- feature2name(nodes)
-
-        i_D <- which(mcols(nodes)$type == "D")
-        i_A <- which(mcols(nodes)$type == "A")
-
-        ## determine 'from' nodes
-
-        ## splice junctions -> D
-        i <- which(mcols(edges)$type == "J")
-        pos <- gr2pos(flank(edges[i], -1, start = TRUE))
-        d$from[i] <- paste0("D:", pos)
         
-        ## exons with 5' splice -> A
-        i <- which(mcols(edges)$type == "E" & mcols(edges)$splice5p)
-        pos <- gr2pos(flank(edges[i], -1, start = TRUE))
-        d$from[i] <- paste0("A:", pos)
+        ## splice junctions -> from nodes
+        D <- gr2pos(flank(edges[i_J], -1, start = TRUE))
+        d$from[i_J] <- paste0("D:", D)
+        
+        ## splice junctions -> to nodes
+        A <- gr2pos(flank(edges[i_J], -1, start = FALSE))
+        d$to[i_J] <- paste0("A:", A)
+        
+        ## exons -> from nodes
+        E_5p_int <- gr2pos(flank(edges[i_E], -1, start = TRUE))
+        E_5p_ext <- gr2pos(flank(edges[i_E], 1, start = TRUE))
+        i <- which(E_5p_int %in% A)
+        d$from[i_E][i] <- paste0("A:", E_5p_int[i])
+        i <- which(is.na(d$from[i_E]) & E_5p_ext %in% D)
+        d$from[i_E][i] <- paste0("D:", E_5p_ext[i])
+        i <- which(is.na(d$from[i_E]))
+        d$from[i_E][i] <- paste0("S:", E_5p_int[i])
 
-        ## exons without 5' splice -> A (if included)
-        i <- which(mcols(edges)$type == "E" & !mcols(edges)$splice5p)
-        pos <- gr2pos(flank(edges[i], -1, start = TRUE))
-        d$from[i] <- nodes_name[i_A][match(pos, nodes_pos[i_A])]
-
-        ## remaining exons without 5' splice -> D (if included)
-        i <- i[which(is.na(d$from[i]))]
-        pos <- gr2pos(suppressWarnings(flank(edges[i], 1, start = TRUE)))
-        d$from[i] <- nodes_name[i_D][match(pos, nodes_pos[i_D])]
-
-        ## remaining edges -> S
-        i <- i[which(is.na(d$from[i]))]
-        pos <- gr2pos(flank(edges[i], -1, start = TRUE))
-        d$from[i] <- paste0("S:", pos)
-
-        ## determine 'to' nodes
-
-        ## splice junctions -> A
-        i <- which(mcols(edges)$type == "J")
-        pos <- gr2pos(flank(edges[i], -1, start = FALSE))
-        d$to[i] <- paste0("A:", pos)
-
-        ## exons with 3' splice -> D
-        i <- which(mcols(edges)$type == "E" & mcols(edges)$splice3p)
-        pos <- gr2pos(flank(edges[i], -1, start = FALSE))
-        d$to[i] <- paste0("D:", pos)
-
-        ## exons without 3' splice -> D (if included)
-        i <- which(mcols(edges)$type == "E" & !mcols(edges)$splice3p)
-        pos <- gr2pos(flank(edges[i], -1, start = FALSE))
-        d$to[i] <- nodes_name[i_D][match(pos, nodes_pos[i_D])]
-
-        ## remaining exons without 3' splice -> A (if included)
-        i <- i[which(is.na(d$to[i]))]
-        pos <- gr2pos(suppressWarnings(flank(edges[i], 1, start = FALSE)))
-        d$to[i] <- nodes_name[i_A][match(pos, nodes_pos[i_A])]
-
-        ## remaining edges -> E
-        i <- i[which(is.na(d$to[i]))]
-        pos <- gr2pos(flank(edges[i], -1, start = FALSE))
-        d$to[i] <- paste0("E:", pos)
-
+        ## exons -> to nodes
+        E_3p_int <- gr2pos(flank(edges[i_E], -1, start = FALSE))
+        E_3p_ext <- gr2pos(flank(edges[i_E], 1, start = FALSE))
+        i <- which(E_3p_int %in% D)
+        d$to[i_E][i] <- paste0("D:", E_3p_int[i])
+        i <- which(is.na(d$to[i_E]) & E_3p_ext %in% A)
+        d$to[i_E][i] <- paste0("A:", E_3p_ext[i])
+        i <- which(is.na(d$to[i_E]))
+        d$to[i_E][i] <- paste0("E:", E_3p_int[i])
+        
     } else if (is(features, "GRangesList")) {
         
         d <- as.data.frame(mcols(features))
@@ -86,11 +55,12 @@ spliceGraph <- function(features)
     g <- graph.data.frame(d = d, directed = TRUE)
     gd <- edges(g)
     gv <- nodes(g)
-    gv$type <- substr(gv$name, 1, 1)
 
     if (is(features, "GRanges")) {
-    
-        gv$featureID <- mcols(nodes)$featureID[match(gv$name, nodes_name)]
+
+        splicesites <- features[mcols(features)$type %in% c("D" ,"A")]
+        gv$featureID <- mcols(splicesites)$featureID[match(gv$name,
+            feature2name(splicesites))]
 
     }
     
@@ -187,8 +157,8 @@ addSourceAndSinkNodes <- function(g)
     
     ## Add unique source node and edges
     
-    i <- which(gv$type == "S")
-
+    i <- which(degree(g, mode = "in") == 0)
+    
     if (length(i) > 0) {
 
         gd_R <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
@@ -206,8 +176,8 @@ addSourceAndSinkNodes <- function(g)
 
     ## Add unique sink nodes and edges
 
-    i <- which(gv$type == "E")
-
+    i <- which(degree(g, mode = "out") == 0)
+    
     if (length(i) > 0) {
 
         gd_K <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
@@ -250,8 +220,8 @@ findSGSegments <- function(features, cores = 1)
     gv <- nodes(g)
     gd <- edges(g)
 
-    i_branch <- which(gv$type == "S" | gv$type == "E" |
-        degree(g, mode = "out") > 1 | degree(g, mode = "in") > 1)
+    i_branch <- setNames(which(degree(g, mode = "out") != 1 |
+        degree(g, mode = "in") != 1), NULL)
     geneID_n_branch <- table(gv$geneID[i_branch])
 
     ## Collapse graph for geneIDs with single isoform
@@ -301,13 +271,10 @@ findSGSegmentsPerGene <- function(g, geneID)
     
     ## Find start and end nodes
     
-    starts <- which(hv$type != "E" & (hv$type == "S" |
-        degree(h, mode = "out") > 1 | degree(h, mode = "in") > 1))
-    ends <- which(hv$type != "S" & (hv$type == "E" |
-        degree(h, mode = "out") > 1 | degree(h, mode = "in") > 1))
-
-    names(starts) <- NULL
-    names(ends) <- NULL
+    starts <- setNames(which(degree(h, mode = "out") > 1 |
+        degree(h, mode = "in") != 1), NULL)    
+    ends <- setNames(which(degree(h, mode = "in") > 1 |
+        degree(h, mode = "out") != 1), NULL)
     
     list_neighbors <- neighborhood2(h, 1, starts, "out")
     
@@ -416,7 +383,8 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
 
     message("Find variants...")
     g <- spliceGraph(segments)
-    i <- which(degree(g, mode = "out") > 1 | degree(g, mode = "in") > 1)
+    i <- setNames(which(degree(g, mode = "out") > 1 |
+        degree(g, mode = "in") > 1), NULL)
     geneIDs <- unique(nodes(g)$geneID[i])
 
     if (length(geneIDs) == 0) {

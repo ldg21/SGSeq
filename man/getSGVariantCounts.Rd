@@ -6,7 +6,7 @@
   splice variants}
 \usage{
 getSGVariantCounts(variants, object = NULL, features = NULL,
-  sample_info = NULL, prefer_junctions = TRUE, verbose = FALSE,
+  sample_info = NULL, prefer_junctions = FALSE, verbose = FALSE,
   cores = 1)
 }
 \arguments{
@@ -24,7 +24,7 @@ and \dQuote{lib_size}. Library information can be obtained with
 function \code{getBamInfo}.}
 
 \item{prefer_junctions}{\code{logical} indicating whether variant
-frequencies should be calculated only based on splice junction
+frequencies should be calculated exclusively based on splice junction
 reads where possible (i.e. events for which all representative
 features at one or both boundaries are splice junctions)}
 

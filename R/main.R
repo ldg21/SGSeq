@@ -389,7 +389,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##'   included in featureID5p(variants) and featureID3p(variants)
 ##' @param object \code{SGFeatureCounts} object
 ##' @param prefer_junctions \code{logical} indicating whether variant
-##'   frequencies should be calculated only based on splice junction
+##'   frequencies should be calculated exclusively based on splice junction
 ##'   reads where possible (i.e. events for which all representative
 ##'   features at one or both boundaries are splice junctions) 
 ##' @param cores Number of cores available for parallel processing
@@ -402,7 +402,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##' @author Leonard Goldstein
 
 getSGVariantCounts <- function(variants, object = NULL, features = NULL,
-    sample_info = NULL, prefer_junctions = TRUE, verbose = FALSE, cores = 1)
+    sample_info = NULL, prefer_junctions = FALSE, verbose = FALSE, cores = 1)
 {
 
     if (!is(variants, "SGVariants")) {
