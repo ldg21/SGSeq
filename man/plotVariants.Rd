@@ -4,81 +4,19 @@
 \alias{plotVariants}
 \title{Plot splice graph and heatmap of splice variant frequencies}
 \usage{
-plotVariants(x, eventID = NULL, toscale = c("exon", "none", "gene"),
-  color = "gray", color_novel = color, color_alpha = 0.8,
-  color_labels = FALSE, border = "fill", curvature = NULL, ypos = c(0.5,
-  0.1), score = NULL, score_color = "darkblue", score_ylim = NULL,
-  score_ypos = c(0.3, 0.1), score_nbin = 200, score_label = NULL,
-  ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-  main = NULL, tx_view = FALSE, tx_dist = 0.1, cex = 1,
+plotVariants(x, eventID = NULL, tx_view = FALSE, cex = 1,
   transform = function(x) {     x }, Rowv = NULL, distfun = dist,
   hclustfun = hclust, margin = 0.2, RowSideColors = NULL,
   square = FALSE, cexRow = 1, cexCol = 1, labRow = colnames(x),
   col = colorRampPalette(c("black", "gold"))(256), zlim = c(0, 1),
-  heightPanels = c(1, 2), expand_variants = FALSE)
+  heightPanels = c(1, 2), expand_variants = FALSE, ...)
 }
 \arguments{
 \item{x}{\code{SGVariantCounts} object}
 
 \item{eventID}{Single event identifier used to subset \code{x}}
 
-\item{toscale}{Controls which parts of the splice graph are drawn to
-scale. Possible values are \dQuote{none} (exonic and intronic regions
-have constant length), \dQuote{exon} (exonic regions are drawn to scale)
-and \dQuote{gene} (both exonic and intronic regions are drawn to scale).}
-
-\item{color}{Color used for plotting the splice graph. Ignored if features
-metadata column \dQuote{color} is not \code{NULL}.}
-
-\item{color_novel}{Features with missing annotation are
-highlighted in \code{color_novel}. Ignored if features
-metadata column \dQuote{color} is not \code{NULL}.}
-
-\item{color_alpha}{Controls color transparency}
-
-\item{color_labels}{Logical indicating whether label colors should
-be the same as feature colors}
-
-\item{border}{Determines the color of exon borders, can be \dQuote{fill}
-(same as exon color), \dQuote{none} (no border) or a valid color name}
-
-\item{curvature}{Numeric determining curvature of plotted splice junctions.}
-
-\item{ypos}{Numeric vector of length two, indicating the vertical
-position and height of the exon bins in the splice graph,
-specificed as fraction of the height of the plotting region
-(not supported for \code{tx_view = TRUE})}
-
-\item{score}{\code{RLeList} containing nucleotide-level scores
-to be plotted with the splice graph}
-
-\item{score_color}{Color used for plotting scores}
-
-\item{score_ylim}{Numeric vector of length two, determining y-axis range
-for plotting scores}
-
-\item{score_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the score panel, specificed as fraction of the
-height of the plotting region}
-
-\item{score_nbin}{Number of bins for plotting scores}
-
-\item{score_label}{Label used to annotate score panel}
-
-\item{ranges}{\code{GRangesList} to be plotted with the splice graph}
-
-\item{ranges_color}{Color used for plotting ranges}
-
-\item{ranges_ypos}{Numeric vector of length two, indicating the vertical
-position and height of the ranges panel, specificed as fraction of the
-height of the plotting region}
-
-\item{main}{Plot title}
-
 \item{tx_view}{Plot transcripts instead of splice graph (experimental)}
-
-\item{tx_dist}{Vertical distance between transcripts as fraction of height
-of plotting region}
 
 \item{cex}{Scale parameter for feature labels and annotation}
 
@@ -119,6 +57,8 @@ if \code{NULL} range of finite values}
 the top and bottom panels.}
 
 \item{expand_variants}{Experimental option - leave set to \code{FALSE}}
+
+\item{...}{further parameters passed to \code{plotSpliceGraph}}
 }
 \value{
 \code{data.frame} with information on exon bins and

@@ -150,51 +150,35 @@ neighborhood2 <- function(graph, order, nodes, mode)
 addSourceAndSinkNodes <- function(g)
 {
 
-    gv <- nodes(g)
     gd <- edges(g)
+    gv <- nodes(g)
 
-    strand <- strsplit(gv$name[1], ":", fixed = TRUE)[[1]][4]
-    
     ## Add unique source node and edges
     
     i <- which(degree(g, mode = "in") == 0)
-    
-    if (length(i) > 0) {
-
-        gd_R <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
-        names(gd_R) <- names(gd)
-        gd_R$from <- "R"
-        gd_R$to <- gv$name[i]
-        gd <- rbind(gd_R, gd)
-
-        gv_R <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
-        names(gv_R) <- names(gv)
-        gv_R$name <- "R"
-        gv <- rbind(gv_R, gv)
-
-    }
+    gd_R <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
+    names(gd_R) <- names(gd)
+    gd_R$from <- "R"
+    gd_R$to <- gv$name[i]
+    gv_R <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
+    names(gv_R) <- names(gv)
+    gv_R$name <- "R"
 
     ## Add unique sink nodes and edges
 
     i <- which(degree(g, mode = "out") == 0)
-    
-    if (length(i) > 0) {
+    gd_K <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
+    names(gd_K) <- names(gd)
+    gd_K$from <- gv$name[i]
+    gd_K$to <- "K"
+    gv_K <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
+    names(gv_K) <- names(gv)
+    gv_K$name <- "K"
 
-        gd_K <- data.frame(matrix(NA, nrow = length(i), ncol = ncol(gd)))
-        names(gd_K) <- names(gd)
-        gd_K$from <- gv$name[i]
-        gd_K$to <- "K"
-        gd <- rbind(gd, gd_K)
+    ## update graph
 
-        gv_K <- data.frame(matrix(NA, nrow = 1, ncol = ncol(gv)))
-        names(gv_K) <- names(gv)
-        gv_K$name <- "K"
-        gv <- rbind(gv, gv_K)
-
-    }
-    
-    ## Create extended splice graph
-    
+    gd <- rbind(gd_R, gd, gd_K)
+    gv <- rbind(gv_R, gv, gv_K)
     g <- graph.data.frame(d = gd, directed = TRUE, vertices = gv)
 
     return(g)

@@ -220,7 +220,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 ##' @author Leonard Goldstein
 
 predictTxFeatures <- function(sample_info, which = NULL,
-    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
+    alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
     min_junction_count = NULL, max_complexity = 20,
     min_n_sample = 1, min_overhang = NA, verbose = FALSE,
     cores = 1)
@@ -347,13 +347,15 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 ##' 
 ##' @title Analysis of splice variants
 ##' @inheritParams findSGVariants
+##' @inheritParams getSGVariantCounts
 ##' @param object \code{SGFeatureCounts} object
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- analyzeVariants(sgfc)
 ##' @author Leonard Goldstein
 
-analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
+analyzeVariants <- function(object, maxnvariant = 20, min_denominator = NA,
+    cores = 1)
 {
 
     if (!is(object, "SGFeatureCounts")) {
@@ -367,7 +369,8 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
         maxnvariant = maxnvariant,
         cores = cores)
 
-    counts <- getSGVariantCounts(variants, object, cores = cores)
+    counts <- getSGVariantCounts(variants, object,
+        min_denominator = min_denominator, cores = cores)
 
     return(counts)
 
@@ -388,10 +391,10 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##' @param features \code{SGFeatures} object that must include all features
 ##'   included in featureID5p(variants) and featureID3p(variants)
 ##' @param object \code{SGFeatureCounts} object
-##' @param prefer_junctions \code{logical} indicating whether variant
-##'   frequencies should be calculated exclusively based on splice junction
-##'   reads where possible (i.e. events for which all representative
-##'   features at one or both boundaries are splice junctions) 
+##' @param min_denominator Integer specifying minimum denominator when
+##'   calculating variant frequencies. If the denominator is smaller than
+##'   \code{min_denominator}, variant frequencies are set to \code{NA}.
+##'   If \code{NA}, all variant frequencies are returned.
 ##' @param cores Number of cores available for parallel processing
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
@@ -402,7 +405,7 @@ analyzeVariants <- function(object, maxnvariant = 20, cores = 1)
 ##' @author Leonard Goldstein
 
 getSGVariantCounts <- function(variants, object = NULL, features = NULL,
-    sample_info = NULL, prefer_junctions = FALSE, verbose = FALSE, cores = 1)
+    sample_info = NULL, min_denominator = NA, verbose = FALSE, cores = 1)
 {
 
     if (!is(variants, "SGVariants")) {
@@ -440,7 +443,7 @@ getSGVariantCounts <- function(variants, object = NULL, features = NULL,
         sgvc <- getSGVariantCountsFromSGFeatureCounts(
             variants = variants,
             object = object,
-            prefer_junctions = prefer_junctions,
+            min_denominator = min_denominator, 
             cores = cores)
 
     } else {
@@ -450,7 +453,7 @@ getSGVariantCounts <- function(variants, object = NULL, features = NULL,
             features = features,
             sample_info = sample_info,
             counts_only = FALSE,
-            prefer_junctions = prefer_junctions,
+            min_denominator = min_denominator,
             verbose = verbose,
             cores = cores)
 

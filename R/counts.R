@@ -227,41 +227,43 @@ getScaledCounts <- function(SE,
     lib_size = colData(SE)$lib_size)
 {
 
-    E <- getEffectiveLengths(rowRanges(SE),
-        paired_end, read_length, frag_length)    
-
+    L <- getFeatureLengths(rowRanges(SE))
+    E <- getEffectiveLengths(L, paired_end, read_length, frag_length)
     X <- assay(SE, "counts")
     X <- X / (E * 1e-3)
-    X <- sweep(X, 2, lib_size * 1e-6, FUN = "/")
-    
+    X <- sweep(X, 2, lib_size * 1e-6, FUN = "/")    
     assays(SE)$FPKM <- X
 
     return(SE)
     
 }
 
-convertFpkmToCount <- function(fpkm, paired_end, read_length, frag_length,
-    lib_size, feature_length = 0)
+getFeatureLengths <- function(features)
 {
-    
-    if (paired_end) {
 
-        I <- frag_length - 2 * read_length
-        E <- feature_length + frag_length - 1 - max(I - feature_length + 1, 0)
+    if (is(features, "SGFeatures")) {
         
-    } else {
+        L <- rep(NA_integer_, length(features))
+        i <- which(type(features) %in% c("J", "A", "D"))
+        if (length(i) > 0) { L[i] <- 0 }        
+        i <- which(type(features) == "E")
+        if (length(i) > 0) { L[i] <- width(features[i]) }
 
-        E <- feature_length + read_length - 1
+    } else if (is(features, "SGSegments")) {
 
+        features_unlisted <- unlist(features)
+        i <- which(type(features_unlisted) == "E")
+        exons <- split(features_unlisted[i], togroup(features)[i])
+        L <- rep(0, length(features))
+        L[as.integer(names(exons))] <- unlist(sum(width(exons)))
+        
     }
 
-    count <- fpkm * (lib_size * 1e-6) * (E * 1e-3)
-    
-    return(count)
+    return(L)
     
 }
 
-getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
+getEffectiveLengths <- function(L, paired_end, read_length, frag_length)
 {
 
     ## R = read length
@@ -284,26 +286,7 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
     ## then E = L + F - 1 - pmax(I - L + 1, 0)
     ## Thus (1) is a special case of (2) for L = 0
 
-    if (is(features, "SGFeatures")) {
-                        
-        L <- rep(NA_integer_, length(features))
-        i <- which(type(features) %in% c("J", "A", "D"))
-        if (length(i) > 0) { L[i] <- 0 }        
-        i <- which(type(features) == "E")
-        if (length(i) > 0) { L[i] <- width(features[i]) }
-
-    }
-    if (is(features, "SGSegments")) {
-
-        features_unlisted <- unlist(features)
-        i <- which(type(features_unlisted) == "E")
-        exons <- split(features_unlisted[i], togroup(features)[i])
-        L <- rep(0, length(features))
-        L[as.integer(names(exons))] <- unlist(sum(width(exons)))
-        
-    }
-
-    n_feature <- length(features)
+    n_feature <- length(L)
     n_sample <- length(paired_end)
 
     E <- matrix(NA_real_, nrow = n_feature, ncol = n_sample)
@@ -338,8 +321,29 @@ getEffectiveLengths <- function(features, paired_end, read_length, frag_length)
 
 }
 
+convertFpkmToCount <- function(fpkm, paired_end, read_length, frag_length,
+    lib_size, feature_length = 0)
+{
+    
+    if (paired_end) {
+
+        I <- frag_length - 2 * read_length
+        E <- feature_length + frag_length - 1 - max(I - feature_length + 1, 0)
+        
+    } else {
+
+        E <- feature_length + read_length - 1
+
+    }
+
+    count <- fpkm * (lib_size * 1e-6) * (E * 1e-3)
+    
+    return(count)
+    
+}
+
 getSGVariantCountsFromSGFeatureCounts <- function(variants, object,
-    prefer_junctions, cores)
+    min_denominator, cores)
 {
 
     n_variants <- length(variants)
@@ -406,7 +410,7 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, object,
         rowRanges = variants,
         colData = colData(object))
     colnames(SE) <- colnames(object)
-    SE <- getVariantFreq(SE, prefer_junctions)
+    SE <- getVariantFreq(SE, min_denominator)
     SE <- SGVariantCounts(SE)
     
     return(SE)
@@ -445,7 +449,7 @@ collapseRows <- function(x, list_i, fun = sum, cores = 1)
     
 }
 
-getVariantFreq <- function(SE, prefer_junctions)
+getVariantFreq <- function(SE, min_denominator)
 {
     
     U5p <- assay(SE, "countsVariant5p")
@@ -457,30 +461,6 @@ getVariantFreq <- function(SE, prefer_junctions)
     eid <- eventID(variants)
     f5p <- featureID5p(variants)
     f3p <- featureID3p(variants)
-
-    if (prefer_junctions) {
-
-        f5p_unlisted <- unlist(f5p)
-        j5p_unlisted <- f5p_unlisted %in% featureID(unlist(variants))
-        j5p <- split(j5p_unlisted, togroup(f5p))
-        j5p <- j5p[match(seq_along(variants), names(j5p))]
-        j5p <- all(LogicalList(j5p))
-        e5p <- names(which(tapply(elementLengths(f5p) > 0 & j5p, eid, all)))
-    
-        f3p_unlisted <- unlist(f3p)
-        j3p_unlisted <- f3p_unlisted %in% featureID(unlist(variants))
-        j3p <- split(j3p_unlisted, togroup(f3p))
-        j3p <- j3p[match(seq_along(variants), names(j3p))]
-        j3p <- all(LogicalList(j3p))
-        e3p <- names(which(tapply(elementLengths(f3p) > 0 & j3p, eid, all)))
-        
-        i5p <- which(eid %in% setdiff(e3p, e5p))
-        i3p <- which(eid %in% setdiff(e5p, e3p))
-        
-        f5p[i5p] <- IntegerList(vector("list", length(i5p)))
-        f3p[i3p] <- IntegerList(vector("list", length(i3p)))
-      
-    }
 
     e5p <- names(which(tapply(elementLengths(f5p) > 0, eid, all)))
     e3p <- names(which(tapply(elementLengths(f3p) > 0, eid, all)))
@@ -502,6 +482,12 @@ getVariantFreq <- function(SE, prefer_junctions)
     X <- U/V
     X[is.na(X)] <- NA_real_
 
+    if (!is.na(min_denominator)) {
+
+        X[V < min_denominator] <- NA_real_
+
+    }
+    
     assay(SE, "variantFreq") <- X
         
     return(SE)
@@ -509,7 +495,7 @@ getVariantFreq <- function(SE, prefer_junctions)
 }
 
 getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
-    counts_only = FALSE, prefer_junctions, verbose, cores)
+    counts_only = FALSE, min_denominator, verbose, cores)
 {
 
     checkSampleInfo(sample_info)
@@ -552,7 +538,7 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
     if (counts_only) return(list_counts)
 
     sgvc <- makeSGVariantCounts(variants, sample_info, list_counts,
-        prefer_junctions, cores$total)
+        min_denominator, cores$total)
     
     return(sgvc)
         
@@ -711,8 +697,8 @@ getSGVariantCountsPerStrand <- function(variants, features,
     
 }
 
-makeSGVariantCounts <- function(rowRanges, colData, counts, prefer_junctions,
-     cores)
+makeSGVariantCounts <- function(rowRanges, colData, counts, min_denominator,
+    cores)
 {
 
     assays <- list()
@@ -729,7 +715,7 @@ makeSGVariantCounts <- function(rowRanges, colData, counts, prefer_junctions,
         rowRanges = rowRanges,
         colData = DataFrame(colData))
     colnames(x) <- colData$sample_name
-    x <- getVariantFreq(x, prefer_junctions)
+    x <- getVariantFreq(x, min_denominator)
     x <- SGVariantCounts(x)
 
     return(x)

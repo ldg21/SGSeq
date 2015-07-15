@@ -102,8 +102,8 @@ convertToTxFeatures <- function(x)
 
         if (is(x, "TxDb")) {
 
-            gene_name_unlisted <- select(x, tx_name_unlisted, "GENEID",
-                "TXNAME")$GENEID
+            gene_name_unlisted <- suppressMessages(select(x, tx_name_unlisted,
+                "GENEID", "TXNAME")$GENEID)
 
         } else {
 

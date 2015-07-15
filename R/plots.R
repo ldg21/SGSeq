@@ -438,14 +438,18 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
           
         }
 
-        df_tmp <- df[i, ]
+        if (length(i) > 0) {
         
-        text(x = df_tmp$x,
-            y = df_tmp$y + c(E = -1, J = 0)[df_tmp$type] * ypos[2],
-            labels = df_tmp[, label],
-            pos = df_tmp$pos,
-            offset = c(E = 0.5, J = 0.5)[df_tmp$type],
-            col = df_tmp$color)
+            df_tmp <- df[i, ]
+        
+            text(x = df_tmp$x,
+                y = df_tmp$y + c(E = -1, J = 0)[df_tmp$type] * ypos[2],
+                labels = df_tmp[, label],
+                pos = df_tmp$pos,
+                offset = c(E = 0.5, J = 0.5)[df_tmp$type],
+                col = df_tmp$color)
+
+        }
         
     }
 
@@ -889,6 +893,7 @@ addAlpha <- function(col, alpha)
 ##'   if \code{NULL} range of finite values
 ##' @param heightPanels Numeric vector of length two indicating height of
 ##'   the top and bottom panels.
+##' @param ... further parameters passed to \code{plotSpliceGraph}
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -899,23 +904,15 @@ addAlpha <- function(col, alpha)
 ##' @author Leonard Goldstein
 
 plotFeatures <- function(x, geneID = NULL, geneName = NULL,
-    which = NULL, toscale = c("exon", "none", "gene"), color = "gray",
-    color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", curvature = NULL, ypos = c(0.5, 0.1),
-    score = NULL, score_color = "darkblue", score_ylim = NULL,
-    score_ypos = c(0.3, 0.1), score_nbin = 200,
-    score_summary = mean, score_label = NULL, ranges = NULL,
-    ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-    main = NULL, tx_view = FALSE, tx_dist = 0.1, cex = 1,
+    which = NULL, tx_view = FALSE, cex = 1,
     assay = "FPKM", include = c("junctions", "exons", "both"),
     transform = function(x) { log2(x + 1) }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
-    zlim = NULL, heightPanels = c(1, 2))
+    zlim = NULL, heightPanels = c(1, 2), ...)
 {
 
-    toscale <- match.arg(toscale)
     include <- match.arg(include)
     
     if (!is(x, "SGFeatureCounts")) {
@@ -947,16 +944,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
     par(cex = cex, mai = pars$mai)
 
-    df <- plotSpliceGraph(x = features, toscale = toscale,
-        label = "id", color = color, color_novel = color_novel,
-        color_alpha = color_alpha, color_labels = color_labels,
-        border = border, curvature = curvature, ypos = ypos,
-        score = score, score_color = score_color,
-        score_ylim = score_ylim, score_ypos = score_ypos,
-        score_nbin = score_nbin, score_summary = score_summary,
-        score_label = score_label, ranges = ranges,
-        ranges_color = ranges_color, ranges_ypos = ranges_ypos,
-        main = main, tx_view = tx_view, tx_dist = tx_dist)
+    df <- plotSpliceGraph(x = features, 
+        label = "id", tx_view = tx_view, ...)
 
     i_df <- switch(include,
         exons = which(df$type == "E"),
@@ -986,6 +975,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' @param cex Scale parameter for feature labels and annotation
 ##' @param transform Transformation applied to splice variant frequencies
 ##' @param expand_variants Experimental option - leave set to \code{FALSE}
+##' @param ... further parameters passed to \code{plotSpliceGraph}
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -995,22 +985,13 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' }
 ##' @author Leonard Goldstein
 
-plotVariants <- function(x, eventID = NULL,
-    toscale = c("exon", "none", "gene"), color = "gray",
-    color_novel = color, color_alpha = 0.8, color_labels = FALSE,
-    border = "fill", curvature = NULL, ypos = c(0.5, 0.1),
-    score = NULL, score_color = "darkblue", score_ylim = NULL,
-    score_ypos = c(0.3, 0.1), score_nbin = 200, score_label = NULL,
-    ranges = NULL, ranges_color = "darkblue",
-    ranges_ypos = c(0.1, 0.1), main = NULL, tx_view = FALSE, tx_dist = 0.1, 
+plotVariants <- function(x, eventID = NULL, tx_view = FALSE, 
     cex = 1, transform = function(x) { x }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
     labRow = colnames(x), col = colorRampPalette(c("black", "gold"))(256),
-    zlim = c(0, 1), heightPanels = c(1, 2), expand_variants = FALSE)
+    zlim = c(0, 1), heightPanels = c(1, 2), expand_variants = FALSE, ...)
 {
-
-    toscale <- match.arg(toscale)
 
     if (!is(x, "SGVariantCounts")) {
 
@@ -1031,34 +1012,40 @@ plotVariants <- function(x, eventID = NULL,
 
     X <- transform(variantFreq(x))
 
-    not_quantifiable <- elementLengths(featureID5p(x)) == 0 &
+    variant_not_quantifiable <- elementLengths(featureID5p(x)) == 0 &
         elementLengths(featureID3p(x)) == 0
+    event_not_quantifiable <- tapply(variant_not_quantifiable, eventID(x),
+        any)
     
-    if (all(not_quantifiable)) {
+    if (all(event_not_quantifiable)) {
 
-        stop("none of the selected splice variants could be quantified")
+        warning("none of the selected splice events could be quantified")
 
-    }
+    } else if (any(event_not_quantifiable)) {
 
-    if (any(not_quantifiable)) {
-
-        warning("one or more splice variants could not be quantified")
+        warning("one or more splice events could not be quantified")
 
     }
 
-    if (any(elementLengths(featureID5p(x)) == 0 &
-        elementLengths(featureID3p(x)) == 0)) {
-
-        warning("one or more splice variants could not be quantified")
-
-    }
-        
     if (!is.null(RowSideColors) && !is.list(RowSideColors)) {
 
         RowSideColors <- list(RowSideColors)
 
     }    
 
+    exclude <- which(colSums(is.na(X)) == nrow(X))
+    n_exclude <- length(exclude)
+    
+    if (n_exclude > 0) {
+
+        labRow <- labRow[-exclude]
+        x <- x[, -exclude]
+        X <- X[, -exclude]
+        RowSideColors <- lapply(RowSideColors, "[", -exclude)
+        warning(paste("excluded", n_exclude, "samples with all values NA"))
+        
+    }
+    
     n_sample <- ncol(x)
     n_feature <- nrow(x)
     
@@ -1067,16 +1054,14 @@ plotVariants <- function(x, eventID = NULL,
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
     par(cex = cex, mai = pars$mai)
     
-    df <- plotSpliceGraph(x = rowRanges(x), toscale = toscale,
-        label = "label", color = color, color_novel = color_novel,
-        color_alpha = color_alpha, color_labels = color_labels,
-        border = border, curvature = curvature, ypos = ypos,
-        score = score, score_color = score_color,
-        score_ylim = score_ylim, score_nbin = score_nbin,
-        score_ypos = score_ypos, score_label = score_label,
-        ranges = ranges, ranges_color = ranges_color,
-        ranges_ypos = ranges_ypos, main = main,
-        tx_view = tx_view, tx_dist = tx_dist)
+    df <- plotSpliceGraph(x = rowRanges(x), label = "label",
+        tx_view = tx_view, ...)
+
+    if (all(event_not_quantifiable) || n_sample == 0) {
+
+        invisible(df)
+
+    }
     
     labCol <- seq_len(nrow(X))
     colLabCol <- "black"

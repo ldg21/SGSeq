@@ -373,7 +373,7 @@ setMethod("counts", "SGFeatureCounts",
 ##' @rdname assays
 setReplaceMethod("counts", "SGFeatureCounts",
     function(object, value) {
-        assay(object, "counts") <- value
+        assays(object)$counts <- value
         object
     })
 
@@ -384,7 +384,7 @@ setMethod("FPKM", "SGFeatureCounts",
 ##' @rdname assays
 setReplaceMethod("FPKM", "SGFeatureCounts",
     function(object, value) {
-        assay(object, "FPKM") <- value
+        assays(object)$FPKM <- value
         object
     })
 
@@ -397,7 +397,7 @@ setMethod("countsVariant5p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsVariant5p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsVariant5p") <- value
+        assays(object)$countsVariant5p <- value
         object
     })
 
@@ -408,7 +408,7 @@ setMethod("countsVariant3p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsVariant3p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsVariant3p") <- value
+        assays(object)$countsVariant3p <- value
         object
     })
 
@@ -419,7 +419,7 @@ setMethod("countsTotal5p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsTotal5p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsTotal5p") <- value
+        assays(object)$countsTotal5p <- value
         object
     })
 
@@ -430,7 +430,7 @@ setMethod("countsTotal3p", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsTotal3p", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsTotal3p") <- value
+        assays(object)$countsTotal3p <- value
         object
     })
 
@@ -441,7 +441,7 @@ setMethod("variantFreq", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("variantFreq", "SGVariantCounts",
     function(object, value) {
-        assay(object, "variantFreq") <- value
+        assays(object)$variantFreq <- value
         object
     })
 
@@ -452,7 +452,7 @@ setMethod("countsVariant", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsVariant", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsVariant") <- value
+        assays(object)$countsVariant <- value
         object
     })
 
@@ -463,6 +463,6 @@ setMethod("countsTotal", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("countsTotal", "SGVariantCounts",
     function(object, value) {
-        assay(object, "countsTotal") <- value
+        assays(object)$countsTotal <- value
         object
     })

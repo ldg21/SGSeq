@@ -4,7 +4,7 @@
 \alias{analyzeVariants}
 \title{Analysis of splice variants}
 \usage{
-analyzeVariants(object, maxnvariant = 20, cores = 1)
+analyzeVariants(object, maxnvariant = 20, min_denominator = NA, cores = 1)
 }
 \arguments{
 \item{object}{\code{SGFeatureCounts} object}
@@ -12,6 +12,11 @@ analyzeVariants(object, maxnvariant = 20, cores = 1)
 \item{maxnvariant}{If more than \code{maxnvariant} variants are
 identified in an event, the event is skipped, resulting in a warning.
 Set to \code{NA} to include all events.}
+
+\item{min_denominator}{Integer specifying minimum denominator when
+calculating variant frequencies. If the denominator is smaller than
+\code{min_denominator}, variant frequencies are set to \code{NA}.
+If \code{NA}, all variant frequencies are returned.}
 
 \item{cores}{Number of cores available for parallel processing}
 }
