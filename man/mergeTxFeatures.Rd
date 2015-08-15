@@ -25,7 +25,7 @@ For terminal exons with shared spliced boundary, the longest exon is
 retained.
 }
 \examples{
-txf_merged <- mergeTxFeatures(txf, txf)
+txf_merged <- mergeTxFeatures(txf_ann, txf_pred)
 }
 \author{
 Leonard Goldstein

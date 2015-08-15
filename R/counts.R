@@ -201,7 +201,8 @@ convertSlots <- function(x)
 ##' @param counts Integer matrix of counts
 ##' @return An \code{SGFeatureCounts} object
 ##' @examples
-##' sgfc <- makeSGFeatureCounts(sgf, si, matrix(0L, length(sgf), nrow(si)))
+##' sgfc <- makeSGFeatureCounts(sgf_pred, si,
+##'   matrix(0L, length(sgf_pred), nrow(si)))
 ##' @author Leonard Goldstein
 
 makeSGFeatureCounts <- function(rowRanges, colData, counts)

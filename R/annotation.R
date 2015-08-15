@@ -24,8 +24,8 @@
 ##' @return \code{query} with updated \code{txName}, \code{geneName}
 ##'   column slots
 ##' @examples
-##' sgf_annotated <- annotate(sgf, txf)
-##' sgv_annotated <- annotate(sgv, txf)
+##' sgf_annotated <- annotate(sgf_pred, txf_ann)
+##' sgv_annotated <- annotate(sgv_pred, txf_ann)
 ##' @author Leonard Goldstein
 
 annotate <- function(query, subject)

@@ -27,7 +27,7 @@ An \code{SGVariants} object
 Find splice variants from splice graph
 }
 \examples{
-sgv <- findSGVariants(sgf)
+sgv <- findSGVariants(sgf_pred)
 }
 \author{
 Leonard Goldstein

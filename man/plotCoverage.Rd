@@ -71,7 +71,7 @@ sample or averaged across samples.
 \examples{
 \dontrun{
 par(mfrow = c(4, 1))
-for (j in seq_len(4)) plotCoverage(sgfc[, j])
+for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 }
 }
 \author{

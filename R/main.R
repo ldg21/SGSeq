@@ -288,7 +288,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(path, "bams", si$file_bam)
-##' sgfc <- getSGFeatureCounts(si, sgf)
+##' sgfc <- getSGFeatureCounts(si, sgf_pred)
 ##' @author Leonard Goldstein
 
 getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
@@ -351,7 +351,7 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 ##' @param object \code{SGFeatureCounts} object
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
-##' sgvc <- analyzeVariants(sgfc)
+##' sgvc <- analyzeVariants(sgfc_pred)
 ##' @author Leonard Goldstein
 
 analyzeVariants <- function(object, maxnvariant = 20, min_denominator = NA,
@@ -398,10 +398,11 @@ analyzeVariants <- function(object, maxnvariant = 20, min_denominator = NA,
 ##' @param cores Number of cores available for parallel processing
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
-##' sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)
+##' sgvc_from_sgfc <- getSGVariantCounts(sgv_pred, sgfc_pred)
 ##' path <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(path, "bams", si$file_bam)
-##' sgvc_from_bam <- getSGVariantCounts(sgv, features = sgf, sample_info = si)
+##' sgvc_from_bam <- getSGVariantCounts(sgv_pred,
+##'   features = sgf_pred, sample_info = si)
 ##' @author Leonard Goldstein
 
 getSGVariantCounts <- function(variants, object = NULL, features = NULL,

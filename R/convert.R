@@ -354,7 +354,7 @@ collapseFeatures <- function(features)
 ##'   exons and omitting splice donor and acceptor sites
 ##' @return An \code{SGFeatures} object
 ##' @examples
-##' sgf <- convertToSGFeatures(txf)
+##' sgf <- convertToSGFeatures(txf_ann)
 ##' @author Leonard Goldstein
 
 convertToSGFeatures <- function(x, coerce = FALSE)

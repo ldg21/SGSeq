@@ -30,7 +30,7 @@ splice graph features. Splice variants are identified with
 and variant frequencies estimated with \code{\link{getSGVariantCounts}}.
 }
 \examples{
-sgvc <- analyzeVariants(sgfc)
+sgvc <- analyzeVariants(sgfc_pred)
 }
 \author{
 Leonard Goldstein

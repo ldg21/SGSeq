@@ -394,8 +394,8 @@ there exists a function with name identical to the column name
 that can be used to access and modify it (see examples).
 }
 \examples{
-head(type(txf))
-head(type(sgf))
+head(type(txf_ann))
+head(type(sgf_ann))
 }
 \author{
 Leonard Goldstein

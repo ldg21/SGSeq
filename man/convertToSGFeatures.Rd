@@ -45,7 +45,7 @@ respectively. The latter indicates features that belong to the
 same gene, represented by a connected component in the splice graph.
 }
 \examples{
-sgf <- convertToSGFeatures(txf)
+sgf <- convertToSGFeatures(txf_ann)
 }
 \author{
 Leonard Goldstein

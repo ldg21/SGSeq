@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{gr}
 \alias{gr}
-\title{Example region of interest}
+\title{Example genomic region of interest}
 \format{A \code{GRanges} object.}
 \description{
 FBXO31 gene locus, based on UCSC knownGene annotation.

@@ -15,8 +15,8 @@
 ##' @return Column value for accessor functions, updated object for
 ##' replacement functions.
 ##' @examples
-##' head(type(txf))
-##' head(type(sgf))
+##' head(type(txf_ann))
+##' head(type(sgf_ann))
 ##' @author Leonard Goldstein
 ##' @name slots
 NULL
@@ -37,8 +37,8 @@ NULL
 ##' @return Assay data for accessor functions, updated object for replacement
 ##' functions.
 ##' @examples
-##' x <- counts(sgfc)
-##' y <- FPKM(sgfc)
+##' x <- counts(sgfc_pred)
+##' y <- FPKM(sgfc_pred)
 ##' @author Leonard Goldstein
 ##' @name assays
 NULL

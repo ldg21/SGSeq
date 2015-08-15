@@ -251,11 +251,11 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##' sgf_annotated <- annotate(sgf, txf)
+##' sgf_annotated <- annotate(sgf_pred, txf_ann)
 ##' plotSpliceGraph(sgf_annotated)
 ##' }
 ##' \dontrun{
-##' sgv_annotated <- annotate(sgv, txf)
+##' sgv_annotated <- annotate(sgv_pred, txf_ann)
 ##' plotSpliceGraph(sgv_annotated)
 ##' }
 ##' @author Leonard Goldstein
@@ -898,7 +898,7 @@ addAlpha <- function(col, alpha)
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##' sgfc_annotated <- annotate(sgfc, txf)
+##' sgfc_annotated <- annotate(sgfc_pred, txf_ann)
 ##' plotFeatures(sgfc_annotated)
 ##' }
 ##' @author Leonard Goldstein
@@ -980,7 +980,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##'   splice junctions included in the splice graph
 ##' @examples
 ##' \dontrun{
-##' sgvc_annotated <- annotate(sgvc, txf)
+##' sgvc_annotated <- annotate(sgvc_pred, txf_ann)
 ##' plotVariants(sgvc_annotated)
 ##' }
 ##' @author Leonard Goldstein
@@ -1414,7 +1414,7 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 ##' @examples
 ##' \dontrun{
 ##' par(mfrow = c(4, 1))
-##' for (j in seq_len(4)) plotCoverage(sgfc[, j])
+##' for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 ##' }
 ##' @author Leonard Goldstein - Regular
 

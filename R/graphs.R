@@ -323,7 +323,7 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##' @param cores Number of cores available for parallel processing
 ##' @return An \code{SGVariants} object
 ##' @examples
-##' sgv <- findSGVariants(sgf)
+##' sgv <- findSGVariants(sgf_pred)
 ##' @author Leonard Goldstein
 
 findSGVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
@@ -1335,7 +1335,7 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
 ##' @param variants \code{SGVariants} object
 ##' @return Character vector with splice variant names
 ##' @examples
-##' makeVariantNames(sgv)
+##' makeVariantNames(sgv_pred)
 ##' @keywords internal
 ##' @author Leonard Goldstein
 

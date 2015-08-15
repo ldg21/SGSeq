@@ -38,8 +38,8 @@ must match spliced subject exon boundaries. Query exon bins cannot
 extend across spliced subject exon boundaries.
 }
 \examples{
-sgf_annotated <- annotate(sgf, txf)
-sgv_annotated <- annotate(sgv, txf)
+sgf_annotated <- annotate(sgf_pred, txf_ann)
+sgv_annotated <- annotate(sgv_pred, txf_ann)
 }
 \author{
 Leonard Goldstein

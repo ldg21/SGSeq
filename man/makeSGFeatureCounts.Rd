@@ -20,7 +20,8 @@ An \code{SGFeatureCounts} object
 Create \code{SGFeatureCounts} object from rowRanges, colData and counts.
 }
 \examples{
-sgfc <- makeSGFeatureCounts(sgf, si, matrix(0L, length(sgf), nrow(si)))
+sgfc <- makeSGFeatureCounts(sgf_pred, si,
+  matrix(0L, length(sgf_pred), nrow(si)))
 }
 \author{
 Leonard Goldstein

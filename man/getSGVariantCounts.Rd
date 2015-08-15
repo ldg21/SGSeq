@@ -43,10 +43,11 @@ and \code{sample_info} must be specified. Splice variant
 frequencies are estimated based on representive counts.
 }
 \examples{
-sgvc_from_sgfc <- getSGVariantCounts(sgv, sgfc)
+sgvc_from_sgfc <- getSGVariantCounts(sgv_pred, sgfc_pred)
 path <- system.file("extdata", package = "SGSeq")
 si$file_bam <- file.path(path, "bams", si$file_bam)
-sgvc_from_bam <- getSGVariantCounts(sgv, features = sgf, sample_info = si)
+sgvc_from_bam <- getSGVariantCounts(sgv_pred,
+  features = sgf_pred, sample_info = si)
 }
 \author{
 Leonard Goldstein

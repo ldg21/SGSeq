@@ -45,7 +45,7 @@ trimmed such that their trimmmed unspliced boundary coincides with
 the spliced boundary of the overlapping exon.
 }
 \examples{
-txf_processed <- processTerminalExons(txf)
+txf_processed <- processTerminalExons(txf_ann)
 }
 \author{
 Leonard Goldstein

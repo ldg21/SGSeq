@@ -190,7 +190,7 @@ removeExonsIsolated <- function(features)
 ##'   and trim all remaining terminal exons overlapping other exons.
 ##' @return \code{TxFeatures} object with processed features
 ##' @examples
-##' txf_processed <- processTerminalExons(txf)
+##' txf_processed <- processTerminalExons(txf_ann)
 ##' @author Leonard Goldstein
 
 processTerminalExons <- function(features, min_overhang = NA)

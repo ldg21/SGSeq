@@ -33,7 +33,7 @@ an \code{SGFeatureCounts} object.
 \examples{
 path <- system.file("extdata", package = "SGSeq")
 si$file_bam <- file.path(path, "bams", si$file_bam)
-sgfc <- getSGFeatureCounts(si, sgf)
+sgfc <- getSGFeatureCounts(si, sgf_pred)
 }
 \author{
 Leonard Goldstein

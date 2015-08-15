@@ -111,11 +111,11 @@ genomic coordinates, is returned invisibly.
 }
 \examples{
 \dontrun{
-sgf_annotated <- annotate(sgf, txf)
+sgf_annotated <- annotate(sgf_pred, txf_ann)
 plotSpliceGraph(sgf_annotated)
 }
 \dontrun{
-sgv_annotated <- annotate(sgv, txf)
+sgv_annotated <- annotate(sgv_pred, txf_ann)
 plotSpliceGraph(sgv_annotated)
 }
 }

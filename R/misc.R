@@ -337,8 +337,8 @@ uniqueFeatures <- function(features)
 ##' @return \code{NULL}
 ##' @examples
 ##' \dontrun{
-##' exportFeatures(txf, "txf.bed")
-##' exportFeatures(sgf, "sgf.bed")
+##' exportFeatures(txf_pred, "txf.bed")
+##' exportFeatures(sgf_pred, "sgf.bed")
 ##' }
 ##' @author Leonard Goldstein
 
@@ -626,4 +626,51 @@ calculateSizeFactor <- function(sample_info)
     
     return(sizefactor)
 
+}
+
+checkIdenticalSummarizedExperiment <- function(target, current,
+    check.colData = FALSE)
+{
+
+    checkTrue(is(target, "RangedSummarizedExperiment"))
+    checkTrue(is(current, "RangedSummarizedExperiment"))
+
+    slots <- c(
+        "rowRanges",
+        "colData",
+        "assays",
+        "NAMES",
+        "elementMetadata",
+        "metadata")
+
+    checkIdentical(slots, slotNames(target))
+    checkIdentical(slots, slotNames(current))
+    
+    slots <- slots[slots != "assays"]
+
+    if (!check.colData) {
+
+        slots <- slots[slots != "colData"]
+
+    }
+    
+    for (s in slots) {
+
+        checkIdentical(slot(target, s), slot(current, s))
+
+    }
+
+    assays_target <- names(assays(target))
+    assays_current <- names(assays(current))
+
+    checkIdentical(assays_target, assays_current)
+
+    for (a in assays_target) {
+
+        checkIdentical(assay(target, a), assay(current, a))
+      
+    }
+ 
+    return(TRUE)
+  
 }

@@ -11,7 +11,7 @@
 ##'   observed in to be included
 ##' @return \code{TxFeatures} object with merged features
 ##' @examples
-##' txf_merged <- mergeTxFeatures(txf, txf)
+##' txf_merged <- mergeTxFeatures(txf_ann, txf_pred)
 ##' @author Leonard Goldstein
 
 mergeTxFeatures <- function(..., min_n_sample = 1)

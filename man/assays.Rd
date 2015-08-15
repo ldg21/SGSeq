@@ -129,8 +129,8 @@ there exists a function with name identical to the assay name
 that can be used to access and modify it (see examples).
 }
 \examples{
-x <- counts(sgfc)
-y <- FPKM(sgfc)
+x <- counts(sgfc_pred)
+y <- FPKM(sgfc_pred)
 }
 \author{
 Leonard Goldstein
