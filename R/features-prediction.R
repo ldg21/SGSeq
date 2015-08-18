@@ -144,7 +144,7 @@ predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
         max_complexity = max_complexity,
         sample_name = sample_name,
         verbose = verbose,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores),
         mc.cores = cores)
 
     checkApplyResultsForErrors(

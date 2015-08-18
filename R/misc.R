@@ -569,7 +569,7 @@ getCoverage <- function(sample_info, which, sizefactor, cores)
       stop("which must be a GRanges object of length 1")
 
   }
-  
+
   list_cov <- mcmapply(
       getCoveragePerSample,
       file_bam = sample_info$file_bam,
@@ -578,7 +578,7 @@ getCoverage <- function(sample_info, which, sizefactor, cores)
       MoreArgs = list(which = which),
       SIMPLIFY = FALSE,
       USE.NAMES = FALSE,
-      mc.preschedule = FALSE,
+      mc.preschedule = setPreschedule(cores),
       mc.cores = cores) 
 
   return(list_cov)

@@ -20,6 +20,7 @@ importFrom(GenomicFeatures, exonsBy, mapToTranscripts)
 importFrom(GenomeInfoDb, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply, mcmapply)
 importFrom(rtracklayer, export)
+importFrom(RUnit, checkIdentical, checkTrue)
 
 ## IMPORT CLASSES
 

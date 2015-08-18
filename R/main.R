@@ -161,10 +161,9 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
         getBamInfoPerSample,
         file_bam = sample_info$file_bam,
         sample_name = sample_info$sample_name,
-        MoreArgs = list(
-            yieldSize = yieldSize),
+        MoreArgs = list(yieldSize = yieldSize),
         SIMPLIFY = FALSE,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores),
         mc.cores = cores
     )
 
@@ -229,7 +228,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
     checkSampleInfo(sample_info)
 
     cores <- setCores(cores, nrow(sample_info))
-
+    
     list_features <- mcmapply(
         predictTxFeaturesPerSample,
         file_bam = sample_info$file_bam,
@@ -253,7 +252,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
             cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores$n_sample),
         mc.cores = cores$n_sample
     )
 
@@ -317,7 +316,7 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
             cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores$n_sample),
         mc.cores = cores$n_sample
     )
 
@@ -534,4 +533,11 @@ setCores <- function(cores, n_sample)
     s <- as.integer(floor(cores/n))
     list(n_sample = s, per_sample = n, total = s * n)
     
+}
+
+setPreschedule <- function(cores)
+{
+
+    as.integer(cores) == 1L
+
 }

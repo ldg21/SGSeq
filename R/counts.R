@@ -15,7 +15,7 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
     hits <- findOverlaps(features, list_range)
     list_index <- split(queryHits(hits), subjectHits(hits))
     list_features <- split(features[queryHits(hits)], subjectHits(hits))
-    
+
     list_counts <- mclapply(
         list_features,
         getSGFeatureCountsPerStrand,
@@ -24,7 +24,7 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
         retain_coverage = retain_coverage,
         sample_name = sample_name,
         verbose = verbose,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores),
         mc.cores = cores)
 
     checkApplyResultsForErrors(
@@ -526,7 +526,7 @@ getSGVariantCountsFromBamFiles <- function(variants, features, sample_info,
             cores = cores$per_sample),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores$n_sample),
         mc.cores = cores$n_sample
     )
 
@@ -558,7 +558,7 @@ getSGVariantCountsPerSample <- function(variants, features,
     
     hits_2 <- findOverlaps(features, list_range)
     list_features <- split(features[queryHits(hits_2)], subjectHits(hits_2))
-                         
+
     list_counts <- mcmapply(
         getSGVariantCountsPerStrand,
         variants = list_variants,
@@ -570,7 +570,7 @@ getSGVariantCountsPerSample <- function(variants, features,
             verbose = verbose),
         SIMPLIFY = FALSE,
         USE.NAMES = FALSE,
-        mc.preschedule = FALSE,
+        mc.preschedule = setPreschedule(cores),
         mc.cores = cores)
 
     checkApplyResultsForErrors(
@@ -603,14 +603,13 @@ getSGVariantCountsPerStrand <- function(variants, features,
     seqlevel <- as.character(seqnames(which))
     strand <- as.character(strand(which))
     
-    f5p <- featureID5p(variants)
-    f3p <- featureID3p(variants)
-    
     vid <- factor(variantID(variants))
     eid <- factor(eventID(variants))
 
+    f5p <- featureID5p(variants)
+    f3p <- featureID3p(variants)
     all <- unique(pc(f5p, f3p))
-
+    
     ## in the case of nested variants with representative features
     ## at both 5' and 3' end, consider features at the 3' end only
     ## (for nested variant, counts based on both ends can be
@@ -642,17 +641,17 @@ getSGVariantCountsPerStrand <- function(variants, features,
     i_J <- which(type == "J")
     i_S <- which(type %in% c("spliceL", "spliceR"))
 
-    index <- as(vector("list", length(ir)), "CompressedIntegerList")
+    ir_index <- as(vector("list", length(ir)), "CompressedIntegerList")
     
     if (length(i_J) > 0) {
 
-        index[i_J] <- junctionCompatible(ir[i_J], frag_intron, FALSE)
+        ir_index[i_J] <- junctionCompatible(ir[i_J], frag_intron, FALSE)
 
     }
     
     if (length(i_S) > 0) {
         
-        index[i_S] <- splicesiteOverlap(ir[i_S],
+        ir_index[i_S] <- splicesiteOverlap(ir[i_S],
             sub("splice", "", type[i_S], fixed = TRUE),
             frag_exonic, frag_intron, "unspliced", FALSE)
 
@@ -677,12 +676,16 @@ getSGVariantCountsPerStrand <- function(variants, features,
         i <- match(unlist(f), featureID(features))
         g <- togroup(f)
 
-        tmp <- as(tapply(unlist(index[i]), vid[g][togroup(index[i])], unique,
+        tmp <- as(tapply(unlist(ir_index[i]),
+            vid[g][togroup(ir_index[i])], unique,
             simplify = FALSE), "CompressedIntegerList")
         countsVariant <- elementLengths(tmp)[match(vid, names(tmp))]
+        vid_uninformative <- vid[elementLengths(f) == 0]
+        countsVariant[vid %in% vid_uninformative] <- NA_integer_
         counts[, paste0("countsVariant", s)] <- countsVariant
         
-        tmp <- as(tapply(unlist(index[i]), eid[g][togroup(index[i])], unique,
+        tmp <- as(tapply(unlist(ir_index[i]),
+            eid[g][togroup(ir_index[i])], unique,
             simplify = FALSE), "CompressedIntegerList")
         countsTotal <- elementLengths(tmp)[match(eid, names(tmp))]
         eid_uninformative <- names(which(tapply(
