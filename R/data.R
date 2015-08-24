@@ -21,6 +21,18 @@ NULL
 ##' @name gr
 NULL
 
+##' Example transcripts
+##' 
+##' FBXO31 transcripts, based on UCSC knownGene annotation.
+##' Suitable as input for \code{convertToTxFeatures} and
+##' \code{predictVariantConsequences}.
+##'
+##' @format A \code{GRangesList} object.
+##' @keywords internal
+##' @author Leonard Goldstein
+##' @name tx
+NULL
+
 ##' Example transcript features (annotation-based)
 ##' 
 ##' Transcript features for FBXO31, based on UCSC knownGene annotation.

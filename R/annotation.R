@@ -37,6 +37,10 @@ annotate <- function(query, subject)
 
     }
 
+    shared_seqlevels <- intersect(seqlevels(query), seqlevels(subject))
+    query <- keepSeqlevels(query, shared_seqlevels)
+    subject <- keepSeqlevels(subject, shared_seqlevels)
+    
     if (is(query, "SGFeatures")) {
 
         query <- annotateFeatures(query, subject)
@@ -100,12 +104,6 @@ annotateFeatures <- function(query, subject)
         
     }
 
-    if (!is.null(mcols(subject)$frame)) {
-
-        query <- annotateFrame(query, subject)
-
-    }
-    
     return(query)
     
 }
@@ -253,70 +251,6 @@ plintersect <- function(x, y)
 
     return(z)
 
-}
-
-annotateFrame <- function(query, subject)
-{
-    
-    hits <- matchExon(query, subject, FALSE)
-    qH <- queryHits(hits)
-    sH <- subjectHits(hits)
-
-    i_pos <- which(strand(query[qH]) == "+")
-    i_neg <- which(strand(query[qH]) == "-")
-
-    offset <- rep(NA_integer_, length(hits))
-    offset[i_pos] <- start(query)[qH][i_pos] - start(subject)[sH][i_pos]
-    offset[i_neg] <- end(subject)[sH][i_neg] - end(query)[qH][i_neg]
-    
-    sH_frame <- mcols(subject)$frame[sH]
-    qH_frame <- nextFrame(sH_frame, offset)
-
-    qH_frameStart <- qH_frame
-    qH_frameEnd <- nextFrame(qH_frame, width(query)[qH])
-
-    sH_cdsStart <- mcols(subject)$cdsStart[sH]
-    sH_cdsEnd <- mcols(subject)$cdsEnd[sH]
-    
-    qH_cdsStart_unlisted <- unlist(sH_cdsStart) - offset[togroup(sH_cdsStart)]
-    i_na <- which(qH_cdsStart_unlisted < 0 |
-        qH_cdsStart_unlisted > width(query)[qH][togroup(sH_cdsStart)])
-    qH_cdsStart_unlisted[i_na] <- NA_integer_
-    
-    qH_cdsEnd_unlisted <- unlist(sH_cdsEnd) - offset[togroup(sH_cdsEnd)]
-    i_na <- which(qH_cdsEnd_unlisted < 0 |
-        qH_cdsEnd_unlisted > width(query)[qH][togroup(sH_cdsEnd)])
-    qH_cdsEnd_unlisted[i_na] <- NA_integer_
-    
-    qH_frameStart_unlisted <- unlist(qH_frameStart)
-    qH_frameStart_unlisted[!is.na(qH_cdsStart_unlisted)] <- -1
-    
-    qH_frameEnd_unlisted <- unlist(qH_frameEnd)
-    qH_frameEnd_unlisted[!is.na(qH_cdsEnd_unlisted)] <- -1
-    
-    x <- paste(qH_frameStart_unlisted, qH_frameEnd_unlisted, sep = ",")
-    x <- tapply(x, qH[togroup(sH_cdsStart)], setdiff, "NA,NA",
-        simplify = FALSE)
-    y <- strsplit(unlist(x), ",")
-
-    frameStart <- split(suppressWarnings(as.integer(sapply(y, "[", 1))),
-        names(x)[togroup(x)])
-    frameStart <- IntegerList(frameStart)
-
-    frameEnd <- split(suppressWarnings(as.integer(sapply(y, "[", 2))),
-        names(x)[togroup(x)])
-    frameEnd <- IntegerList(frameEnd)
-
-    query_frameStart <- IntegerList(vector("list", length(query)))
-    query_frameStart[as.integer(names(frameStart))] <- frameStart
-    mcols(query)$frameStart <- setNames(query_frameStart, NULL)
-
-    query_frameEnd <- IntegerList(vector("list", length(query)))
-    query_frameEnd[as.integer(names(frameEnd))] <- frameEnd
-    mcols(query)$frameEnd <- setNames(query_frameEnd, NULL)
-
-    return(query)
-    
 }
 
 matchTxFeatures <- function(query, subject)

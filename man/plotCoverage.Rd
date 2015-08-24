@@ -75,6 +75,6 @@ for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 }
 }
 \author{
-Leonard Goldstein - Regular
+Leonard Goldstein
 }
 

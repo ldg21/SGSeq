@@ -63,3 +63,9 @@ sgvc_pred_from_bam <- getSGVariantCounts(sgv_pred,
     features = sgf_pred, sample_info = si)
 sgvc_pred_from_bam$file_bam <- si_file_bam
 save(sgvc_pred_from_bam, file = "sgvc_pred_from_bam.rda")
+
+## transcripts
+
+tx <- SGSeq:::convertToTranscripts(txdb)
+tx <- tx[tx %over% gr]
+save(tx, file = "tx.rda")

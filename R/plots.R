@@ -1416,7 +1416,7 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 ##' par(mfrow = c(4, 1))
 ##' for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 ##' }
-##' @author Leonard Goldstein - Regular
+##' @author Leonard Goldstein
 
 plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     eventID = NULL, which = NULL, sample_info = NULL, sizefactor = NA,
