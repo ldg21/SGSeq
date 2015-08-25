@@ -1,50 +1,54 @@
-test_predictVariantConsequences <- function()
+test_predictVariantEffects <- function()
 {
 
     require(BSgenome.Hsapiens.UCSC.hg19)
     seqlevelsStyle(Hsapiens) <- "NCBI"
 
-    current <- predictVariantConsequences(sgv_pred, tx,
+    current <- predictVariantEffects(sgv_pred, tx,
         Hsapiens, summarize = FALSE)
     target <- data.frame(
-        var_id = c(2L, 2L, 2L),
-        ref_name = c(
+        variantID = c(2L, 2L, 2L),
+        txName = c(
             "uc002fjv.3",
             "uc002fjw.3",
             "uc010vot.2"),
-        alt = c(
+        effect = c(
             "CDS_insertion_in-frame",
             "CDS_insertion_in-frame",
             "CDS_upstream_start"),
-        ref_aa_start = c(29, 137, 0),
-        ref_aa_end = c(30, 138, 0),
-        var_aa_start = c(29, 137, 0),
-        var_aa_end = c(59, 167, 44),
+        ref_start = c(29, 137, 0),
+        ref_end = c(30, 138, 0),
+        ref_length = c(431L, 539L, 367L),
+        var_start = c(29, 137, 0),
+        var_end = c(59, 167, 44),
+        var_length = c(460L, 568L, 411L),
         stringsAsFactors = FALSE)
     checkIdentical(target, current[names(target)])
     
-    current <- predictVariantConsequences(sgv_ann, tx,
+    current <- predictVariantEffects(sgv_ann, tx,
         Hsapiens, summarize = FALSE)
     target <- data.frame(
-        var_id = c(1L, 1L, 2L, 2L, 3L, 3L),
-        ref_name = c(
+        variantID = c(1L, 1L, 2L, 2L, 3L, 3L),
+        txName = c(
+            "uc002fjv.3",
             "uc010vot.2",
             "uc002fjv.3",
             "uc002fjw.3",
-            "uc002fjv.3",
             "uc002fjw.3",
             "uc010vot.2"),
-        alt = c(
+        effect = c(
+            "CDS_5p_alteration",
             "CDS_upstream_start",
             "CDS_5p_alteration",
             "CDS_5p_alteration",
             "CDS_5p_alteration",
-            "CDS_5p_alteration",
             "CDS_upstream_start"),
-        ref_aa_start = c(0, 0, 0, 0, 0, 0),
-        ref_aa_end = c(0, 6, 172, 64, 114, 0),
-        var_aa_start = c(0, 0, 0, 0, 0, 0),
-        var_aa_end = c(172, 114, 0, 0, 6, 64),
+        ref_start = c(0, 0, 0, 0, 0, 0),
+        ref_end = c(6, 0, 64, 172, 114, 0),
+        ref_length = c(431L, 367L, 431L, 539L, 539L, 367L),
+        var_start = c(0, 0, 0, 0, 0, 0),
+        var_end = c(114, 172, 0, 0, 6, 64),
+        var_length = c(539L, 539L, 367L, 367L, 431L, 431L),
         stringsAsFactors = FALSE)
     checkIdentical(target, current[names(target)])
 

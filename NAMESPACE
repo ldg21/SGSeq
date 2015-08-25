@@ -48,7 +48,7 @@ export(
  plotSpliceGraph,
  plotVariants,
  predictTxFeatures,
- predictVariantConsequences,
+ predictVariantEffects,
  processTerminalExons
 )
 

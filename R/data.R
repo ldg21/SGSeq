@@ -25,7 +25,7 @@ NULL
 ##' 
 ##' FBXO31 transcripts, based on UCSC knownGene annotation.
 ##' Suitable as input for \code{convertToTxFeatures} and
-##' \code{predictVariantConsequences}.
+##' \code{predictVariantEffects}.
 ##'
 ##' @format A \code{GRangesList} object.
 ##' @keywords internal
