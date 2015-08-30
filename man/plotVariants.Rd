@@ -72,6 +72,7 @@ Plot splice graph and heatmap of splice variant frequencies
 sgvc_annotated <- annotate(sgvc_pred, txf_ann)
 plotVariants(sgvc_annotated)
 }
+NULL
 }
 \author{
 Leonard Goldstein

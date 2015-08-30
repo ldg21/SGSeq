@@ -442,7 +442,8 @@ predictCandidatesInternal <- function(islands, splicesites, frag_coverage,
 
     island_splicesite_pairs <- mapply(expand.grid,
         island_splicesite, island_splicesite, SIMPLIFY = FALSE)
-    splicesite_pairs <- unique(do.call(rbind, island_splicesite_pairs))
+    splicesite_pairs <- unique(do.call(rbindDfsWithoutRowNames,
+        island_splicesite_pairs))
 
     ## retain pairs of splice sites that are consistent with
     ## flanking an internal exon

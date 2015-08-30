@@ -22,6 +22,7 @@ Export features to BED format. Splice sites are not included.
 exportFeatures(txf_pred, "txf.bed")
 exportFeatures(sgf_pred, "sgf.bed")
 }
+NULL
 }
 \author{
 Leonard Goldstein

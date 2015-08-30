@@ -102,7 +102,7 @@ addDummyNodes <- function(v, E, J, tx_view)
 
         }
         
-        v <- rbind(v, v_dummy)
+        v <- rbindDfsWithoutRowNames(v, v_dummy)
 
     }
 
@@ -258,6 +258,7 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' sgv_annotated <- annotate(sgv_pred, txf_ann)
 ##' plotSpliceGraph(sgv_annotated)
 ##' }
+##' NULL
 ##' @author Leonard Goldstein
 
 plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
@@ -901,6 +902,7 @@ addAlpha <- function(col, alpha)
 ##' sgfc_annotated <- annotate(sgfc_pred, txf_ann)
 ##' plotFeatures(sgfc_annotated)
 ##' }
+##' NULL
 ##' @author Leonard Goldstein
 
 plotFeatures <- function(x, geneID = NULL, geneName = NULL,
@@ -983,6 +985,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' sgvc_annotated <- annotate(sgvc_pred, txf_ann)
 ##' plotVariants(sgvc_annotated)
 ##' }
+##' NULL
 ##' @author Leonard Goldstein
 
 plotVariants <- function(x, eventID = NULL, tx_view = FALSE, 
@@ -1416,6 +1419,7 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 ##' par(mfrow = c(4, 1))
 ##' for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 ##' }
+##' NULL
 ##' @author Leonard Goldstein
 
 plotCoverage <- function(x, geneID = NULL, geneName = NULL,

@@ -3,10 +3,10 @@
 ##' 
 ##' @title Predict the effect of splice variants on protein-coding transcripts
 ##' @param sgv \code{SGVariants} object
-##' @param tx A \code{TxDb} object, or a \code{GRangesList} of
-##'   exons grouped by transcripts with metadata columns \code{cdsStart} and
-##'   \code{cdsEnd} indicating genomic start and end of the coding sequence,
-##'   respectively (by convention, cdsStart < cdsEnd for both strands)
+##' @param tx A \code{TxDb} object or \code{GRangesList} of exons
+##'   grouped by transcript with metadata columns \code{cdsStart} and
+##'   \code{cdsEnd} (by convention, cdsStart < cdsEnd for both strands).
+##'   For import from GFF format, use function \code{importTranscripts}.
 ##' @param genome \code{BSgenome} object
 ##' @param summarize Logical indicating whether results should be
 ##'   summarized per variant
@@ -37,7 +37,7 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
     } else if (is(tx, "GRangesList")) {
 
         checkTranscripts(tx)
-
+        
         if (is.null(names(tx))) {
 
             names(tx) <- seq_along(tx)
@@ -51,10 +51,8 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
 
     }
 
-    common_seqlevels <- intersect(seqlevels(sgv), seqlevels(tx))
-    sgv <- keepSeqlevels(sgv, common_seqlevels)
-    tx <- keepSeqlevels(tx, common_seqlevels)
-
+    tx <- filterTranscripts(tx)
+        
     sgv_vid <- variantID(sgv)
 
     excl <- grep("(", type(sgv), fixed = TRUE)
@@ -68,14 +66,26 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
     list_expanded_sgv <- split(expanded_sgv, seq_along(expanded_sgv))
     list_expanded_tx <- split(expanded_tx, seq_along(expanded_tx))
     
-    res <- do.call(rbind, mcmapply(
+    list_res <- mcmapply(
         predictVariantEffectPerVariantAndTranscript,
         list_expanded_sgv,
         list_expanded_tx,
         MoreArgs = list(genome = genome),
         SIMPLIFY = FALSE,
-        mc.cores = cores))
-    rownames(res) <- NULL
+        USE.NAMES = FALSE,
+        mc.preschedule = setPreschedule(cores),
+        mc.cores = cores)
+
+    items <- paste("variant", variantID(expanded_sgv),
+        "and transcript", names(expanded_tx))
+    
+    checkApplyResultsForErrors(
+        list_res,
+        "predictVariantEffectPerVariantAndTranscript\n",
+        items,
+        "character")
+    
+    res <- do.call(rbindDfsWithoutRowNames, list_res)
     
     if (summarize) {
 
@@ -148,13 +158,13 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome)
 
     list_var <- split(var, seq_along(var))
     
-    regions <- do.call(rbind, lapply(
+    regions <- do.call(rbindDfsWithoutRowNames, lapply(
         list_var,
         getVariantRegions,
         ref = ref,
         sgv = sgv,
         genome = genome))
-
+    
     res <- cbind(res, regions)
 
     return(res)
@@ -565,9 +575,8 @@ convertToTranscripts <- function(txdb)
 
     tx <- exonsBy(txdb, "tx", use.names = TRUE)
     cds <- unlist(range(cdsBy(txdb, "tx", use.names = TRUE)))
-    tx <- tx[match(names(cds), names(tx))]
-    cdsLeft(tx) <- start(cds)
-    cdsRight(tx) <- end(cds)
+    cdsLeft(tx) <- start(cds)[match(names(tx), names(cds))]
+    cdsRight(tx) <- end(cds)[match(names(tx), names(cds))]
 
     return(tx)
     
@@ -593,11 +602,27 @@ checkTranscripts <- function(tx)
 
     if (any(mcols(tx)$cdsStart > mcols(tx)$cdsEnd, na.rm = TRUE)) {
 
-        msg <- "All transcripts must have cdsStart < cdsEnd"
+        msg <- "All coding transcripts must have cdsStart < cdsEnd"
         stop(msg, call. = FALSE)
 
     }
 
+}
+
+filterTranscripts <- function(tx)
+{
+
+    tx <- tx[!is.na(cdsLeft(tx)) & !is.na(cdsRight(tx))]
+    
+    cds <- GRanges(
+        seqnames(unlist(range(tx))),
+        IRanges(cdsLeft(tx), cdsRight(tx)),
+        strand(unlist(range(tx))))
+
+    tx <- tx[sum(width(pintersect(tx, cds))) %% 3 == 0]
+
+    return(tx)
+    
 }
 
 cdsLeft <- function(tx)
@@ -712,7 +737,7 @@ cds <- function(tx)
     }
 
     tx <- restrict(tx, cdsLeft(tx), cdsRight(tx))
-    tx <- granges(tx[[1]])
+    tx <- sort(granges(tx[[1]]))
     
     return(tx)
     

@@ -80,6 +80,7 @@ Plot splice graph and heatmap of expression values
 sgfc_annotated <- annotate(sgfc_pred, txf_ann)
 plotFeatures(sgfc_annotated)
 }
+NULL
 }
 \author{
 Leonard Goldstein

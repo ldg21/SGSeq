@@ -125,7 +125,7 @@
 \alias{variantType<-}
 \alias{variantType<-,SGVariantCounts-method}
 \alias{variantType<-,SGVariants-method}
-\title{Accessing and replacing column slots}
+\title{Accessing and replacing metadata columns}
 \usage{
 type(object)
 
@@ -372,24 +372,24 @@ featureID3p(object) <- value
 \S4method{featureID3p}{SGVariantCounts}(object) <- value
 }
 \arguments{
-\item{object}{Object containing column slot}
+\item{object}{Object containing metadata column}
 
 \item{value}{Replacement value}
 }
 \value{
-Column value for accessor functions, updated object for
-replacement functions.
+Content of metadata column for accessor functions or updated
+object for replacement functions.
 }
 \description{
-Accessor and replacement functions for column slots.
+Accessor and replacement functions for metadata columns.
 }
 \details{
-S4 classes defined in the \code{SGSeq} package contain columns that
-store information for each element in the object. For example, class
+S4 classes defined in the \code{SGSeq} package contain metadata columns
+that store information for each element in the object. For example, class
 \code{TxFeatures} contains a column \code{type} that indicates feature
 type. The specific columns contained in an object depend on its class.
 
-To facilitate accessing and modifying columns, for each column
+To facilitate accessing and modifying metadata columns, for each column
 there exists a function with name identical to the column name
 that can be used to access and modify it (see examples).
 }

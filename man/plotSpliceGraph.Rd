@@ -118,6 +118,7 @@ plotSpliceGraph(sgf_annotated)
 sgv_annotated <- annotate(sgv_pred, txf_ann)
 plotSpliceGraph(sgv_annotated)
 }
+NULL
 }
 \author{
 Leonard Goldstein

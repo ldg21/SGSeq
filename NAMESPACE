@@ -20,7 +20,7 @@ importFrom(GenomicFeatures, cdsBy, exonsBy, mapFromTranscripts,
  mapToTranscripts)
 importFrom(GenomeInfoDb, keepSeqlevels, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply, mcmapply)
-importFrom(rtracklayer, export)
+importFrom(rtracklayer, export, import)
 importFrom(RUnit, checkIdentical, checkTrue)
 
 ## IMPORT CLASSES
@@ -40,6 +40,7 @@ export(
  getBamInfo,
  getSGFeatureCounts,
  getSGVariantCounts,
+ importTranscripts,
  makeSGFeatureCounts,
  makeVariantNames,
  mergeTxFeatures,

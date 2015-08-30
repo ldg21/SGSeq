@@ -9,10 +9,10 @@ predictVariantEffects(sgv, tx, genome, summarize = TRUE, cores = 1)
 \arguments{
 \item{sgv}{\code{SGVariants} object}
 
-\item{tx}{A \code{TxDb} object, or a \code{GRangesList} of
-exons grouped by transcripts with metadata columns \code{cdsStart} and
-\code{cdsEnd} indicating genomic start and end of the coding sequence,
-respectively (by convention, cdsStart < cdsEnd for both strands)}
+\item{tx}{A \code{TxDb} object or \code{GRangesList} of exons
+grouped by transcript with metadata columns \code{cdsStart} and
+\code{cdsEnd} (by convention, cdsStart < cdsEnd for both strands).
+For import from GFF format, use function \code{importTranscripts}.}
 
 \item{genome}{\code{BSgenome} object}
 

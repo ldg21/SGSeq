@@ -177,8 +177,8 @@ addSourceAndSinkNodes <- function(g)
 
     ## update graph
 
-    gd <- rbind(gd_R, gd, gd_K)
-    gv <- rbind(gv_R, gv, gv_K)
+    gd <- rbindDfsWithoutRowNames(gd_R, gd, gd_K)
+    gv <- rbindDfsWithoutRowNames(gv_R, gv, gv_K)
     g <- graph.data.frame(d = gd, directed = TRUE, vertices = gv)
 
     return(g)
@@ -226,11 +226,12 @@ findSGSegments <- function(features, cores = 1)
         g = g,
         mc.cores = cores)
 
-    checkApplyResultsForErrors(
-        list_segments_2,
-        "findSGSegmentsPerGene",
-        geneIDs_2,
-        "try-error")
+    ## error checking only works for mc.preschedule = FALSE
+    ## checkApplyResultsForErrors(
+    ##     list_segments_2,
+    ##     "findSGSegmentsPerGene",
+    ##     geneIDs_2,
+    ##     "try-error")
 
     segments_2 <- IntegerList(do.call(c, list_segments_2))
 
@@ -384,11 +385,12 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
         maxnvariant = maxnvariant,
         mc.cores = cores)
 
-    checkApplyResultsForErrors(
-        list_variant_info,
-        "findVariantsPerGene",
-        geneIDs,
-        "try-error")
+    ## error checking only works for mc.preschedule = FALSE
+    ## checkApplyResultsForErrors(
+    ##     list_variant_info,
+    ##     "findVariantsPerGene",
+    ##     geneIDs,
+    ##     "try-error")
 
     variant_info <- rbindListOfDFs(list_variant_info, cores)
 
@@ -547,13 +549,14 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             if (k < nrow(b)) {
 
                 ## Include event in data frame of recursively defined events
-                ref <- rbind(ref, data.frame(
-                    from = from,
-                    to = to,
-                    type = "",
-                    featureID = "",
-                    segmentID = "",
-                    stringsAsFactors = FALSE))
+                ref <- rbindDfsWithoutRowNames(ref,
+                    data.frame(
+                        from = from,
+                        to = to,
+                        type = "",
+                        featureID = "",
+                        segmentID = "",
+                        stringsAsFactors = FALSE))
                 
             }
 
@@ -600,15 +603,16 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
         if (k < nrow(b) && all(closed3p) && all(closed5p)) {
           
             ## Include event in data frame of recursively defined paths
-            ref <- rbind(ref, data.frame(
-                from = from,
-                to = to,
-                type = paste0("(", paste(paths_type, collapse = "|"), ")"),
-                featureID = paste0("(", paste(paths_featureID,
-                    collapse = "|"), ")"),
-                segmentID = paste0("(", paste(paths_segmentID,
-                    collapse = "|"), ")"),
-                stringsAsFactors = FALSE))
+            ref <- rbindDfsWithoutRowNames(ref,
+                data.frame(
+                    from = from,
+                    to = to,
+                    type = paste0("(", paste(paths_type, collapse = "|"), ")"),
+                    featureID = paste0("(", paste(paths_featureID,
+                        collapse = "|"), ")"),
+                    segmentID = paste0("(", paste(paths_segmentID,
+                        collapse = "|"), ")"),
+                    stringsAsFactors = FALSE))
 
             ref <- ref[-unique(unlist(paths_index_ref)), ]
 
@@ -639,7 +643,7 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
 
     }
     
-    path_info <- do.call(rbind, list_path_info)
+    path_info <- do.call(rbindDfsWithoutRowNames, list_path_info)
 
     ## remove references to artifical source and sink nodes
     path_info$type <- gsub("NA", "", path_info$type, fixed = TRUE)

@@ -340,6 +340,7 @@ uniqueFeatures <- function(features)
 ##' exportFeatures(txf_pred, "txf.bed")
 ##' exportFeatures(sgf_pred, "sgf.bed")
 ##' }
+##' NULL
 ##' @author Leonard Goldstein
 
 exportFeatures <- function(features, file)
@@ -673,4 +674,48 @@ checkIdenticalSummarizedExperiment <- function(target, current,
  
     return(TRUE)
   
+}
+
+rbindDfsWithoutRowNames <- function(...)
+{
+
+    rbind(..., make.row.names = FALSE)
+
+}
+
+##' Import GFF file and generate a \code{GRangesList} of transcripts
+##' suitable as input for functions \code{convertToTxFeatures} or
+##' \code{predictVariantEffects}.
+##'
+##' @title Import transcripts from GFF file
+##' @param file Character string specifying input GFF file
+##' @param tag_tx GFF attribute tag for transcript identifier
+##' @param tag_gene GFF attribute tag for gene identifier
+##' @return A \code{GRangesList} of exons grouped by transcipts with
+##'   metadata columns txName, geneName, cdsStart, cdsEnd.
+##' @examples
+##' \dontrun{
+##' tx <- importTranscripts(file)
+##' }
+##' NULL
+##' @author Leonard Goldstein
+
+importTranscripts <- function(file, tag_tx = "transcript_id",
+    tag_gene = "gene_id")
+{
+
+  gff <- import(file)
+  exons <- gff[mcols(gff)$type == "exon", ]
+  df <- unique(data.frame(mcols(exons)[c(tag_tx, tag_gene)]))
+  tx <- split(exons, mcols(exons)[[tag_tx]])
+  cds <- gff[mcols(gff)$type == "CDS"]
+  cds <- split(cds, mcols(cds)[[tag_tx]])
+  cds <- unlist(range(cds))
+  mcols(tx)$txName <- names(tx)
+  mcols(tx)$geneName <- df[match(names(tx), df[, 1]), 2]
+  mcols(tx)$cdsStart <- start(cds)[match(names(tx), names(cds))]
+  mcols(tx)$cdsEnd <- end(cds)[match(names(tx), names(cds))]
+
+  return(tx)
+
 }

@@ -12,8 +12,9 @@
 ##' (unspliced).
 ##' 
 ##' @title Convert to TxFeatures object
-##' @param x \code{TxDb} object, or \code{GRangesList} of exons
-##'   grouped by transcripts
+##' @param x \code{TxDb} object or \code{GRangesList} of exons grouped
+##'   by transcript. For import from GFF format, use function
+##'   \code{importTranscripts}.
 ##' @return A \code{TxFeatures} object
 ##' @examples
 ##' gr <- GRanges(c(1, 1), IRanges(c(1, 201), c(100, 300)), c("+", "+"))

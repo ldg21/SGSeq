@@ -37,10 +37,6 @@ annotate <- function(query, subject)
 
     }
 
-    shared_seqlevels <- intersect(seqlevels(query), seqlevels(subject))
-    query <- keepSeqlevels(query, shared_seqlevels)
-    subject <- keepSeqlevels(subject, shared_seqlevels)
-    
     if (is(query, "SGFeatures")) {
 
         query <- annotateFeatures(query, subject)

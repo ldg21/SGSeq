@@ -173,7 +173,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
         sample_info$sample_name,
         "character")
 
-    bamInfo <- do.call(rbind, list_bamInfo)
+    bamInfo <- do.call(rbindDfsWithoutRowNames, list_bamInfo)
 
     checkBamInfo(bamInfo)
 

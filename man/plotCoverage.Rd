@@ -73,6 +73,7 @@ sample or averaged across samples.
 par(mfrow = c(4, 1))
 for (j in seq_len(4)) plotCoverage(sgfc_pred[, j])
 }
+NULL
 }
 \author{
 Leonard Goldstein

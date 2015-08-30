@@ -7,8 +7,9 @@
 convertToTxFeatures(x)
 }
 \arguments{
-\item{x}{\code{TxDb} object, or \code{GRangesList} of exons
-grouped by transcripts}
+\item{x}{\code{TxDb} object or \code{GRangesList} of exons grouped
+by transcript. For import from GFF format, use function
+\code{importTranscripts}.}
 }
 \value{
 A \code{TxFeatures} object
