@@ -1,6 +1,6 @@
 ##' The effect of each splice variant is assessed with respect to individual
 ##' protein-coding transcripts. 
-##' 
+##'
 ##' @title Predict the effect of splice variants on protein-coding transcripts
 ##' @param sgv \code{SGVariants} object
 ##' @param tx A \code{TxDb} object or \code{GRangesList} of exons
@@ -32,11 +32,12 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
 
     if (is(tx, "TxDb")) {
 
+        message("Obtaining transcripts from TxDb...")
         tx <- convertToTranscripts(tx)
       
     } else if (is(tx, "GRangesList")) {
 
-        checkTranscripts(tx)
+        checkTranscriptFormat(tx)
         
         if (is.null(names(tx))) {
 
@@ -50,16 +51,28 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
             grouped by transcripts")
 
     }
-
-    tx <- filterTranscripts(tx)
         
     sgv_vid <- variantID(sgv)
 
     excl <- grep("(", type(sgv), fixed = TRUE)
-    if (length(excl) > 0) sgv <- sgv[-excl]
 
-    sgv_tx <- mapVariantsToTranscripts(sgv, tx, cores)
-        
+    if (length(excl) > 0) {
+
+        sgv <- sgv[-excl]
+        msg <- paste("Excluded", length(excl), "nested variants")
+        warning(msg, call. = FALSE, immediate. = TRUE)
+
+    }
+
+    sgv_tx <- mapVariantsToTranscripts(sgv, tx, cores)    
+    tx <- tx[names(tx) %in% unlist(sgv_tx)]
+    tx <- processTranscripts(tx, genome, cores)
+    sgv_tx <- lapply(sgv_tx, intersect, names(tx))
+
+    msg <- paste("Predicting effect of", length(sgv),
+        "variants on", length(tx), "coding transcripts...")
+    message(msg)
+    
     expanded_sgv <- sgv[rep(seq_along(sgv), elementLengths(sgv_tx))]
     expanded_tx <- tx[match(unlist(sgv_tx), names(tx))]
 
@@ -198,7 +211,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
 
         } else {
 
-            effect(var) <- "CDS_upstream_start"
+            effect(var) <- "upstream_start_codon"
 
         }
         
@@ -208,15 +221,15 @@ getTranscriptVariant <- function(sgv, ref, genome)
 
         if (identical(gr2co(cds(var)), gr2co(cds(ref)))) {
 
-            effect(var) <- "CDS_unaffected"
+            effect(var) <- "protein_unaffected"
 
         } else if (is.na(cdsStart(var))) {
 
-            effect(var) <- "CDS_start_lost"
+            effect(var) <- "start_codon_lost"
 
         } else {
 
-            effect(var) <- "CDS_5p_alteration"
+            effect(var) <- "N-terminal_variant"
 
         }
         
@@ -234,6 +247,16 @@ getTranscriptVariant <- function(sgv, ref, genome)
         del_w <- sum(width(del))
         ins_w <- sum(width(ins))
 
+        if (del_w %% 3 == ins_w %% 3) {
+
+            effect_cds <- "in-frame"
+
+        } else {
+
+            effect_cds <- "frame-shift"
+
+        }
+
         if (del_w > 0 && ins_w > 0) {
           
             effect_tx <- "alteration"
@@ -247,18 +270,8 @@ getTranscriptVariant <- function(sgv, ref, genome)
             effect_tx <- "insertion"
 
         }
-
-        if (del_w %% 3 == ins_w %% 3) {
-
-            effect_cds <- "in-frame"
-
-        } else {
-
-            effect_cds <- "frame-shift"
-
-        }
         
-        prefix <- paste0("CDS_", effect_tx, "_", effect_cds)
+        prefix <- paste0(effect_cds, "_", effect_tx)
 
         if (identical(gr2co(cds(var_3p)), gr2co(cds(ref)))) {
 
@@ -280,7 +293,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
 
                 if (!is.na(cdsStart(var_5p))) {
                  
-                    effect(var_5p) <- paste0(prefix, "_5p_alteration")
+                    effect(var_5p) <- paste0(prefix, "_N-terminal_variant")
                     var <- c(var, var_5p)
 
                 }
@@ -296,18 +309,18 @@ getTranscriptVariant <- function(sgv, ref, genome)
 
             } else if (!is.na(cdsEnd(var_3p)) && is.na(cdsStart(var_5p))) {
 
-                effect(var_3p) <- paste0(prefix, "_3p_alteration")
+                effect(var_3p) <- paste0(prefix, "_C-terminal_variant")
                 var <- var_3p
 
             } else if (is.na(cdsEnd(var_3p)) && !is.na(cdsStart(var_5p))) {
 
-                effect(var_5p) <- paste0(prefix, "_5p_alteration")
+                effect(var_5p) <- paste0(prefix, "_N-terminal_variant")
                 var <- var_5p
 
             } else if (!is.na(cdsEnd(var_3p)) && !is.na(cdsStart(var_5p))) {
 
-                effect(var_3p) <- paste0(prefix, "_3p_alteration")
-                effect(var_5p) <- paste0(prefix, "_5p_alteration")
+                effect(var_3p) <- paste0(prefix, "_C-terminal_variant")
+                effect(var_5p) <- paste0(prefix, "_N-terminal_variant")
                 var <- c(var_3p, var_5p)
             
             }
@@ -320,15 +333,15 @@ getTranscriptVariant <- function(sgv, ref, genome)
 
         if (identical(gr2co(cds(var)), gr2co(cds(ref)))) {
 
-            effect(var) <- "CDS_unaffected"
+            effect(var) <- "protein_unaffected"
 
         } else if (is.na(cdsEnd(var))) {
 
-            effect(var) <- "CDS_stop_lost"
+            effect(var) <- "stop_codon_lost"
 
         } else {
 
-            effect(var) <- "CDS_3p_alteration"
+            effect(var) <- "C-terminal_variant"
 
         }
       
@@ -464,14 +477,7 @@ getAASeq <- function(tx, genome)
     cds <- sort(cds(tx), decreasing = (strand == "-"))
     cds_seq <- do.call(c, getSeq(genome, cds))
     aa <- as.character(translate(cds_seq))
-    aa_first <- substr(aa, 1, 1)
-    aa_last <- substr(aa, nchar(aa), nchar(aa))
-    
-    if (aa_first != "M" || aa_last != "*") {
-
-        stop("invalid coding sequence")
-
-    }
+    aa <- sub("\\*$", "", aa)
 
     return(aa)
     
@@ -481,7 +487,6 @@ getVariantRegions <- function(ref, var, sgv, genome)
 {
 
     ref_aa <- getAASeq(ref, genome)
-    ref_aa <- sub("\\*$", "", ref_aa)
     
     ## note the following always holds for effect == "CDS_lost"
     
@@ -501,7 +506,6 @@ getVariantRegions <- function(ref, var, sgv, genome)
     }
 
     var_aa <- getAASeq(var, genome)
-    var_aa <- sub("\\*$", "", var_aa)
 
     ref_loc <- range(ref[[1]])
     ref_cds <- range(cds(ref))
@@ -582,7 +586,7 @@ convertToTranscripts <- function(txdb)
     
 }
 
-checkTranscripts <- function(tx)
+checkTranscriptFormat <- function(tx)
 {
 
     if (!exonsOnSameChromAndStrand(tx)) {
@@ -609,19 +613,44 @@ checkTranscripts <- function(tx)
 
 }
 
-filterTranscripts <- function(tx)
+processTranscripts <- function(tx, genome, cores)
 {
-
+  
     tx <- tx[!is.na(cdsLeft(tx)) & !is.na(cdsRight(tx))]
+
+    list_tx <- split(tx, seq_along(tx))
+
+    tx_aa <- unlist(mclapply(list_tx, getAASeq, genome, mc.cores = cores))
+
+    tx_aa_first <- substr(tx_aa, 1, 1)
     
-    cds <- GRanges(
-        seqnames(unlist(range(tx))),
-        IRanges(cdsLeft(tx), cdsRight(tx)),
-        strand(unlist(range(tx))))
+    list_pr <- mcmapply(
+        findCDS,
+        list_tx,
+        cdsStart(tx),
+        rep(NA_integer_, length(tx)),
+        MoreArgs = list(genome = genome),
+        SIMPLIFY = FALSE,
+        mc.cores = cores)
 
-    tx <- tx[sum(width(pintersect(tx, cds))) %% 3 == 0]
+    pr <- setNames(Reduce(c, list_pr), names(tx))
+    
+    pr_aa <- unlist(mclapply(list_pr, getAASeq, genome, mc.cores = cores))
 
-    return(tx)
+    invalid <- which(is.na(tx_aa) | is.na(pr_aa) |
+        tx_aa_first != "M" | tx_aa != pr_aa)
+
+    if (length(invalid) > 0) {
+
+        pr <- pr[-invalid]
+        msg <- paste0("Excluded ", length(invalid),
+            " transcripts with invalid CDS\n",
+            paste(names(tx)[invalid], collapse = "\n"))
+        warning(msg, call. = FALSE, immediate. = TRUE)
+
+    }
+    
+    return(pr)
     
 }
 
@@ -660,7 +689,7 @@ cdsRight <- function(tx)
 cdsStart <- function(tx)
 {
 
-    st <- as.character(strand(range(tx[[1]])))
+    st <- as.character(strand(unlist(range(tx))))
     ifelse(st == "+", cdsLeft(tx), cdsRight(tx))
   
 }
@@ -668,17 +697,11 @@ cdsStart <- function(tx)
 'cdsStart<-' <- function(tx, value)
 {
 
-    st <- as.character(strand(range(tx[[1]])))
-
-    if (st == "+") {
-
-        cdsLeft(tx) <- value
-
-    } else {
-
-        cdsRight(tx) <- value
-
-    }
+    st <- as.character(strand(unlist(range(tx))))
+    i_pos <- which(st == "+")
+    cdsLeft(tx)[i_pos] <- value[i_pos]
+    i_neg <- which(st == "-")
+    cdsRight(tx)[i_neg] <- value[i_neg]
 
     return(tx)
   
@@ -687,7 +710,7 @@ cdsStart <- function(tx)
 cdsEnd <- function(tx) 
 {
 
-    st <- as.character(strand(range(tx[[1]])))
+    st <- as.character(strand(unlist(range(tx))))
     ifelse(st == "+", cdsRight(tx), cdsLeft(tx))
   
 }
@@ -695,17 +718,11 @@ cdsEnd <- function(tx)
 'cdsEnd<-' <- function(tx, value)
 {
 
-    st <- as.character(strand(range(tx[[1]])))
-
-    if (st == "+") {
-
-        cdsRight(tx) <- value
-
-    } else {
-
-        cdsLeft(tx) <- value
-
-    }
+    st <- as.character(strand(unlist(range(tx))))
+    i_pos <- which(st == "+")
+    cdsRight(tx)[i_pos] <- value[i_pos]
+    i_neg <- which(st == "-")
+    cdsLeft(tx)[i_neg] <- value[i_neg]
 
     return(tx)
   
