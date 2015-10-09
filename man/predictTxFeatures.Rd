@@ -4,7 +4,7 @@
 \alias{predictTxFeatures}
 \title{Splice junction and exon prediction from BAM files}
 \usage{
-predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0.1,
+predictTxFeatures(sample_info, which = NULL, alpha = 2, psi = 0,
   beta = 0.2, gamma = 0.2, min_junction_count = NULL,
   max_complexity = 20, min_n_sample = 1, min_overhang = NA,
   verbose = FALSE, cores = 1)

@@ -5,7 +5,7 @@
 \title{Analysis of splice graph features from BAM files}
 \usage{
 analyzeFeatures(sample_info, which = NULL, features = NULL,
-  predict = is.null(features), alpha = 2, psi = 0.1, beta = 0.2,
+  predict = is.null(features), alpha = 2, psi = 0, beta = 0.2,
   gamma = 0.2, min_n_sample = 1, min_overhang = NA, annotation = NULL,
   max_complexity = 20, verbose = FALSE, cores = 1)
 }

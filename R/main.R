@@ -38,7 +38,7 @@
 
 analyzeFeatures <- function(sample_info, which = NULL,
     features = NULL, predict = is.null(features), 
-    alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
+    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
     min_n_sample = 1, min_overhang = NA, annotation = NULL,
     max_complexity = 20, verbose = FALSE, cores = 1)
 {
@@ -219,7 +219,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 ##' @author Leonard Goldstein
 
 predictTxFeatures <- function(sample_info, which = NULL,
-    alpha = 2, psi = 0.1, beta = 0.2, gamma = 0.2,
+    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
     min_junction_count = NULL, max_complexity = 20,
     min_n_sample = 1, min_overhang = NA, verbose = FALSE,
     cores = 1)
@@ -353,8 +353,8 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 ##' sgvc <- analyzeVariants(sgfc_pred)
 ##' @author Leonard Goldstein
 
-analyzeVariants <- function(object, maxnvariant = 20, min_denominator = NA,
-    cores = 1)
+analyzeVariants <- function(object, maxnvariant = 20, include = "default",
+    min_denominator = NA, cores = 1)
 {
 
     if (!is(object, "SGFeatureCounts")) {
@@ -366,6 +366,7 @@ analyzeVariants <- function(object, maxnvariant = 20, min_denominator = NA,
     variants <- findSGVariants(
         features = rowRanges(object),
         maxnvariant = maxnvariant,
+        include = include,
         cores = cores)
 
     counts <- getSGVariantCounts(variants, object,

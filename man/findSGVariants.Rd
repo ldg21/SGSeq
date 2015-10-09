@@ -5,7 +5,7 @@
 \title{Find splice variants from splice graph}
 \usage{
 findSGVariants(features, maxnvariant = 20, annotate_events = TRUE,
-  cores = 1)
+  include = c("default", "closed", "all"), cores = 1)
 }
 \arguments{
 \item{features}{\code{SGFeatures} object}
@@ -17,6 +17,12 @@ Set to \code{NA} to include all events.}
 \item{annotate_events}{Logical indicating whether identified
 splice variants should be annotated in terms of canonical events.
 For details see help page for \code{\link{annotateSGVariants}}.}
+
+\item{include}{Character string indicating whether identified splice
+variants should be filtered. Possible options are \dQuote{default}
+(only include variants for events with all variants closed),
+\dQuote{closed} (only include closed variants) and \dQuote{all}
+(include all variants).}
 
 \item{cores}{Number of cores available for parallel processing}
 }

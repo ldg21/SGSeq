@@ -321,6 +321,11 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##' @param annotate_events Logical indicating whether identified
 ##'   splice variants should be annotated in terms of canonical events.
 ##'   For details see help page for \code{\link{annotateSGVariants}}.
+##' @param include Character string indicating whether identified splice
+##'   variants should be filtered. Possible options are \dQuote{default}
+##'   (only include variants for events with all variants closed),
+##'   \dQuote{closed} (only include closed variants) and \dQuote{all}
+##'   (include all variants).
 ##' @param cores Number of cores available for parallel processing
 ##' @return An \code{SGVariants} object
 ##' @examples
@@ -328,9 +333,11 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##' @author Leonard Goldstein
 
 findSGVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
-    cores = 1)
+    include = c("default", "closed", "all"), cores = 1)
 {
 
+    include <- match.arg(include)
+  
     if (!is(features, "SGFeatures")) {
 
         stop("features must be an SGFeatures object")
@@ -356,6 +363,28 @@ findSGVariants <- function(features, maxnvariant = 20, annotate_events = TRUE,
     
     variantName(variants) <- makeVariantNames(variants)
 
+    open <- !closed5p(variants) | !closed3p(variants)
+
+    if (include == "default") {
+
+        excl <- which(eventID(variants) %in% eventID(variants)[open])
+      
+    } else if (include == "closed") {
+
+        excl <- which(open)
+      
+    } else if (include == "all") {
+
+        excl <- vector()
+      
+    }
+
+    if (length(excl) > 0) {
+
+        variants <- variants[-excl]
+
+    }
+    
     return(variants)
 
 }
@@ -490,6 +519,7 @@ getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
     tmp_rep_id <- relist(tmp_rep_id_unlisted, tmp_rep_id)
     
     ## exclude open variants and variants with ambiguous terminal features
+    ## 09/10/15 ambiguous terminal features should now be flagged as open
 
     event_dup <- tapply(unlist(tmp_rep_id),
         tmp_info$eventID[togroup(tmp_rep_id)],
@@ -583,24 +613,29 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
         paths_all_from <- relist(hd$from[i], paths_segmentIDs)
         paths_all_to <- relist(hd$to[i], paths_segmentIDs)
         paths_all_nodes <- lapply(pc(paths_all_from, paths_all_to),
-            setdiff, hv$name[c(b$start[k], b$end[k])])
+            setdiff, y = hv$name[c(b$start[k], b$end[k])])
+        paths_ext_nodes <- lapply(paths_all_nodes, setdiff, x = hv$name)
+        event_ext_nodes <- setdiff(hv$name, unlist(paths_all_nodes))
         hme <- delete.vertices(h, b$end[k])
         paths_nodes_out <- lapply(paths_all_nodes,
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hme, mode = "out")) }))) })
+        variantClosed3p <- elementLengths(mapply(intersect,
+            paths_nodes_out, paths_ext_nodes)) == 0
+        eventClosed3p <- all(elementLengths(lapply(paths_nodes_out,
+            intersect, event_ext_nodes)) == 0)
         hms <- delete.vertices(h, b$start[k])
         paths_nodes_in <- lapply(paths_all_nodes,
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hms, mode = "in")) }))) })
-        external_nodes <- setdiff(hv$name, unlist(paths_all_nodes))
-        closed3p <- elementLengths(lapply(paths_nodes_out, intersect,
-            external_nodes)) == 0
-        closed5p <- elementLengths(lapply(paths_nodes_in, intersect,
-            external_nodes)) == 0
+        variantClosed5p <- elementLengths(mapply(intersect,
+            paths_nodes_in, paths_ext_nodes)) == 0
+        eventClosed5p <- all(elementLengths(lapply(paths_nodes_in,
+            intersect, event_ext_nodes)) == 0)
         
-        if (k < nrow(b) && all(closed3p) && all(closed5p)) {
+        if (k < nrow(b) && eventClosed3p && eventClosed5p) {
           
             ## Include event in data frame of recursively defined paths
             ref <- rbindDfsWithoutRowNames(ref,
@@ -624,8 +659,8 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             type = paths_type,
             featureID = paths_featureID,
             segmentID = paths_segmentID,
-            closed3p = closed3p,
-            closed5p = closed5p,
+            closed3p = variantClosed3p,
+            closed5p = variantClosed5p,
             stringsAsFactors = FALSE)
          
     }
