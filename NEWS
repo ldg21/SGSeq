@@ -1,3 +1,22 @@
+CHANGES IN VERSION 1.4.0
+------------------------
+
+    o Added importTranscripts() for importing annotation from GFF format
+
+    o Added plotCoverage() for visualization of per-base read coverage
+      and junction read counts
+
+    o Added predictVariantEffects() for predicting the effect of splice 
+      variants on annotated protein-coding transcripts
+
+    o findSGVariants() is now able to deal with more complex gene models
+
+    o SGVariants columns closed5p and closed3p now refer to individual
+      splice variants rather than the splice event they belong to
+
+    o Bug fixes and other improvements
+
+
 CHANGES IN VERSION 1.2.0
 ------------------------
 
