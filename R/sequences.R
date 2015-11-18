@@ -1,5 +1,5 @@
 ##' The effect of each splice variant is assessed with respect to individual
-##' protein-coding transcripts. 
+##' protein-coding transcripts.
 ##'
 ##' @title Predict the effect of splice variants on protein-coding transcripts
 ##' @param sgv \code{SGVariants} object
@@ -34,11 +34,11 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
 
         message("Obtaining transcripts from TxDb...")
         tx <- convertToTranscripts(tx)
-      
+
     } else if (is(tx, "GRangesList")) {
 
         checkTranscriptFormat(tx)
-        
+
         if (is.null(names(tx))) {
 
             names(tx) <- seq_along(tx)
@@ -51,7 +51,7 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
             grouped by transcripts")
 
     }
-        
+
     sgv_vid <- variantID(sgv)
 
     excl <- grep("(", type(sgv), fixed = TRUE)
@@ -64,7 +64,7 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
 
     }
 
-    sgv_tx <- mapVariantsToTranscripts(sgv, tx, cores)    
+    sgv_tx <- mapVariantsToTranscripts(sgv, tx, cores)
     tx <- tx[names(tx) %in% unlist(sgv_tx)]
     tx <- processTranscripts(tx, genome, cores)
     sgv_tx <- lapply(sgv_tx, intersect, names(tx))
@@ -72,13 +72,13 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
     msg <- paste("Predicting effect of", length(sgv),
         "variants on", length(tx), "coding transcripts...")
     message(msg)
-    
+
     expanded_sgv <- sgv[rep(seq_along(sgv), elementLengths(sgv_tx))]
     expanded_tx <- tx[match(unlist(sgv_tx), names(tx))]
 
     list_expanded_sgv <- split(expanded_sgv, seq_along(expanded_sgv))
     list_expanded_tx <- split(expanded_tx, seq_along(expanded_tx))
-    
+
     list_res <- mcmapply(
         predictVariantEffectPerVariantAndTranscript,
         list_expanded_sgv,
@@ -91,34 +91,34 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
 
     items <- paste("variant", variantID(expanded_sgv),
         "and transcript", names(expanded_tx))
-    
+
     checkApplyResultsForErrors(
         list_res,
         "predictVariantEffectPerVariantAndTranscript\n",
         items,
         "character")
-    
+
     res <- do.call(rbindDfsWithoutRowNames, list_res)
-    
+
     if (summarize) {
 
         res$effect <- paste0(res$txName, ":", res$effect)
         vid_effect <- unstrsplit(split(res$effect, res$variantID), ",")
         res <- vid_effect[match(sgv_vid, names(vid_effect))]
         names(res) <- NULL
-        
+
     }
-    
+
     return(res)
-    
+
 }
 
 mapVariantsToTranscripts <- function(sgv, tx, cores)
 {
 
     gr_from <- pos2gr(sub("^(D|S):", "", from(sgv)))
-    gr_to <- pos2gr(sub("^(A|E):", "", to(sgv)))    
-  
+    gr_to <- pos2gr(sub("^(A|E):", "", to(sgv)))
+
     list_D <- vector("list", length(sgv))
     i_D <- which(substr(from(sgv), 1, 1) == "D")
     list_D[i_D] <- as.list(findOverlaps(gr_from[i_D], tx))
@@ -126,7 +126,7 @@ mapVariantsToTranscripts <- function(sgv, tx, cores)
     list_A <- vector("list", length(sgv))
     i_A <- which(substr(to(sgv), 1, 1) == "A")
     list_A[i_A] <- as.list(findOverlaps(gr_to[i_A], tx))
-    
+
     list_i <- vector("list", length(sgv))
     i <- intersect(i_D, i_A)
     list_i[i] <- mcmapply(
@@ -139,7 +139,7 @@ mapVariantsToTranscripts <- function(sgv, tx, cores)
     list_i[i] <- list_D[i]
     i <- setdiff(i_A, i_D)
     list_i[i] <- list_A[i]
-    
+
     sgv_tx <- relist(names(tx)[unlist(list_i)], list_i)
 
     inc <- tx[match(unique(unlist(sgv_tx)), names(tx))]
@@ -153,7 +153,7 @@ mapVariantsToTranscripts <- function(sgv, tx, cores)
         mc.cores = cores)
 
     return(sgv_tx)
-    
+
 }
 
 predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome)
@@ -162,7 +162,7 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome)
     var <- getTranscriptVariant(sgv, ref, genome)
 
     n <- length(var)
-    
+
     res <- data.frame(
         variantID = rep(variantID(sgv), n),
         txName = rep(names(ref), n),
@@ -170,33 +170,33 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome)
         stringsAsFactors = FALSE)
 
     list_var <- split(var, seq_along(var))
-    
+
     regions <- do.call(rbindDfsWithoutRowNames, lapply(
         list_var,
         getVariantRegions,
         ref = ref,
         sgv = sgv,
         genome = genome))
-    
+
     res <- cbind(res, regions)
 
     return(res)
-    
+
 }
 
-getTranscriptVariant <- function(sgv, ref, genome) 
+getTranscriptVariant <- function(sgv, ref, genome)
 {
 
     ref_loc <- range(ref[[1]])
     ref_cds <- range(cds(ref))
-    
+
     utr_5p <- range(c(flank(ref_loc, -1, TRUE), flank(ref_cds, 1, TRUE)))
     utr_3p <- range(c(flank(ref_cds, 1, FALSE), flank(ref_loc, -1, FALSE)))
 
     event <- getEventLocation(ref, sgv)
     event_start <- flank(event, -1, TRUE)
     event_end <- flank(event, -1, FALSE)
-    
+
     del <- intersect(ref[[1]], event)
     ins <- granges(sgv[[1]][type(sgv[[1]]) == "E"])
     var <- GRangesList(reduce(c(setdiff(ref[[1]], del), ins)))
@@ -214,7 +214,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
             effect(var) <- "upstream_start_codon"
 
         }
-        
+
     } else if (event_start %over% utr_5p && event_end %over% ref_cds) {
 
         var <- findCDS(var, NA_integer_, cdsEnd(ref), genome)
@@ -232,7 +232,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
             effect(var) <- "N-terminal_variant"
 
         }
-        
+
     } else if (event_start %over% utr_5p && event_end %over% utr_3p) {
 
         cdsStart(var) <- NA_integer_
@@ -240,7 +240,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
         effect(var) <- "CDS_lost"
 
     } else if (event_start %over% ref_cds && event_end %over% ref_cds) {
-      
+
         var_3p <- findCDS(var, cdsStart(ref), NA_integer_, genome)
         var_5p <- findCDS(var, NA_integer_, cdsEnd(ref), genome)
 
@@ -258,7 +258,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
         }
 
         if (del_w > 0 && ins_w > 0) {
-          
+
             effect_tx <- "alteration"
 
         } else if (del_w > 0) {
@@ -270,7 +270,7 @@ getTranscriptVariant <- function(sgv, ref, genome)
             effect_tx <- "insertion"
 
         }
-        
+
         prefix <- paste0(effect_cds, "_", effect_tx)
 
         if (identical(gr2co(cds(var_3p)), gr2co(cds(ref)))) {
@@ -278,26 +278,26 @@ getTranscriptVariant <- function(sgv, ref, genome)
             stop("internal CDS variant does not affect CDS")
 
         }
-          
+
         if (effect_cds == "in-frame") {
 
             if (cdsEnd(var_3p) == cdsEnd(ref)) {
 
                 effect(var_3p) <- prefix
                 var <- var_3p
-                
+
             } else {
 
                 effect(var_3p) <- paste0(prefix, "_premature_stop")
                 var <- var_3p
 
                 if (!is.na(cdsStart(var_5p))) {
-                 
+
                     effect(var_5p) <- paste0(prefix, "_N-terminal_variant")
                     var <- c(var, var_5p)
 
                 }
-                
+
             }
 
         } else if (effect_cds == "frame-shift") {
@@ -322,11 +322,11 @@ getTranscriptVariant <- function(sgv, ref, genome)
                 effect(var_3p) <- paste0(prefix, "_C-terminal_variant")
                 effect(var_5p) <- paste0(prefix, "_N-terminal_variant")
                 var <- c(var_3p, var_5p)
-            
+
             }
 
         }
-        
+
     } else if (event_start %over% ref_cds && event_end %over% utr_3p) {
 
         var <- findCDS(var, cdsStart(ref), NA_integer_, genome)
@@ -344,34 +344,35 @@ getTranscriptVariant <- function(sgv, ref, genome)
             effect(var) <- "C-terminal_variant"
 
         }
-      
+
     } else if (event_start %over% utr_3p && event_end %over% utr_3p) {
 
         cdsStart(var) <- cdsStart(ref)
         cdsEnd(var) <- cdsEnd(ref)
         effect(var) <- "3p_UTR_variant"
-        
+
     }
-    
+
     return(var)
-    
+
 }
 
 findCDS <- function(tx, cdsStart, cdsEnd, genome)
 {
 
     start_codons <- c("ATG")
-    stop_codons <- c("TAG", "TAA", "TGA")        
+    stop_codons <- c("TAG", "TAA", "TGA")
 
     chrom <- as.character(seqnames(tx[[1]][1]))
     strand <- as.character(strand(tx[[1]][1]))
 
     names(tx) <- "1"
     tx[[1]] <- sort(tx[[1]], decreasing = (strand == "-"))
-    tx_seq <- as.character(do.call(c, getSeq(genome, tx[[1]])))
+    tx_seq <- as.character(do.call(c,
+        suppressWarnings(getSeq(genome, tx[[1]]))))
 
     if (is.na(cdsStart)) {
-      
+
         cdsEnd_gr <- GRanges(chrom, IRanges(cdsEnd, cdsEnd), strand)
         cdsEnd_tx <- start(mapToTranscripts(cdsEnd_gr, tx))
         p <- seq(from = cdsEnd_tx %% 3 + 1, to = cdsEnd_tx - 2, by = 3)
@@ -380,25 +381,25 @@ findCDS <- function(tx, cdsStart, cdsEnd, genome)
         i_stop <- which(codons[-length(codons)] %in% stop_codons)
 
         if (length(i_start) > 0 && length(i_stop) > 0) {
-        
+
             i_start <- i_start[i_start > max(i_stop)]
 
         }
-        
+
         if (length(i_start) > 0) {
-              
+
             cdsStart_tx <- p[min(i_start)]
             x <- GRanges(1, IRanges(cdsStart_tx, cdsStart_tx), "*")
             cdsStart_gr <- mapFromTranscripts(x, tx)
             cdsStart <- start(cdsStart_gr)
-            
+
         } else {
 
             cdsStart <- NA_integer_
             cdsEnd <- NA_integer_
-                
+
         }
-                                
+
     } else {
 
         cdsStart_gr <- GRanges(chrom, IRanges(cdsStart, cdsStart), strand)
@@ -406,26 +407,26 @@ findCDS <- function(tx, cdsStart, cdsEnd, genome)
         p <- seq(from = cdsStart_tx, to = nchar(tx_seq), by = 3)
         codons <- mapply(substr, p, p + 2, MoreArgs = list(x = tx_seq))
         i_stop <- which(codons %in% stop_codons)
-        
+
         if (length(i_stop) > 0) {
-          
+
             cdsEnd_tx <- (p + 2)[min(i_stop)]
             x <- GRanges(1, IRanges(cdsEnd_tx, cdsEnd_tx), "*")
             cdsEnd_gr <- mapFromTranscripts(x, tx)
             cdsEnd <- start(cdsEnd_gr)
-            
+
         } else {
 
             cdsStart <- NA_integer_
             cdsEnd <- NA_integer_
-            
+
         }
-        
+
     }
 
     cdsStart(tx) <- cdsStart
     cdsEnd(tx) <- cdsEnd
-    
+
     return(tx)
 
 }
@@ -435,33 +436,33 @@ getEventLocation <- function(x, sgv)
 
     start_type <- substr(from(sgv), 1, 1)
     end_type <- substr(to(sgv), 1, 1)
-    
+
     if (start_type == "D") {
 
         start_gr <- pos2gr(sub("^D:", "", from(sgv)))
         start_gr <- flank(start_gr, 1, FALSE)
-      
+
     } else if (start_type == "S") {
 
         start_gr <- flank(range(x[[1]]), -1, TRUE)
-      
+
     }
 
     if (end_type == "A") {
-      
+
         end_gr <- pos2gr(sub("^A:", "", to(sgv)))
         end_gr <- flank(end_gr, 1, TRUE)
-        
+
     } else if (end_type == "E") {
 
         end_gr <- flank(range(x[[1]]), -1, FALSE)
-      
+
     }
 
     event <- range(c(start_gr, end_gr))
-        
+
     return(event)
-    
+
 }
 
 getAASeq <- function(tx, genome)
@@ -472,26 +473,26 @@ getAASeq <- function(tx, genome)
         return(NA_character_)
 
     }
-    
+
     strand <- as.character(strand(tx[[1]][1]))
     cds <- sort(cds(tx), decreasing = (strand == "-"))
-    cds_seq <- do.call(c, getSeq(genome, cds))
+    cds_seq <- do.call(c, suppressWarnings(getSeq(genome, cds)))
     aa <- as.character(translate(cds_seq))
     aa <- sub("\\*$", "", aa)
 
     return(aa)
-    
+
 }
 
 getVariantRegions <- function(ref, var, sgv, genome)
 {
 
     ref_aa <- getAASeq(ref, genome)
-    
+
     ## note the following always holds for effect == "CDS_lost"
-    
+
     if (is.na(cdsLeft(var)) || is.na(cdsRight(var))) {
-      
+
         data.frame(
             ref_aa_start = 0,
             ref_aa_end = nchar(ref_aa),
@@ -509,7 +510,7 @@ getVariantRegions <- function(ref, var, sgv, genome)
 
     ref_loc <- range(ref[[1]])
     ref_cds <- range(cds(ref))
-    
+
     var_loc <- range(var[[1]])
     var_cds <- range(cds(var))
 
@@ -521,19 +522,19 @@ getVariantRegions <- function(ref, var, sgv, genome)
     event <- reduce(c(
         getEventLocation(ref, sgv),
         getEventLocation(var, sgv)))
-    
+
     if (start(ref_cds_5p_fl) != start(var_cds_5p_fl)) {
 
         event <- range(c(event, ref_cds_5p_fl, var_cds_5p_fl))
-      
+
     }
 
     if (start(ref_cds_3p_fl) != start(var_cds_3p_fl)) {
-      
+
         event <- range(c(event, ref_cds_3p_fl, var_cds_3p_fl))
-      
+
     }
-    
+
     ref_event_tx <- mapEventToProtein(ref, event)
     var_event_tx <- mapEventToProtein(var, event)
 
@@ -547,7 +548,7 @@ getVariantRegions <- function(ref, var, sgv, genome)
         ref_aa = ref_aa,
         var_aa = var_aa,
         stringsAsFactors = FALSE)
-    
+
 }
 
 mapEventToProtein <- function(tx, event)
@@ -557,13 +558,13 @@ mapEventToProtein <- function(tx, event)
     event <- intersect(event + 1, cds[[1]])
     event <- ranges(reduce(mapToTranscripts(event, cds)))
     event <- flank(event, -width(event) + 1, TRUE)
-    
+
     if (length(event) == 0) {
 
         out <- data.frame(start = NA_integer_, end = NA_integer_)
 
     } else {
-    
+
         out <- data.frame(
             start = floor(start(event) / 3),
             end = ceiling(end(event) / 3))
@@ -571,7 +572,7 @@ mapEventToProtein <- function(tx, event)
     }
 
     return(out)
-    
+
 }
 
 convertToTranscripts <- function(txdb)
@@ -583,7 +584,7 @@ convertToTranscripts <- function(txdb)
     cdsRight(tx) <- end(cds)[match(names(tx), names(cds))]
 
     return(tx)
-    
+
 }
 
 checkTranscriptFormat <- function(tx)
@@ -615,7 +616,7 @@ checkTranscriptFormat <- function(tx)
 
 processTranscripts <- function(tx, genome, cores)
 {
-  
+
     tx <- tx[!is.na(cdsLeft(tx)) & !is.na(cdsRight(tx))]
 
     list_tx <- split(tx, seq_along(tx))
@@ -623,7 +624,7 @@ processTranscripts <- function(tx, genome, cores)
     tx_aa <- unlist(mclapply(list_tx, getAASeq, genome, mc.cores = cores))
 
     tx_aa_first <- substr(tx_aa, 1, 1)
-    
+
     list_pr <- mcmapply(
         findCDS,
         list_tx,
@@ -634,7 +635,7 @@ processTranscripts <- function(tx, genome, cores)
         mc.cores = cores)
 
     pr <- setNames(Reduce(c, list_pr), names(tx))
-    
+
     pr_aa <- unlist(mclapply(list_pr, getAASeq, genome, mc.cores = cores))
 
     invalid <- which(is.na(tx_aa) | is.na(pr_aa) |
@@ -649,9 +650,9 @@ processTranscripts <- function(tx, genome, cores)
         warning(msg, call. = FALSE, immediate. = TRUE)
 
     }
-    
+
     return(pr)
-    
+
 }
 
 cdsLeft <- function(tx)
@@ -665,9 +666,9 @@ cdsLeft <- function(tx)
 {
 
     mcols(tx)$cdsStart <- value
-    
+
     return(tx)
-    
+
 }
 
 cdsRight <- function(tx)
@@ -681,9 +682,9 @@ cdsRight <- function(tx)
 {
 
     mcols(tx)$cdsEnd <- value
-    
+
     return(tx)
-    
+
 }
 
 cdsStart <- function(tx)
@@ -691,7 +692,7 @@ cdsStart <- function(tx)
 
     st <- as.character(strand(unlist(range(tx))))
     ifelse(st == "+", cdsLeft(tx), cdsRight(tx))
-  
+
 }
 
 'cdsStart<-' <- function(tx, value)
@@ -704,15 +705,15 @@ cdsStart <- function(tx)
     cdsRight(tx)[i_neg] <- value[i_neg]
 
     return(tx)
-  
+
 }
 
-cdsEnd <- function(tx) 
+cdsEnd <- function(tx)
 {
 
     st <- as.character(strand(unlist(range(tx))))
     ifelse(st == "+", cdsRight(tx), cdsLeft(tx))
-  
+
 }
 
 'cdsEnd<-' <- function(tx, value)
@@ -725,7 +726,7 @@ cdsEnd <- function(tx)
     cdsLeft(tx)[i_neg] <- value[i_neg]
 
     return(tx)
-  
+
 }
 
 effect <- function(tx)
@@ -755,7 +756,7 @@ cds <- function(tx)
 
     tx <- restrict(tx, cdsLeft(tx), cdsRight(tx))
     tx <- sort(granges(tx[[1]]))
-    
+
     return(tx)
-    
+
 }

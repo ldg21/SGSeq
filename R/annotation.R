@@ -1,5 +1,5 @@
 ##' Features in \code{query} are annotated with respect to transcript
-##' features in \code{subject}. 
+##' features in \code{subject}.
 ##'
 ##' Annotation is performed at the gene and transcript level.
 ##' For transcript-level annotation, query features are assigned all
@@ -7,7 +7,7 @@
 ##' For gene-level annotation, query features are assigned all gene
 ##' names associated with subject features that belong to the same
 ##' gene (connected component of the splice graph) as matching
-##' query features. 
+##' query features.
 ##'
 ##' Feature matching is performed as follows:
 ##' Query splice junctions are matched with identical subject splice
@@ -16,7 +16,7 @@
 ##' overlapping subject exons. Spliced boundaries of query exon bins
 ##' must match spliced subject exon boundaries. Query exon bins cannot
 ##' extend across spliced subject exon boundaries.
-##' 
+##'
 ##' @title Annotation with respect to transcript features
 ##' @param query \code{SGFeatures}, \code{SGVariants},
 ##'   \code{SGFeatureCounts} or \code{SGVariantCounts} object
@@ -40,7 +40,7 @@ annotate <- function(query, subject)
     if (is(query, "SGFeatures")) {
 
         query <- annotateFeatures(query, subject)
-        
+
     } else if (is(query, "SGVariants")) {
 
         query_class <- class(query)
@@ -51,7 +51,7 @@ annotate <- function(query, subject)
         mcols(query) <- query_mcols
         query <- new(query_class, query)
         query <- annotatePaths(query)
-        
+
     } else if (is(query, "Counts")) {
 
         rd <- rowRanges(query)
@@ -59,7 +59,7 @@ annotate <- function(query, subject)
         rowRanges(query) <- rd
 
     }
-        
+
     return(query)
 
 }
@@ -67,11 +67,11 @@ annotate <- function(query, subject)
 annotateFeatures <- function(query, subject)
 {
 
-    i_Z <- which(type(subject) %in% c("F", "L"))
+    i <- which(type(subject) %in% c("F", "L"))
 
-    if (length(i_Z) > 0) {
+    if (length(i) > 0) {
 
-        subject <- c(subject[-i_Z], mergeExonsTerminal(subject[i_Z], 1))
+        subject <- c(subject[-i], mergeExonsTerminal(subject[i], 1))
 
     }
 
@@ -88,20 +88,83 @@ annotateFeatures <- function(query, subject)
     qH <- queryHits(hits)
     sH <- subjectHits(hits)
 
-    for (option in c("feature", "gene")) {
+    for (option in c("tx", "gene")) {
 
-        slot_id <- switch(option, feature = "featureID", gene = "geneID")
-        slot_ann <- switch(option, feature = "txName", gene = "geneName")
-        query_id <- factor(slot(query, slot_id))
-        subject_ann <- slot(subject, slot_ann)
-        id_ann <- collapseCharacterList(subject_ann[sH], query_id[qH])
-        query_ann <- id_ann[match(query_id, names(id_ann))]
-        slot(query, slot_ann) <- setNames(query_ann, NULL)
-        
+        q_id <- factor(slot(query, "featureID"))
+        s_ann <- slot(subject, paste0(option, "Name"))
+        id_ann <- splitCharacterList(s_ann[sH], q_id[qH])
+        q_ann <- setNames(id_ann[match(q_id, names(id_ann))], NULL)
+        slot(query, paste0(option, "Name")) <- q_ann
+
+    }
+
+    if (is(query, "SGFeatures")) {
+
+        query <- propagateAnnotation(query)
+
     }
 
     return(query)
-    
+
+}
+
+propagateAnnotation <- function(query)
+{
+
+    g <- spliceGraph(query)
+
+    ## Remove annotated parts of the splice graph. Specifically,
+    ## remove annotated edges with annotated 'to' and 'from' vertices.
+    ## Then remove edge-free vertices (vertices that are annotated and with
+    ## all incoming and outgoing edges annotated in the original graph)
+
+    gv <- nodes(g)
+    gd <- edges(g)
+
+    gd_ann <- elementLengths(gd$geneName) > 0
+    i <- match(gv$featureID[match(gd$from, gv$name)], featureID(query))
+    from_ann <- elementLengths(geneName(query))[i] > 0
+    i <- match(gv$featureID[match(gd$to, gv$name)], featureID(query))
+    to_ann <- elementLengths(geneName(query))[i] > 0
+
+    excl <- which(
+        (is.na(from_ann) | is.na(to_ann)) |
+        (gd_ann & from_ann & to_ann))
+
+    if (length(excl) > 0)  g <- delete.edges(g, excl)
+
+    gd <- edges(g)
+
+    excl <- which(!gv$name %in% c(gd$from, gd$to))
+
+    if (length(excl) > 0) g <- delete.vertices(g, excl)
+
+    ## Unnannotated parts of the splice graph are assigned gene names
+    ## of connected annotated vertices or edges.
+
+    gv <- nodes(g)
+    gd <- edges(g)
+
+    gv_geneName <- geneName(query)[match(gv$featureID, featureID(query))]
+    gd_geneName <- geneName(query)[match(gd$featureID, featureID(query))]
+
+    gv_cluster <- as.character(clusters(g)$membership)
+    gd_cluster <- gv_cluster[match(gd$from, gv$name)]
+
+    ann <- DataFrame(
+        featureID = c(gv$featureID, gd$featureID),
+        geneName = c(gv_geneName, gd_geneName),
+        cluster = c(gv_cluster, gd_cluster))
+
+    cluster_geneName <- splitCharacterList(ann$geneName, factor(ann$cluster))
+    ann <- ann[elementLengths(ann$geneName) == 0, ]
+    i <- match(ann$cluster, names(cluster_geneName))
+    ann$geneName <- cluster_geneName[i]
+    i <- match(ann$featureID, featureID(query))
+    geneName(query)[i] <- ann$geneName
+
+    return(query)
+
 }
 
 annotateSGSegments <- function(ids, features)
@@ -109,7 +172,7 @@ annotateSGSegments <- function(ids, features)
 
     ## ids is a character vector with comma-separatated lists of
     ## feature IDs, or txNames in the format {tx1;...;txn}
-  
+
     out <- vector("list", length(ids))
 
     segment_ids <- strsplit(ids, ",")
@@ -119,7 +182,7 @@ annotateSGSegments <- function(ids, features)
     ids_segment <- togroup(segment_ids)
     ids_ann <- vector("list", length(ids))
     ids_ann <- as(ids_ann, "CompressedCharacterList")
-    
+
     i <- grep("^\\d+$", ids)
 
     if (length(i) > 0) {
@@ -149,7 +212,7 @@ annotateSGSegments <- function(ids, features)
         return(out)
 
     }
-    
+
     segment_ann_n <- table(paste0(ann_segment, ":", ann))
     x_segment <- sapply(strsplit(names(segment_ann_n), ":"), "[", 1)
     x_ann <- sub("^\\d+:", "", names(segment_ann_n))
@@ -164,7 +227,7 @@ annotateSGSegments <- function(ids, features)
         out[as.integer(names(segment_ann))] <- segment_ann
 
     }
-        
+
     return(out)
 
 }
@@ -178,21 +241,21 @@ annotatePaths <- function(paths)
     txName_unique <- unique(unlist(txName(features)))
     txName(features) <- relist(as.character(match(unlist(txName(features)),
         txName_unique)), txName(features))
-    
+
     x <- featureID(paths)
     i <- grep("(", x, fixed = TRUE)
-    
+
     while (length(i) > 0) {
 
         ## find inner event
         m <- regexpr("\\([^\\(\\)]+\\)", x[i])
         l <- attr(m, "match.length")
-        
+
         ## split at event
         u <- substr(x[i], 1, m - 1)
         b <- substr(x[i], m + 1, m + l - 2)
         v <- substr(x[i], m + l, nchar(x)[i])
-        
+
         ## annotate event
         list_ids <- strsplit(b, "|", fixed = TRUE)
         ids <- unlist(list_ids)
@@ -205,7 +268,7 @@ annotatePaths <- function(paths)
         path_ann <- vector("list", length(i))
 
         if (!is.null(ann)) {
-          
+
             tmp <- tapply(ann, ann_path, unique, simplify = FALSE)
             path_ann[match(names(tmp), i)] <- tmp
 
@@ -229,12 +292,12 @@ annotatePaths <- function(paths)
         togroup(paths))]
 
     return(paths)
-    
+
 }
 
 plintersect <- function(x, y)
 {
-  
+
     n <- length(x)
     ix <- paste0(togroup(x), ":", unlist(x))
     iy <- paste0(togroup(y), ":", unlist(y))
@@ -261,7 +324,7 @@ matchTxFeatures <- function(query, subject)
 
     qH <- qH[togroup(sH)]
     sH <- unlist(sH)
-    
+
     new2("Hits",
          queryHits = qH,
          subjectHits = sH,
@@ -279,7 +342,7 @@ matchSGFeatures <- function(query, subject) {
         matchSplice(query, subject, "D"),
         matchSplice(query, subject, "A")
     ))
-    
+
 }
 
 matchJunction <- function(query, subject) {
@@ -295,19 +358,19 @@ matchJunction <- function(query, subject) {
         queryLength = length(query),
         subjectLength = length(subject),
         check = FALSE)
-    
+
 }
 
 matchExon <- function(query, subject, stringent = TRUE) {
 
-    i_q <- which(type(query) == "E")    
+    i_q <- which(type(query) == "E")
     i_s <- which(type(subject) %in% c("I", "F", "L", "U"))
 
     q2 <- query[i_q]
     s2 <- subject[i_s]
-    
+
     hits <- findOverlaps(q2, s2)
-    
+
     qH <- queryHits(hits)
     sH <- subjectHits(hits)
 
@@ -319,9 +382,9 @@ matchExon <- function(query, subject, stringent = TRUE) {
         check = FALSE)
 
     if (!stringent) { return(hits) }
-    
+
     ## exclude hits with inconsistent 5' spliced boundary
-    
+
     i <- which(splice5p(q2)[qH])
 
     if (length(i) > 0) {
@@ -338,7 +401,7 @@ matchExon <- function(query, subject, stringent = TRUE) {
     i <- which(splice3p(q2)[qH])
 
     if (length(i) > 0) {
-    
+
         q2_3p <- start(flank(q2[qH][i], -1, FALSE))
         s2_3p <- start(flank(s2[sH][i], -1, FALSE))
         s2_type <- type(s2)[sH][i]
@@ -347,7 +410,7 @@ matchExon <- function(query, subject, stringent = TRUE) {
     } else { excl_q_3p <- integer() }
 
     ## exclude hits with query overlapping 5' flanking intron
-    
+
     i <- which(type(s2)[sH] %in% c("I", "L"))
 
     if (length(i) > 0) {
@@ -369,20 +432,20 @@ matchExon <- function(query, subject, stringent = TRUE) {
         excl_s_3p <- i[queryHits(hits_2)]
 
     } else { excl_s_3p <- integer() }
-    
+
     excl <- unique(c(excl_q_5p, excl_q_3p, excl_s_5p, excl_s_3p))
 
     if (length(excl) > 0) { hits <- hits[-excl] }
 
     return(hits)
-    
+
 }
 
 matchSplice <- function(query, subject, type = c("D", "A")) {
 
     type <- match.arg(type)
-    
-    i_q <- which(type(query) == type)    
+
+    i_q <- which(type(query) == type)
     q <- query[i_q]
 
     if (type == "D") {
@@ -392,7 +455,7 @@ matchSplice <- function(query, subject, type = c("D", "A")) {
 
         i_s_E <- which(type(subject) %in% c("I", "F"))
         s_E <- flank(subject[i_s_E], -1, FALSE)
-      
+
     } else if (type == "A") {
 
         i_s_J <- which(type(subject) == "J")
@@ -405,7 +468,7 @@ matchSplice <- function(query, subject, type = c("D", "A")) {
 
     i_s <- c(i_s_J, i_s_E)
     s <- c(s_J, s_E)
-    
+
     hits <- findMatches(q, s)
 
     new2("Hits",

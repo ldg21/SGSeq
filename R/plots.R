@@ -5,22 +5,22 @@ exonGraph <- function(features, tx_view)
 
         tx_name <- txName(features)
         i <- which(elementLengths(tx_name) == 0)
-        tx_name[i] <- as(feature2name(features[i]), "CompressedCharacterList") 
+        tx_name[i] <- as(feature2name(features[i]), "CompressedCharacterList")
         features <- features[togroup(tx_name)]
         mcols(features)$tx_name <- unlist(tx_name)
 
-    } 
-    
+    }
+
     E <- features[type(features) == "E"]
     J <- features[type(features) == "J"]
-    
+
     v <- exonGraphNodes(E, J, tx_view)
     d <- exonGraphEdges(v, J, tx_view)
-    
+
     g <- graph.data.frame(d = d, directed = TRUE, vertices = v)
-    
+
     invisible(g)
-    
+
 }
 
 exonGraphNodes <- function(E, J, tx_view)
@@ -41,16 +41,16 @@ exonGraphNodes <- function(E, J, tx_view)
         v$tx_name <- mcols(E)$tx_name
 
     }
-    
+
     v <- addDummyNodes(v, E, J, tx_view)
-    
+
     return(v)
 
 }
 
 addDummyNodes <- function(v, E, J, tx_view)
 {
-    
+
     E_A <- gr2co(flank(E, -1, TRUE))
     E_D <- gr2co(flank(E, -1, FALSE))
     J_D <- gr2co(flank(J, -1, TRUE))
@@ -64,7 +64,7 @@ addDummyNodes <- function(v, E, J, tx_view)
         J_A <- paste0(J_A, "_", mcols(J)$tx_name)
 
     }
-    
+
     dummy_nodes <- union(setdiff(J_D, E_D), setdiff(J_A, E_A))
 
     if (length(dummy_nodes) > 0) {
@@ -78,7 +78,7 @@ addDummyNodes <- function(v, E, J, tx_view)
             coordinates <- dummy_nodes
 
         }
-        
+
         v_dummy <- data.frame(
             name = nrow(v) + seq_along(dummy_nodes),
             coordinates = coordinates,
@@ -95,13 +95,13 @@ addDummyNodes <- function(v, E, J, tx_view)
 
             v_dummy$label <- NA
 
-        }        
+        }
         if (tx_view) {
 
             v_dummy$tx_name <- sapply(strsplit(dummy_nodes, "_"), "[", 2)
 
         }
-        
+
         v <- rbindDfsWithoutRowNames(v, v_dummy)
 
     }
@@ -114,16 +114,16 @@ exonGraphEdges <- function(v, J, tx_view)
 {
 
     if (length(J) == 0) {
-      
+
         d <- data.frame(
             from = character(),
             to = character(),
             stringsAsFactors = FALSE)
 
         return(d)
-        
+
     }
-  
+
     E_A <- flank(co2gr(v$coordinates), -1, TRUE)
     E_D <- flank(co2gr(v$coordinates), -1, FALSE)
 
@@ -146,7 +146,7 @@ exonGraphEdges <- function(v, J, tx_view)
         ol <- ol[mcols(E_D)$tx_name[qH] == mcols(J_D)$tx_name[sH]]
 
     }
-    
+
     i_from <- queryHits(ol)
     i_junc <- subjectHits(ol)
 
@@ -180,9 +180,9 @@ exonGraphEdges <- function(v, J, tx_view)
         d$tx_name <- v$tx_name[i_from]
 
     }
-    
+
     return(d)
-    
+
 }
 
 ##' Plot splice graph implied by splice junctions and exon bins.
@@ -196,7 +196,7 @@ exonGraphEdges <- function(v, J, tx_view)
 ##'
 ##' A \code{data.frame} with information on plotted features, including
 ##' genomic coordinates, is returned invisibly.
-##' 
+##'
 ##' @title Plot splice graph
 ##' @param x \code{SGFeatures} or \code{SGVariants} object
 ##' @param geneID Single gene identifier used to subset \code{x}
@@ -277,19 +277,19 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     label <- match.arg(label)
 
     if (!is(x, "SGFeatures") && !is(x, "SGVariants")) {
-      
+
         stop("x must be an SGFeatures or SGVariants object")
 
     }
 
     if (!is.null(score) && !is(score, "RleList")) {
-      
+
         stop("score must be an RleList or NULL")
 
     }
 
     if (!is.null(ranges) && !is(ranges, "GRangesList")) {
-      
+
         stop("ranges must be a GRangesList or NULL")
 
     }
@@ -299,13 +299,13 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     if (length(x) == 0) { return() }
 
     if (is(x, "SGVariants")) {
-        
+
         x <- extractFeaturesFromVariants(x)
 
     }
 
     x <- setFeatureColors(x, color, color_novel, color_alpha)
-        
+
     g <- exonGraph(x, tx_view)
 
     exon_coordinates <- getExonCoordinates(g, toscale)
@@ -317,30 +317,30 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
         curvature, label, color_labels, 1, 3, tx_view, tx_dist)
 
     if (!is.null(score)) {
-      
+
         plotTrackScore(exon_coordinates, score, score_color, score_ylim,
             score_ypos, score_nbin, score_summary, score_label)
 
     }
 
     if (!is.null(ranges)) {
-      
+
         plotTrackRanges(exon_coordinates, toscale, ranges, ranges_color,
             ranges_ypos)
 
     }
-    
+
     text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2)
 
     invisible(df)
-    
+
 }
 
 plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
     curvature, label, color_labels, label_pos_exon, label_pos_junction,
     tx_view, tx_dist)
 {
-    
+
     ## data frames of nodes and edges
     gv <- nodes(g)
     gd <- edges(g)
@@ -355,7 +355,7 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
         vertex_y <- vertex_y * 2 * tx_dist
         vertex_y <- vertex_y - mean(unique(vertex_y))
         edge_short <- rep(TRUE, nrow(gd))
- 
+
     } else {
 
         vertex_y <- rep(-1 + 2 * ypos[1], nrow(gv))
@@ -363,11 +363,11 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
             rank(exon_coordinates$vertex_x)[i_from] + 1
 
     }
-    
+
     vertex_pos <- rep(label_pos_exon, nrow(gv))
-    
+
     if (is.null(label_pos_junction)) {
-    
+
         edge_pos <- ifelse(edge_short, 1, 3)
 
     } else {
@@ -379,7 +379,7 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
     if (is.null(curvature)) {
 
         edge_curved <- as.numeric(!edge_short)
-    
+
     } else {
 
         edge_curved <- rep(curvature, nrow(gd))
@@ -391,9 +391,9 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
     edge_curved <- edge_curved / asp
 
     vertex_frame_color <- switch(border, fill = gv$color, none = NA, border)
-    vertex_shape <- ifelse(!is.na(gv$type), "rectangle", "none")    
+    vertex_shape <- ifelse(!is.na(gv$type), "rectangle", "none")
     edge_lty <- rep(1, nrow(gd))
-    
+
     if (include == "exons") {
 
         edge_lty <- rep(0, nrow(gd))
@@ -403,7 +403,7 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
         vertex_shape <- rep("none", nrow(gv))
 
     }
-    
+
     plot(g,
         add = TRUE,
         rescale = FALSE,
@@ -424,7 +424,7 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
     df <- getGraphInfo(g, exon_coordinates$vertex_x, vertex_y,
         exon_coordinates$vertex_width, vertex_pos, edge_curved,
         edge_pos, color_labels, tx_view)
-    
+
     if (label != "none") {
 
         i <- seq_len(nrow(df))
@@ -432,17 +432,17 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
         if (include == "exons") {
 
             i <- which(df$type == "E")
-          
+
         } else if (include == "junctions") {
 
             i <- which(df$type == "J")
-          
+
         }
 
         if (length(i) > 0) {
-        
+
             df_tmp <- df[i, ]
-        
+
             text(x = df_tmp$x,
                 y = df_tmp$y + c(E = -1, J = 0)[df_tmp$type] * ypos[2],
                 labels = df_tmp[, label],
@@ -451,7 +451,7 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
                 col = df_tmp$color)
 
         }
-        
+
     }
 
     if (tx_view) {
@@ -461,18 +461,18 @@ plotExonGraph <- function(g, exon_coordinates, ypos, include, border,
             cex = par()$cex, line = 0.5, las = 1)
 
     }
-    
+
     cols <- c("id", "name", "type", "featureID", "label", "color")
     cols <- cols[cols %in% names(df)]
     df <- df[, cols]
-    
+
     return(df)
-    
+
 }
 
 getExonCoordinates <- function(g, toscale)
 {
-    
+
     ## data frames of nodes
     gv <- nodes(g)
 
@@ -485,7 +485,7 @@ getExonCoordinates <- function(g, toscale)
         stop("features must be on the same chromosome and strand")
 
     }
-    
+
     ## exon coordinates relative to gene locus
     ir_exon <- ranges(mapToTranscripts(gr_exon, split(gr_gene, 1),
         ignore.strand = FALSE))
@@ -497,7 +497,7 @@ getExonCoordinates <- function(g, toscale)
     exon_coordinates <- xcoordinates(ir_exon, ir_exonic, toscale)
     exon_width <- exon_coordinates$w
     exon_x <- exon_coordinates$x
-    
+
     coordinates <- list(
         gene_chrom = as.character(seqnames(gr_gene)),
         gene_strand = as.character(strand(gr_gene)),
@@ -506,7 +506,7 @@ getExonCoordinates <- function(g, toscale)
         vertex_x = exon_x,
         vertex_width = exon_width
     )
-    
+
     return(coordinates)
 
 }
@@ -516,7 +516,7 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
 {
 
     if (is(score, "RleList")) score <- score[[exon_coordinates$gene_chrom]]
-    
+
     tmp <- lapply(seq_along(exon_coordinates$vertex_x),
         scorePerExon, exon_coordinates, score)
 
@@ -533,7 +533,7 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
         bp_y <- bp_y[-excl]
 
     }
-    
+
     bin_size <- 2 / nbin
     bin_breaks <- seq(-1, 1, length.out = nbin + 1)
 
@@ -543,34 +543,43 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
 
     bin_y <- tapply(bp_y[rep(seq_along(bp_bin), width(bp_bin))],
         as.integer(bp_bin), summary)
-    
+
     if (is.null(ylim)) {
 
-      ylim <- range(bin_y, na.rm = TRUE, finite = TRUE)
-      ylim[1] <- floor(ylim[1])
-      ylim[2] <- ceiling(ylim[2])
-      
+        ymin <- floor(min(bin_y, na.rm = TRUE, finite = TRUE))
+        ymax <- ceiling(max(bin_y, na.rm = TRUE, finite = TRUE))
+
+        if (ymin >= 0) {
+
+            ylim <- c(0, ymax)
+
+        } else {
+
+            ylim <- c(ymin, ymax)
+
+        }
+
     }
 
     bin_y[bin_y < ylim[1]] <- ylim[1]
     bin_y[bin_y > ylim[2]] <- ylim[2]
 
     ypos_2 <- c(-1 + 2 * ypos[1] - ypos[2], 2 * ypos[2])
-    
+
     bin_y <- bin_y - ylim[1]
     bin_y <- bin_y / diff(range(ylim)) * ypos_2[2]
     bin_y <- bin_y + ypos_2[1]
-        
+
     mapply(rect, xleft = bin_breaks[-length(bin_breaks)],
         xright = bin_breaks[-1], ytop = bin_y,
         MoreArgs = list(ybottom = ypos_2[1], col = color, border = NA))
 
     axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]), labels = ylim,
         mgp = c(3, 0.5, 0.5), tcl = -0.25, las = 1)
-    
+
     mtext(side = 2, at = ypos_2[1] + 0.5 * ypos_2[2],
         cex = par()$cex, text = label, line = 3, las = 1)
-    
+
 }
 
 scorePerExon <- function(i, co, score)
@@ -579,21 +588,21 @@ scorePerExon <- function(i, co, score)
     ir_exon <- IRanges(co$exon_start[i], co$exon_end[i])
     y <- as.numeric(score[ir_exon])
     if (co$gene_strand == "-") { y <- rev(y) }
-    
+
     ex_start <- co$vertex_x[i] - 0.5 * co$vertex_width[i]
     ex_end <- co$vertex_x[i] + 0.5 * co$vertex_width[i]
-    
+
     d <- (ex_end - ex_start) / length(y)
-    
+
     ex_bp_x_start <- seq(ex_start, ex_end - d, length.out = length(y))
     ex_bp_x_end <- seq(ex_start + d, ex_end, length.out = length(y))
     ex_bp_y <- y
-    
+
     if (i < length(co$vertex_x) && co$exon_start[i + 1] - co$exon_end[i] > 1) {
-        
+
         ir_intron <- IRanges(co$exon_end[i], co$exon_start[i + 1]) - 1
         y <- as.numeric(score[ir_intron])
-        
+
         if (co$gene_strand == "-") {
 
           y <- rev(y)
@@ -601,35 +610,35 @@ scorePerExon <- function(i, co, score)
         }
 
         if (co$gene_strand == "+") {
-            
+
             in_start <- co$vertex_x[i] + 0.5 * co$vertex_width[i]
             in_end <- co$vertex_x[i + 1] - 0.5 * co$vertex_width[i + 1]
-            
+
         } else {
-            
+
             in_start <- co$vertex_x[i + 1] + 0.5 * co$vertex_width[i + 1]
             in_end <- co$vertex_x[i] - 0.5 * co$vertex_width[i]
-            
+
         }
-        
+
         d <- (in_end - in_start) / length(y)
-        
+
         in_bp_x_start <- seq(in_start, in_end - d, length.out = length(y))
         in_bp_x_end <- seq(in_start + d, in_end, length.out = length(y))
         in_bp_y <- y
-        
+
         out_bp_x_start <- c(ex_bp_x_start, in_bp_x_start)
         out_bp_x_end <- c(ex_bp_x_end, in_bp_x_end)
         out_bp_y <- c(ex_bp_y, in_bp_y)
-        
+
     } else {
-        
+
         out_bp_x_start <- ex_bp_x_start
         out_bp_x_end <- ex_bp_x_end
         out_bp_y <- ex_bp_y
-        
+
     }
-    
+
     out_bp_x_start[which(out_bp_x_start < -1)] <- -1
     out_bp_x_start[which(out_bp_x_start > 1)] <- 1
     out_bp_x_end[which(out_bp_x_end < -1)] <- -1
@@ -638,7 +647,7 @@ scorePerExon <- function(i, co, score)
     out <- list(x_start = out_bp_x_start, x_end = out_bp_x_end, y = out_bp_y)
 
     return(out)
-    
+
 }
 
 plotTrackRanges <- function(exon_coordinates, toscale, score, color, ypos)
@@ -648,17 +657,17 @@ plotTrackRanges <- function(exon_coordinates, toscale, score, color, ypos)
         IRanges(exon_coordinates$exon_start,
         exon_coordinates$exon_end), exon_coordinates$gene_strand)
     gr_gene <- range(gr_exon)
-    
+
     score <- score[which(unlist(range(score)) %over% gr_gene)]
     score <- endoapply(score, restrict, start(gr_gene), end(gr_gene))
-    
+
     ypos_2 <- c(-1 + 2 * ypos[1] - ypos[2], 2 * ypos[2])
 
     n <- length(score)
     h <- ypos_2[2] / (2 * n - 1)
     y <- seq(ypos_2[1] + ypos_2[2] - 0.5 * h, ypos_2[1] + 0.5 * h,
         length.out = n)
-    
+
     x <- mapply(plotRanges, score, y,
         MoreArgs = list(exon_coordinates = exon_coordinates,
             toscale = toscale, h = h, color = color))
@@ -687,7 +696,7 @@ plotRanges <- function(exon_coordinates, toscale, score, color, y, h)
     xright <- coords$x + 0.5 * coords$w
     ybottom <- y - 0.5 * h
     ytop <- y + 0.5 * h
-    
+
     mapply(rect, xleft = xleft, xright = xright,
         MoreArgs = list(ybottom = ybottom, ytop = ytop,
             col = color, border = NA))
@@ -695,7 +704,7 @@ plotRanges <- function(exon_coordinates, toscale, score, color, y, h)
     x <- 0.5 * (min(xleft) + max(xright))
 
     return(x)
-      
+
 }
 
 getGraphInfo <- function(g, x_exon, y_exon, w_exon, vertex_pos,
@@ -724,7 +733,7 @@ getGraphInfo <- function(g, x_exon, y_exon, w_exon, vertex_pos,
 
     co_E <- gv$coordinates[i_exon]
     co_J <- gd$coordinates[i_junc]
-    
+
     df <- data.frame(
         id = c(
             paste0(rep("E", length(co_E)),
@@ -738,7 +747,7 @@ getGraphInfo <- function(g, x_exon, y_exon, w_exon, vertex_pos,
         x = c(x_exon[i_exon], x_junc[i_junc]),
         y = c(y_exon[i_exon], y_junc[i_junc]),
         pos = c(vertex_pos[i_exon], edge_pos[i_junc]))
-    
+
     if (color_labels) {
 
         df$color <- addAlpha(c(gv$color[i_exon], gd$color[i_junc]), 1)
@@ -748,11 +757,11 @@ getGraphInfo <- function(g, x_exon, y_exon, w_exon, vertex_pos,
         df$color <- "black"
 
     }
-    
+
     if (!is.null(gv$label) && !is.null(gd$label)) {
-        
+
         df$label <- c(gv$label[i_exon], gd$label[i_junc])
-        
+
     }
 
     if (tx_view) {
@@ -772,27 +781,27 @@ xcoordinates <- function(ir, ir_exonic, toscale)
 
     ## intronic regions
     ir_intronic <- IRanges(end(ir_exonic)[-n_exonic],
-        start(ir_exonic)[-1]) - 1 
+        start(ir_exonic)[-1]) - 1
     n_intronic <- length(ir_intronic)
-    
+
     ## set widths for exonic/intronic regions
     ## if toscale is 'none' or 'exon', half of the x-axis range is used
     ## for plotting exonic regions and half for intronic regions
     if (toscale == "none") {
-        
+
         w_exonic <- rep(1 / n_exonic, n_exonic)
         w_intronic <- rep(1 / n_intronic, n_intronic)
-        
+
     } else if (toscale == "exon") {
-        
+
         w_exonic <- width(ir_exonic) / sum(width(ir_exonic))
         w_intronic <- rep(1 / n_intronic, n_intronic)
-        
+
     } else if (toscale == "gene") {
-        
+
         w_exonic <- 2 * width(ir_exonic) / width(range(ir_exonic))
         w_intronic <- 2 * width(ir_intronic) / width(range(ir_exonic))
-        
+
     }
 
     ## if there are no intronic regions, use full x-axis range
@@ -811,16 +820,16 @@ xcoordinates <- function(ir, ir_exonic, toscale)
     ol <- findOverlaps(ir, ir_block)
     ol_min <- as.integer(tapply(subjectHits(ol), queryHits(ol), min))
     ol_max <- as.integer(tapply(subjectHits(ol), queryHits(ol), max))
-    
+
     x_1 <- x_block[ol_min] + (start(ir) - start(ir_block)[ol_min]) /
         width(ir_block)[ol_min] * w_block[ol_min]
     x_2 <- x_block[ol_max] + (end(ir) - start(ir_block)[ol_max] + 1) /
         width(ir_block)[ol_max] * w_block[ol_max]
-    
+
     out <- list("x" = x_1 + 0.5 * (x_2 - x_1), "w" = x_2 - x_1)
-    
+
     return(out)
-    
+
 }
 
 setFeatureColors <- function(features, color, color_novel, alpha)
@@ -847,9 +856,9 @@ setFeatureColors <- function(features, color, color_novel, alpha)
     if (!is.null(alpha)) {
 
         features_color <- addAlpha(features_color, alpha)
-            
+
     }
-    
+
     mcols(features)$color <- features_color
 
     return(features)
@@ -861,9 +870,11 @@ addAlpha <- function(col, alpha)
 
     col_rgb <- col2rgb(col)/255
     rgb(col_rgb[1, ], col_rgb[2, ], col_rgb[3, ], alpha)
-    
+
 }
 
+##' Plot splice graph and heatmap of expression values.
+##'
 ##' @title Plot splice graph and heatmap of expression values
 ##' @inheritParams plotSpliceGraph
 ##' @param x \code{SGFeatureCounts} object
@@ -916,7 +927,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 {
 
     include <- match.arg(include)
-    
+
     if (!is(x, "SGFeatureCounts")) {
 
         stop("x must be an SGFeatureCounts object")
@@ -929,7 +940,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     if (nrow(x) == 0) { return() }
 
     features <- rowRanges(x)
-    
+
     if (!is.null(RowSideColors) && !is.list(RowSideColors)) {
 
         RowSideColors <- list(RowSideColors)
@@ -940,13 +951,13 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     include_type <- switch(include, junctions = "J", exons = "E",
         both = c("E", "J"))
     n_feature <- length(which(type(features) %in% include_type))
-    
+
     pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
     par(cex = cex, mai = pars$mai)
 
-    df <- plotSpliceGraph(x = features, 
+    df <- plotSpliceGraph(x = features,
         label = "id", tx_view = tx_view, ...)
 
     i_df <- switch(include,
@@ -955,11 +966,11 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
         both = seq_len(nrow(df)))
     i_df <- i_df[!duplicated(df$name[i_df])]
     i <- match(df$name[i_df], feature2name(features))
-    
+
     X <- transform(assay(x[i, ], assay))
     labCol <- df$id[i_df]
     colLabCol <- df$color[i_df]
-        
+
     plotImage(X, Rowv = Rowv, distfun = distfun,
         hclustfun = hclustfun, RowSideColors = RowSideColors,
         cexRow = cexRow, cexCol = cexCol, labRow = labRow,
@@ -970,6 +981,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 
 }
 
+##' Plot splice graph and heatmap of splice variant frequencies.
+##'
 ##' @title Plot splice graph and heatmap of splice variant frequencies
 ##' @inheritParams plotSpliceGraph
 ##' @inheritParams plotFeatures
@@ -988,7 +1001,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' NULL
 ##' @author Leonard Goldstein
 
-plotVariants <- function(x, eventID = NULL, tx_view = FALSE, 
+plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
     cex = 1, transform = function(x) { x }, Rowv = NULL,
     distfun = dist, hclustfun = hclust, margin = 0.2,
     RowSideColors = NULL, square = FALSE, cexRow = 1, cexCol = 1,
@@ -1005,10 +1018,10 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
     x <- restrictFeatures(x, eventID = eventID,
         expand_variants = expand_variants)
 
-    if (nrow(x) == 0) { return() }    
+    if (nrow(x) == 0) { return() }
 
     if (expand_variants) {
-    
+
         x <- expandSGVariantCounts(x, eventID)
 
     }
@@ -1019,7 +1032,7 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         elementLengths(featureID3p(x)) == 0
     event_not_quantifiable <- tapply(variant_not_quantifiable, eventID(x),
         any)
-    
+
     if (all(event_not_quantifiable)) {
 
         warning("none of the selected splice events could be quantified")
@@ -1034,11 +1047,11 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 
         RowSideColors <- list(RowSideColors)
 
-    }    
+    }
 
     exclude <- which(colSums(is.na(X)) == nrow(X))
     n_exclude <- length(exclude)
-    
+
     if (n_exclude > 0) {
 
         labRow <- labRow[-exclude]
@@ -1046,17 +1059,17 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         X <- X[, -exclude]
         RowSideColors <- lapply(RowSideColors, "[", -exclude)
         warning(paste("excluded", n_exclude, "samples with all values NA"))
-        
+
     }
-    
+
     n_sample <- ncol(x)
     n_feature <- nrow(x)
-    
+
     pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
     par(cex = cex, mai = pars$mai)
-    
+
     df <- plotSpliceGraph(x = rowRanges(x), label = "label",
         tx_view = tx_view, ...)
 
@@ -1065,10 +1078,10 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         invisible(df)
 
     }
-    
+
     labCol <- seq_len(nrow(X))
     colLabCol <- "black"
-    
+
     plotImage(X, Rowv = Rowv, distfun = distfun,
         hclustfun = hclustfun, RowSideColors = RowSideColors,
         cexRow = cexRow, cexCol = cexCol, labRow = labRow,
@@ -1081,7 +1094,7 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 
 extractFeaturesFromVariants <- function(variants)
 {
-    
+
     id2variant <- tapply(togroup(variants),
         featureID(unlist(variants)), unique, simplify = FALSE)
     id2variant <- id2variant[elementLengths(id2variant) == 1]
@@ -1090,7 +1103,7 @@ extractFeaturesFromVariants <- function(variants)
         featureID(features), names(id2variant))]
 
     return(features)
-    
+
 }
 
 getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
@@ -1098,36 +1111,36 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
 {
 
     n_RSC <- length(RowSideColors)
-    
+
     mat <- rbind(
         c(1, 1, 1),
         c(0, 0, 0),
         c(0, 2, 0),
         c(0, 0, 0))
-    
+
     for (i in seq_len(n_RSC)) {
-        
-        n <- max(mat) + 1            
+
+        n <- max(mat) + 1
         mat <- cbind(c(1, 0, 0, 0), c(1, 0, n, 0), mat)
-        
+
     }
 
     heightTopPanel <- heightPanels[1] / sum(heightPanels)
     heightBottomPanel <- heightPanels[2] / sum(heightPanels)
-    
+
     mar_wid <- c(0.05, margin)
     mar_hei <- c(0.05, 0.15) * heightBottomPanel
-    
+
     img_wid <- 1 - sum(mar_wid) - 0.025 * n_RSC * 2
     img_hei <- heightBottomPanel - sum(mar_hei)
-    
+
     wid <- c(mar_wid[1], rep(0.025, n_RSC * 2), img_wid, mar_wid[2])
     hei <- c(heightTopPanel, mar_hei[1], img_hei, mar_hei[2])
 
     if (square) {
 
         padding <- getPadding(n_sample, n_feature, wid, hei)
-        
+
         i_wid_mar <- c(1, length(wid))
         i_wid_img <- length(wid) - 1
 
@@ -1139,42 +1152,42 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
 
         hei[i_hei_mar] <- hei[i_hei_mar] + 0.5 * padding[2]
         hei[i_hei_img] <- hei[i_hei_img] - padding[2]
-        
+
     }
 
     ## add color key
 
     k <- ncol(mat)
-    r <- nrow(mat)    
+    r <- nrow(mat)
     mat <- cbind(mat[, seq_len(k - 2)], mat[, k - 1], mat[, k - 1], mat[, k])
     wid <- c(wid[seq_len(k - 2)], wid[k - 1] * 2/3, wid[k - 1] * 1/3, wid[k])
     mat <- rbind(mat, 0, 0)
     mat[nrow(mat) - 1, ncol(mat) - 1] <- max(mat) + 1
     hei <- c(hei[seq_len(r - 1)], rep(0.05, 2) * heightBottomPanel,
         hei[r] - 0.1 * heightBottomPanel)
-    
+
     ## splice graph margins and aspect ratio
-    
+
     ds <- dev.size()
     dev_wid <- ds[1]
     dev_hei <- ds[2]
 
     mai_hei <- c(0.05, 0.05) * dev_hei * heightTopPanel
-    
+
     if (tx_view) {
 
         mai_wid <- c(0.05, margin) * dev_wid
-        
+
     } else {
-        
+
         mai_wid <- c(0.05, 0.05) * dev_wid
-        
+
     }
 
     mai <- c(mai_hei[1], mai_wid[1], mai_hei[2], mai_wid[2])
-    
+
     list(mat = mat, wid = wid, hei = hei, mai = mai)
-    
+
 }
 
 getPadding <- function(n_sample, n_feature, wid, hei)
@@ -1189,10 +1202,10 @@ getPadding <- function(n_sample, n_feature, wid, hei)
 
     img_wid_real <- img_wid / sum(wid) * dev_wid
     img_hei_real <- img_hei / sum(hei) * dev_hei
-    
+
     cel_wid_real <- img_wid_real / n_feature
     cel_hei_real <- img_hei_real / n_sample
-    
+
     if (cel_wid_real > cel_hei_real) {
 
         pad_wid <- (1 - cel_hei_real / cel_wid_real) * img_wid
@@ -1202,7 +1215,7 @@ getPadding <- function(n_sample, n_feature, wid, hei)
 
         pad_wid <- 0
         pad_hei <- (1 - cel_wid_real / cel_hei_real) * img_hei
-        
+
     }
 
     pad <- c(pad_wid, pad_hei)
@@ -1214,11 +1227,11 @@ getPadding <- function(n_sample, n_feature, wid, hei)
 plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
     cexRow, cexCol, labRow = NULL, labCol = NULL, colLabCol, col, zlim)
 {
-    
+
     if (is.null(Rowv)) {
 
         if (ncol(x) > 1) {
-            
+
             j <- hclustfun(distfun(t(x)))$order
 
         } else {
@@ -1239,15 +1252,15 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
 
     x <- x[, j]
     RowSideColors <- lapply(RowSideColors, "[", j)
-    
-    if (!is.matrix(x)) { x <- matrix(x, ncol = length(j)) }        
+
+    if (!is.matrix(x)) { x <- matrix(x, ncol = length(j)) }
     if (is.null(zlim)) { zlim <- range(x[is.finite(x)]) }
 
     par(mai = c(0, 0, 0, 0))
     image(x, col = col, zlim = zlim, axes = FALSE)
 
     if (!is.null(labCol)) {
-    
+
         mtext(side = 3, at = seq(from = 0, to = 1,
             length.out = length(labCol)), text = labCol,
             cex = par()$cex * cexCol, col = colLabCol,
@@ -1270,14 +1283,14 @@ plotImage <- function(x, Rowv = NA, distfun, hclustfun, RowSideColors,
             col = RowSideColors[[r]], axes = FALSE)
         mtext(side = 3, text = names(RowSideColors)[r],
             cex = par()$cex * cexCol, line = 0.25, las = 3)
-        
+
     }
 
     par(mai = c(0, 0, 0, 0))
     image(matrix(seq_along(col), ncol = 1), col = col, axes = FALSE)
     mtext(side = 1, at = c(0, 1), text = format(zlim, digits = 2),
         cex = par()$cex, line = 0.25, las = 1)
-    
+
 }
 
 restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
@@ -1295,9 +1308,9 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
     }
 
     if (!is.null(geneID) || !is.null(eventID) || !is.null(geneName)) {
-    
+
         if (!is.null(geneID)) {
-            
+
             index <- which(geneID(y) %in% geneID)
 
         } else if (!is.null(eventID)) {
@@ -1313,15 +1326,15 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
                 featureIDs <- unlist(strsplit(featureIDs, ",", fixed = TRUE))
 
                 if (any(duplicated(featureIDs))) {
-                    
+
                     stop("cannot plot overlapping events")
 
                 }
 
             }
-            
+
             if (expand_variants) {
-            
+
                 featureIDs <- unique(unlist(strsplit(
                     unlist(expandString(featureID(y)[index])), ",",
                         fixed = TRUE)))
@@ -1332,21 +1345,21 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
                 index <- which(eventID(y) %in% eventIDs)
 
             }
-            
+
         } else if (!is.null(geneName)) {
 
             if (is.null(geneName(y))) {
-                
+
                 stop("missing geneName")
 
             }
-        
+
             if (length(geneName) > 1) {
-                
+
                 stop("geneName must be of length 1")
 
             }
-            
+
             index <- which(any(geneName(y) == geneName))
 
         }
@@ -1356,14 +1369,14 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
     } else if (!is.null(which)) {
 
         ol <- findOverlaps(y, which, type = "within")
-        
+
         index <- which(
             type(y) == "E" & (y %over% which) |
             type(y) == "J" & (seq_along(y) %in% queryHits(ol)))
-        
+
         y <- restrict(y[index], start = start(which), end = end(which))
-        
-                        
+
+
     } else {
 
         return(x)
@@ -1375,17 +1388,18 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
         x <- x[index, ]
         rowRanges(x) <- y
         return(x)
-        
+
     } else {
-        
+
         return(y)
-        
+
     }
 
 }
 
 ##' Plot read coverage and splice junction read counts for an individual
 ##' sample or averaged across samples.
+##'
 ##' @title Plot read coverage and splice junction read counts
 ##' @inheritParams plotSpliceGraph
 ##' @param x \code{SGFeatureCounts} or \code{SGFeatures} object.
@@ -1393,7 +1407,7 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 ##'   multiple samples, average coverage and splice junction counts
 ##'   are obtained.
 ##' @param sample_info Data frame with sample information.
-##'   If \code{x} is an \code{SGFeatureCounts} object, sample information 
+##'   If \code{x} is an \code{SGFeatureCounts} object, sample information
 ##'   is obtained from \code{colData(x)}. If \code{sample_info} includes
 ##'   multiple samples, average coverage and splice junction counts
 ##'   are obtained.
@@ -1411,6 +1425,7 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 ##' @param nbin Number of bins for plotting coverages
 ##' @param summary Function used to calculate per-bin coverage summaries
 ##' @param label Optional y-axis label
+##' @param min_anchor Integer specifiying minimum anchor length
 ##' @param cores Number of cores available for parallel processing.
 ##' @return \code{data.frame} with information on splice junctions included
 ##'   in the splice graph
@@ -1426,7 +1441,7 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     eventID = NULL, which = NULL, sample_info = NULL, sizefactor = NA,
     toscale = c("exon", "none", "gene"), color = "darkblue",
     ylim = NULL, label = NULL, nbin = 200, summary = mean,
-    curvature = 1, main = NULL, cores = 1)
+    curvature = 1, main = NULL, min_anchor = 1, cores = 1)
 {
 
     toscale <- match.arg(toscale)
@@ -1434,9 +1449,10 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     x <- restrictFeatures(x, geneID, eventID, which, geneName)
 
     if (is(x, "SGFeatures") && !is.null(sample_info)) {
-      
+
         sgf <- x
-        sgfc <- getSGFeatureCounts(sample_info, sgf, cores = cores)
+        sgfc <- getSGFeatureCounts(sample_info, sgf,
+            min_anchor = min_anchor, cores = cores)
 
     } else if (is(x, "SGFeatureCounts")) {
 
@@ -1447,9 +1463,9 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     } else {
 
         stop("either x must be an SGFeatureCounts object,
-            or an SGFeatures object and sample_info not NULL")
+            or x must be an SGFeatures object and sample_info not NULL")
 
-    } 
+    }
 
     if (is.null(sizefactor)) {
 
@@ -1458,7 +1474,7 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     } else if (length(sizefactor) == 1 && is.na(sizefactor)) {
 
         sizefactor <- rep(1, nrow(sample_info))
-            
+
     } else if (length(sizefactor) != nrow(sample_info)) {
 
         stop("sizefactor must have length equal to the number of samples")
@@ -1467,7 +1483,7 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
 
     scaled_cov <- getCoverage(sample_info, range(sgf), sizefactor, cores)
     average_cov <- Reduce("+", scaled_cov) / length(scaled_cov)
-    
+
     scaled_counts <- sweep(counts(sgfc), 2, sizefactor, FUN = "/")
     average_counts <- rowSums(scaled_counts) / ncol(scaled_counts)
 
@@ -1485,5 +1501,5 @@ plotCoverage <- function(x, geneID = NULL, geneName = NULL,
     text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2)
 
     invisible(df)
-    
+
 }

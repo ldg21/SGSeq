@@ -1,5 +1,5 @@
 ##' Example sample information
-##' 
+##'
 ##' Sample information for example BAM files included in the
 ##' \code{SGSeq} package.
 ##'
@@ -12,7 +12,7 @@
 NULL
 
 ##' Example genomic region of interest
-##' 
+##'
 ##' FBXO31 gene locus, based on UCSC knownGene annotation.
 ##'
 ##' @format A \code{GRanges} object.
@@ -22,7 +22,7 @@ NULL
 NULL
 
 ##' Example transcripts
-##' 
+##'
 ##' FBXO31 transcripts, based on UCSC knownGene annotation.
 ##' Suitable as input for \code{convertToTxFeatures} and
 ##' \code{predictVariantEffects}.
@@ -34,7 +34,7 @@ NULL
 NULL
 
 ##' Example transcript features (annotation-based)
-##' 
+##'
 ##' Transcript features for FBXO31, based on UCSC knownGene annotation.
 ##'
 ##' @format A \code{TxFeatures} object.
@@ -44,7 +44,7 @@ NULL
 NULL
 
 ##' Example transcript features (predicted)
-##' 
+##'
 ##' Transcript features for FBXO31, predicted from example BAM files.
 ##'
 ##' @format A \code{TxFeatures} object.

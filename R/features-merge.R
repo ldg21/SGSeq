@@ -3,7 +3,7 @@
 ##' Merged features are the union of splice junctions and internal exons.
 ##' For terminal exons with shared spliced boundary, the longest exon is
 ##' retained.
-##' 
+##'
 ##' @title Merge redundant features
 ##' @param ... one or more \code{TxFeatures} objects, or a single
 ##'   list of \code{TxFeatures} objects
@@ -28,14 +28,14 @@ mergeTxFeatures <- function(..., min_n_sample = 1)
         x <- dots
 
     }
-    
+
     if (all(sapply(x, is, "TxFeatures") | sapply(x, is.null)) &&
         !all(sapply(x, is.null))) {
 
         x <- x[which(elementLengths(x) > 0)]
         x <- lapply(x, dropMcols)
         features <- do.call(c, x)
-        
+
     } else {
 
         stop("... must be one or more TxFeatures or a single
@@ -44,11 +44,11 @@ mergeTxFeatures <- function(..., min_n_sample = 1)
     }
 
     if (is.null(features)) { return(TxFeatures()) }
-    
+
     ## obtain unique splice junctions and internal exons
     J <- selectFeatures(features, "J", min_n_sample)
     I <- selectFeatures(features, "I", min_n_sample)
-    
+
     ## merge terminal exons
     Z <- mergeExonsTerminal(features, min_n_sample)
 
@@ -58,10 +58,10 @@ mergeTxFeatures <- function(..., min_n_sample = 1)
     ## erase txName, geneName
     txName(features) <- CharacterList(vector("list", length(features)))
     geneName(features) <- CharacterList(vector("list", length(features)))
-    
+
     ## filter isolated exons (without flanking splice junctions)
     if (min_n_sample > 1) { features <- removeExonsIsolated(features) }
-            
+
     ## sort features
     features <- sort(features)
 
@@ -81,15 +81,15 @@ selectFeatures <- function(features, type, min_n_sample = 1)
         co_n <- table(co)
         i <- which(co %in% names(which(co_n >= min_n_sample)))
         features <- unique(features[i])
-        
+
     } else {
 
         si <- seqinfo(features)
         features <- TxFeatures()
         seqinfo(features) <- si
-        
+
     }
-    
+
     return(features)
 
 }
@@ -100,7 +100,7 @@ mergeExonsTerminal <- function(features, min_n_sample = 1)
     index <- which(type(features) %in% c("F", "L"))
 
     if (length(index) > 0) {
-    
+
         features <- features[index]
         splicesite <- feature2name(features, collapse_terminal = TRUE)
         splicesite_n <- table(splicesite)
@@ -116,19 +116,19 @@ mergeExonsTerminal <- function(features, min_n_sample = 1)
 
         for (ann in c("txName", "geneName")) {
 
-            exons_ann <- collapseCharacterList(slot(features, ann), splicesite)
+            exons_ann <- splitCharacterList(slot(features, ann), splicesite)
             slot(exons, ann) <- setNames(exons_ann, NULL)
-            
+
         }
-            
+
     } else {
 
         si <- seqinfo(features)
         exons <- TxFeatures()
         seqinfo(exons) <- si
-        
+
     }
-    
+
     return(exons)
 
 }
@@ -147,14 +147,14 @@ mergeSGFeatures <- function(...)
         x <- dots
 
     }
-    
+
     if (all(sapply(x, is, "SGFeatures") | sapply(x, is.null)) &&
         !all(sapply(x, is.null))) {
 
         x <- x[which(elementLengths(x) > 0)]
         x <- lapply(x, dropMcols)
         x <- do.call(c, x)
-        
+
     } else {
 
         stop("... must be one or more SGFeatures objects or a single
@@ -166,7 +166,7 @@ mergeSGFeatures <- function(...)
     features <- addFeatureID(features)
     features <- addGeneID(features)
     features <- SGFeatures(features)
-    
+
     return(features)
-    
+
 }

@@ -1,6 +1,6 @@
 ## NOTE
 ## Sample information for test BAM files must be available.
-## All other example R data objects are created. 
+## All other example R data objects are created.
 
 library(SGSeq)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
@@ -8,7 +8,7 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 si_file_bam <- si$file_bam
 
 path <- system.file("extdata", package = "SGSeq")
-si$file_bam <- file.path(path, "bams", si$file_bam)
+si$file_bam <- file.path(path, "bams", si_file_bam)
 
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 txdb <- keepSeqlevels(txdb, "chr16")
@@ -36,8 +36,7 @@ save(sgv_ann, file = "sgv_ann.rda")
 sgvc_ann <- getSGVariantCounts(sgv_ann, sgfc_ann)
 save(sgvc_ann, file = "sgvc_ann.rda")
 
-sgvc_ann_from_bam <- getSGVariantCounts(sgv_ann,
-    features = sgf_ann, sample_info = si)
+sgvc_ann_from_bam <- getSGVariantCounts(sgv_ann, sample_info = si)
 sgvc_ann_from_bam$file_bam <- si_file_bam
 save(sgvc_ann_from_bam, file = "sgvc_ann_from_bam.rda")
 
@@ -59,13 +58,12 @@ save(sgv_pred, file = "sgv_pred.rda")
 sgvc_pred <- getSGVariantCounts(sgv_pred, sgfc_pred)
 save(sgvc_pred, file = "sgvc_pred.rda")
 
-sgvc_pred_from_bam <- getSGVariantCounts(sgv_pred,
-    features = sgf_pred, sample_info = si)
+sgvc_pred_from_bam <- getSGVariantCounts(sgv_pred, sample_info = si)
 sgvc_pred_from_bam$file_bam <- si_file_bam
 save(sgvc_pred_from_bam, file = "sgvc_pred_from_bam.rda")
 
 ## transcripts
 
 tx <- SGSeq:::convertToTranscripts(txdb)
-tx <- tx[tx %over% gr]
+tx <- tx[c("uc002fjv.3", "uc002fjw.3", "uc010vot.2")]
 save(tx, file = "tx.rda")

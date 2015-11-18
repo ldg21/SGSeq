@@ -2,7 +2,7 @@ feature2name <- function(features, collapse_terminal = FALSE)
 {
 
     if (is(features, "Features")) {
-    
+
         features_type <- type(features)
 
     } else {
@@ -10,9 +10,9 @@ feature2name <- function(features, collapse_terminal = FALSE)
         features_type <- mcols(features)$type
 
     }
-    
+
     name <- rep(NA, length(features))
-    
+
     if (collapse_terminal) {
 
         i <- which(features_type %in% c("J", "I", "U", "E"))
@@ -21,12 +21,12 @@ feature2name <- function(features, collapse_terminal = FALSE)
         start <- ifelse(features_type[i] == "F", FALSE, TRUE)
         name[i] <- paste0(features_type[i], ":",
             gr2co(flank(features[i], -1, start)))
-        
+
     } else {
-    
+
         i <- which(features_type %in% c("J", "I", "F", "L", "U", "E"))
         name[i] <- paste0(features_type[i], ":", gr2co(features[i]))
-        
+
     }
 
     i <- which(features_type %in% c("D", "A"))
@@ -40,7 +40,7 @@ co2str <- function(seqlevel, start, end, strand)
 {
 
     paste0(seqlevel, ":", start, "-", end, ":", strand)
-    
+
 }
 
 gr2co <- function(x)
@@ -51,11 +51,11 @@ gr2co <- function(x)
         return()
 
     } else {
-      
+
         co2str(seqnames(x), start(x), end(x), strand(x))
 
     }
-    
+
 }
 
 co2gr <- function(co)
@@ -68,7 +68,7 @@ co2gr <- function(co)
     end <- as.integer(sapply(r, "[", 2))
     st <- sapply(x, "[", 3)
     GRanges(sn, IRanges(start, end), st)
-    
+
 }
 
 pos2str <- function(seqlevel, position, strand)
@@ -86,26 +86,32 @@ gr2pos <- function(x)
         return()
 
     } else {
-      
+
         pos2str(seqnames(x), start(x), strand(x))
 
     }
-    
+
 }
 
 pos2gr <- function(x)
 {
 
-    x <- strsplit(x, split = ":", fixed = TRUE)    
+    x <- strsplit(x, split = ":", fixed = TRUE)
     sn <- sapply(x, "[", 1)
     pos <- as.integer(sapply(x, "[", 2))
-    st <- sapply(x, "[", 3)    
+    st <- sapply(x, "[", 3)
     GRanges(sn, IRanges(pos, pos), st)
 
 }
 
-readGap <- function(file, paired_end, which = NULL)
+readGap <- function(file, paired_end, which, sample_name, verbose)
 {
+
+    if (length(which) != 1) {
+
+        stop("which argument must have length 1")
+
+    }
 
     ## the following flags are set by functions
     ## readGAlignments and readGAlignmentPairs
@@ -114,16 +120,10 @@ readGap <- function(file, paired_end, which = NULL)
     ## - hasUnmappedMate
 
     flag <- scanBamFlag(isSecondaryAlignment = FALSE)
-    param <- ScanBamParam(flag = flag, tag = "XS")
-    
-    if (!is.null(which)) {
-
-        bamWhich(param) <- reduce(which)
-
-    }
+    param <- ScanBamParam(flag = flag, tag = "XS", which = which)
 
     if (paired_end) {
-      
+
         gap <- suppressWarnings(readGAlignmentPairs(file = file,
             param = param))
 
@@ -133,18 +133,54 @@ readGap <- function(file, paired_end, which = NULL)
         ## gap <- makeGAlignmentPairs(ga, use.names = TRUE, use.mcols = TRUE)
         ## names(gap) <- NULL
         ## scanBam workaround end
-      
+
         gap <- propagateXS(gap)
 
     } else {
 
         gap <- suppressWarnings(readGAlignments(file = file, param = param))
-        
+
     }
 
     gap <- filterGap(gap)
-    
+
     mcols(gap)$strand <- XS2strand(mcols(gap)$XS)
+
+    gap <- gap[mcols(gap)$strand %in% c(as.character(strand(which)), "*")]
+
+    frag_exonic <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
+    frag_intron <- ranges(junctions(gap))
+
+    if (paired_end) {
+
+        diff <- setdiff(frag_exonic, frag_intron)
+        excl <- which(sum(width(frag_exonic)) > sum(width(diff)))
+
+        if (length(excl) > 0) {
+
+            if (verbose) {
+
+                msg <- paste(
+                    "filtered",
+                    length(excl),
+                    "inconsistent paired alignments in",
+                    gr2co(which))
+
+                generateWarningMessage(
+                    "readGap",
+                    sample_name,
+                    msg)
+
+            }
+
+            frag_exonic <- frag_exonic[-excl]
+            frag_intron <- frag_intron[-excl]
+
+        }
+
+    }
+
+    gap <- list(frag_exonic = frag_exonic, frag_intron = frag_intron)
 
     return(gap)
 
@@ -168,7 +204,7 @@ XS2strand <- function(xs)
     s <- xs
     s[is.na(s)|s == "?"] <- "*"
     return(s)
-    
+
 }
 
 filterGap <- function(gap)
@@ -178,13 +214,13 @@ filterGap <- function(gap)
 
         exclude <- filterGa(gap)
 
-    }    
+    }
     if (is(gap, "GAlignmentPairs")) {
-        
+
         exclude <- filterGa(first(gap)) | filterGa(last(gap))
 
     }
-    
+
     gap <- gap[!exclude]
 
     return(gap)
@@ -195,7 +231,7 @@ filterGa <- function(ga)
 {
 
     grepl("(\\d+D\\d+N)|(\\d+N\\d+D)", cigar(ga))
-    
+
 }
 
 dropMcols <- function(x)
@@ -203,20 +239,20 @@ dropMcols <- function(x)
 
     mcols(x) <- NULL
     return(x)
-    
+
 }
 
 completeMcols <- function(x, retain_coverage)
 {
 
     mcol <- c("type", "N")
-    
+
     if (retain_coverage) {
 
         mcol <- c(mcol, "N_splicesite", "coverage")
 
     }
-        
+
     for (m in setdiff(mcol, names(mcols(x)))) {
 
         if (m == "N") {
@@ -232,12 +268,12 @@ completeMcols <- function(x, retain_coverage)
             mcols(x)[, m] <- RleList(as.integer(), compress = TRUE)
 
         }
-        
+
     }
-    
+
     mcols(x) <- mcols(x)[, mcol, drop = FALSE]
-    names(mcols(x)) <- mcol        
-    
+    names(mcols(x)) <- mcol
+
     return(x)
 
 }
@@ -258,7 +294,7 @@ getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
     read_length <- median(bam$qwidth, na.rm = TRUE)
 
     if (paired_end) {
-        
+
         isize <- bam$isize
         frag_length <- median(isize[which(isize > 0)], na.rm = TRUE)
 
@@ -277,15 +313,15 @@ getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
        frag_length = frag_length)
 
     if (is.null(yieldSize)) {
-        
+
         x$lib_size <- length(unique(bam$qname))
-        
-    } 
+
+    }
 
     generateCompleteMessage(sample_name)
-    
+
     return(x)
-    
+
 }
 
 expandUnstrandedRanges <- function(x)
@@ -294,7 +330,7 @@ expandUnstrandedRanges <- function(x)
     i <- which(strand(x) == "*")
 
     if (length(i) > 0) {
-    
+
         additional <- x[i]
         strand(additional) <- "-"
         strand(x)[i] <- "+"
@@ -310,7 +346,7 @@ uniqueFeatures <- function(features)
 {
 
     i_duplicated <- vector()
-    
+
     for (type in levels(type(features))) {
 
         i_type <- which(type(features) == type)
@@ -326,7 +362,7 @@ uniqueFeatures <- function(features)
     }
 
     return(features)
-    
+
 }
 
 ##' Export features to BED format. Splice sites are not included.
@@ -353,7 +389,7 @@ exportFeatures <- function(features, file)
     }
 
     features <- asGRanges(features)
-    
+
     i_splicesite <- which(mcols(features)$type %in% c("D", "A"))
 
     if (length(i_splicesite) > 0) {
@@ -365,11 +401,11 @@ exportFeatures <- function(features, file)
     i_junction <- which(mcols(features)$type == "J")
     color <- mcols(features)$color
     mcols(features) <- NULL
-    
+
     bed <- split(features, seq_along(features))
 
     if (length(i_junction) > 0) {
-    
+
         bed[i_junction] <- psetdiff(
            split(features[i_junction], seq_along(i_junction)),
            split(features[i_junction] - 1, seq_along(i_junction)))
@@ -380,22 +416,22 @@ exportFeatures <- function(features, file)
 
         itemRgb <- rgb(t(col2rgb(color)), maxColorValue = 255)
         mcols(bed)$itemRgb <- itemRgb
-        
+
     }
 
     names(bed) <- feature2name(features)
-    
+
     export(object = bed, con = file, format = "BED")
 
     return()
-    
+
 }
 
 nextFrame <- function(f, w, prev = FALSE)
 {
 
-    if (is(f, "list") || is(f, "List")) { 
-    
+    if (is(f, "list") || is(f, "List")) {
+
         f_unlisted <- unlist(f)
         w_unlisted <- w[togroup(f)]
         n_unlisted <- nextFrame(f_unlisted, w_unlisted, prev)
@@ -408,7 +444,7 @@ nextFrame <- function(f, w, prev = FALSE)
             n <- ifelse(f != -1, (f - w) %% 3, -1)
 
         } else {
-            
+
             n <- ifelse(f != -1, (f + w) %% 3, -1)
 
         }
@@ -416,10 +452,10 @@ nextFrame <- function(f, w, prev = FALSE)
     }
 
     return(n)
-    
+
 }
 
-collapseCharacterList <- function(x, f)
+splitCharacterList <- function(x, f)
 {
 
     if (!is(f, "factor")) {
@@ -441,14 +477,14 @@ asGRanges <- function(from)
 {
 
     granges(from, TRUE)
-    
+
 }
 
 asGRangesList <- function(from)
 {
 
     as(from, "GRangesList")
-    
+
 }
 
 reorderFeatures <- function(x)
@@ -466,7 +502,7 @@ reorderFeatures <- function(x)
     x <- split(features[i_all], features_x[i_all])
     names(x) <- x_names
     mcols(x) <- x_mc
-    
+
     return(x)
 
 }
@@ -499,25 +535,25 @@ rbindListOfDFs <- function(x, cores)
     }
 
     names(df) <- k
-    
+
     df <- DataFrame(df, check.names = FALSE)
 
     return(df)
-  
+
 }
 
 checkApplyResultsForErrors <- function(out, fun_name, items, error_class)
 {
-  
+
     failed <- sapply(out, is, error_class)
 
     if (any(failed)) {
-  
+
         i <- which(failed)
         err <- makeErrorMessage(fun_name, items[i], out[i])
         err <- paste0("\n", err)
         stop(err, call. = FALSE)
-        
+
     }
 
 }
@@ -529,7 +565,7 @@ makeErrorMessage <- function(fun_name, items, msgs)
     msg <- paste(msg, collapse = "\n")
 
     return(msg)
- 
+
 }
 
 makeWarningMessage <- function(fun_name, items, msgs)
@@ -539,7 +575,7 @@ makeWarningMessage <- function(fun_name, items, msgs)
     msg <- paste(msg, collapse = "\n")
 
     return(msg)
- 
+
 }
 
 makeCompleteMessage <- function(item) {
@@ -565,66 +601,66 @@ generateCompleteMessage <- function(item)
 getCoverage <- function(sample_info, which, sizefactor, cores)
 {
 
-  if (!is(which, "GRanges") || length(which) > 1) {
+    if (!is(which, "GRanges") || length(which) > 1) {
 
-      stop("which must be a GRanges object of length 1")
+        stop("which must be a GRanges object of length 1")
 
-  }
+    }
 
-  list_cov <- mcmapply(
-      getCoveragePerSample,
-      file_bam = sample_info$file_bam,
-      paired_end = sample_info$paired_end,
-      sizefactor = sizefactor,
-      MoreArgs = list(which = which),
-      SIMPLIFY = FALSE,
-      USE.NAMES = FALSE,
-      mc.preschedule = setPreschedule(cores),
-      mc.cores = cores) 
+    list_cov <- mcmapply(
+        getCoveragePerSample,
+        file_bam = sample_info$file_bam,
+        paired_end = sample_info$paired_end,
+        sample_name = sample_info$sample_name,
+        sizefactor = sizefactor,
+        MoreArgs = list(which = which),
+        SIMPLIFY = FALSE,
+        USE.NAMES = FALSE,
+        mc.preschedule = setPreschedule(cores),
+        mc.cores = cores)
 
-  return(list_cov)
+    return(list_cov)
 
 }
 
-getCoveragePerSample <- function(file_bam, paired_end, sizefactor, which)
+getCoveragePerSample <- function(file_bam, paired_end, sample_name,
+    sizefactor, which)
 {
 
-  st <- as.character(strand(which))  
-  gap <- readGap(file_bam, paired_end, which)
-  gap <- gap[mcols(gap)$strand %in% c(st, "*")]
-  irl <- reduce(ranges(grglist(gap, drop.D.ranges = TRUE)))
-  cov <- coverage(unlist(irl), width = end(which)) / sizefactor
-  
-  return(cov)
-  
+    gap <- readGap(file_bam, paired_end, which, sample_name, FALSE)
+    cov <- coverage(unlist(gap$frag_exonic), width = end(which))
+    cov <- cov / sizefactor
+
+    return(cov)
+
 }
 
 calculateSizeFactor <- function(sample_info)
 {
-        
+
     E <- rep(NA, nrow(sample_info))
 
     i_PE <- which(sample_info$paired_end)
-    
+
     if (length(i_PE) > 0) {
 
         R_PE <- sample_info$read_length[i_PE]
         F_PE <- sample_info$frag_length[i_PE]
         I_PE <- F_PE - 2 * R_PE
         E[i_PE] <- F_PE - pmax(I_PE, 0)
-    
+
     }
 
     i_SE <- which(!sample_info$paired_end)
-        
+
     if (length(i_SE) > 0) {
 
         E[i_SE] <- sample_info$read_length[i_SE]
-    
+
     }
 
     sizefactor <- sample_info$lib_size * E * 1e-9
-    
+
     return(sizefactor)
 
 }
@@ -646,7 +682,7 @@ checkIdenticalSummarizedExperiment <- function(target, current,
 
     checkIdentical(slots, slotNames(target))
     checkIdentical(slots, slotNames(current))
-    
+
     slots <- slots[slots != "assays"]
 
     if (!check.colData) {
@@ -654,7 +690,7 @@ checkIdenticalSummarizedExperiment <- function(target, current,
         slots <- slots[slots != "colData"]
 
     }
-    
+
     for (s in slots) {
 
         checkIdentical(slot(target, s), slot(current, s))
@@ -669,11 +705,11 @@ checkIdenticalSummarizedExperiment <- function(target, current,
     for (a in assays_target) {
 
         checkIdentical(assay(target, a), assay(current, a))
-      
+
     }
- 
+
     return(TRUE)
-  
+
 }
 
 rbindDfsWithoutRowNames <- function(...)

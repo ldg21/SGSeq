@@ -37,7 +37,7 @@ validSGSegments <- function(object)
         txName = "CharacterList",
         geneName = "CharacterList")
     validMcols(object, mcol_type)
-    
+
 }
 
 validSGVariants <- function(object)
@@ -52,10 +52,14 @@ validSGVariants <- function(object)
         geneID = "integer",
         eventID = "integer",
         variantID = "integer",
-        closed3p = "logical",
         closed5p = "logical",
+        closed3p = "logical",
+        closed5pEvent = "logical",
+        closed3pEvent = "logical",
         featureID5p = "IntegerList",
         featureID3p = "IntegerList",
+        featureID5pEvent = "IntegerList",
+        featureID3pEvent = "IntegerList",
         variantType = "CharacterList",
         variantName = "character",
         txName = "CharacterList",
@@ -71,20 +75,20 @@ validSGFeatureCounts <- function(object)
         counts = "integer",
         FPKM = "numeric")
     validAssays(object, assay_type)
-    
+
 }
 
 validSGVariantCounts <- function(object)
 {
 
     assay_type <- c(
-        countsVariant5p = "integer",
-        countsVariant3p = "integer",
-        countsTotal5p = "integer",
-        countsTotal3p = "integer",
+        counts5p = "integer",
+        counts3p = "integer",
+        counts5pEvent = "integer",
+        counts3pEvent = "integer",
         variantFreq = "numeric")
     validAssays(object, assay_type)
-    
+
 }
 
 ## Validity checks - helper functions
@@ -100,9 +104,9 @@ validExtraColumnSlotLengths <- function(object)
 
         return(paste("invalid length for slot(s)",
             paste(dQuote(slots[i]), collapse = ", ")))
-      
+
     }
-  
+
 }
 
 validExtraColumnSlotValues <- function(object, slot_values)
@@ -134,28 +138,28 @@ typeLevels <- function(class)
     switch(class,
         TxFeatures = c("J", "I", "F", "L", "U"),
         SGFeatures = c("J", "E", "D", "A"))
-    
+
 }
 
 validMcols <- function(object, mcol_type)
 {
 
     i <- which(!names(mcol_type) %in% names(mcols(object)))
-    
+
     if (length(i) > 0) {
 
         return(paste("missing metadata column(s)",
             paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
-        
+
     }
-    
+
     i <- which(!mapply(is, mcols(object)[names(mcol_type)], mcol_type))
-    
+
     if (length(i) > 0) {
 
         return(paste("invalid type for metadata column(s)",
             paste(dQuote(names(mcol_type)[i]), collapse = ", ")))
-        
+
     }
 
 }
@@ -164,22 +168,22 @@ validAssays <- function(object, assay_type)
 {
 
     i <- which(!names(assay_type) %in% names(assays(object)))
-    
+
     if (length(i) > 0) {
 
         return(paste("missing assay(s)",
             paste(dQuote(names(assay_type)[i]), collapse = ", ")))
-        
+
     }
-    
+
     i <- which(!mapply(function(x, t) { is(as.vector(x), t) },
         assays(object)[names(assay_type)], assay_type))
-    
+
     if (length(i) > 0) {
 
         return(paste("invalid type for assay(s)",
             paste(dQuote(names(assay_type)[i]), collapse = ", ")))
-        
+
     }
 
 }
@@ -267,7 +271,7 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 
 ##' Creates an instance of S4 class \code{TxFeatures} for storing
 ##' transcript features.
-##' 
+##'
 ##' \code{TxFeatures} extends \code{GRanges} with column slot \code{type}
 ##' specifying feature type. \code{type} is a factor with levels
 ##' \code{J} (splice junction), \code{I} (internal exon),
@@ -276,7 +280,7 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 ##'
 ##' \code{txName} and \code{geneName} are CharacterLists storing
 ##' transcript and gene annotation, respectively.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{TxFeatures}
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
 ##' @param type Character vector or factor, taking values in
@@ -301,13 +305,13 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
         geneName <- CharacterList()
 
     } else {
-        
+
         if (is.character(type))
             type <- factor(type, levels = typeLevels("TxFeatures"))
-        
+
         if (is.null(txName))
             txName <- CharacterList(vector("list", length(x)))
-        
+
         if (is.null(geneName))
             geneName <- CharacterList(vector("list", length(x)))
 
@@ -315,14 +319,14 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 
     slots <- c("type", "txName", "geneName")
     mcols(x) <- mcols(x)[!names(mcols(x)) %in% slots]
-        
+
     new("TxFeatures", x, type = type, txName = txName, geneName = geneName)
 
 }
 
 ##' Creates an instance of S4 class \code{SGFeatures} for storing
 ##' splice graph features.
-##' 
+##'
 ##' \code{SGFeatures} extends \code{GRanges} with column slot \code{type}
 ##' specifying feature type. \code{type} is a factor with levels
 ##' \code{J} (splice junction), \code{E} (exon bin),
@@ -337,10 +341,10 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 ##' \code{featureID} and \code{geneID} are integer vectors representing
 ##' unique identifiers for features and genes (connected components in
 ##' the splice graph).
-##' 
+##'
 ##' \code{txName} and \code{geneName} are CharacterLists storing
 ##' transcript and gene annotation, respectively.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{SGFeatures}
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
 ##' @param type Character vector or factor taking values in \code{J},
@@ -362,7 +366,7 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 
 SGFeatures <- function(x, type = mcols(x)$type,
     splice5p = mcols(x)$splice5p, splice3p = mcols(x)$splice3p,
-    featureID = mcols(x)$featureID, geneID = mcols(x)$geneID, 
+    featureID = mcols(x)$featureID, geneID = mcols(x)$geneID,
     txName = mcols(x)$txName, geneName = mcols(x)$geneName)
 {
 
@@ -376,29 +380,29 @@ SGFeatures <- function(x, type = mcols(x)$type,
         geneID <- integer()
         txName <- CharacterList()
         geneName <- CharacterList()
-        
-    } else {    
-    
+
+    } else {
+
         if (is.character(type))
             type <- factor(type, levels = typeLevels("SGFeatures"))
-        
+
         if (is.null(txName))
             txName <- CharacterList(vector("list", length(x)))
-        
+
         if (is.null(geneName))
             geneName <- CharacterList(vector("list", length(x)))
 
     }
-    
+
     new("SGFeatures", granges(x), type = type, splice5p = splice5p,
         splice3p = splice3p, featureID = featureID, geneID = geneID,
         txName = txName, geneName = geneName)
-        
+
 }
 
 ##' Creates an instance of S4 class \code{SGSegments} for storing
 ##' splice graph segments.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{SGSegments}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
@@ -426,24 +430,24 @@ SGSegments <- function(x)
             geneName = CharacterList())
 
     } else {
-        
+
         n <- length(x)
-        
+
         if (is.null(mcols(x)$txName))
             mcols(x)$txName <- CharacterList(vector("list", n))
-    
+
         if (is.null(mcols(x)$geneName))
             mcols(x)$geneName <- CharacterList(vector("list", n))
 
     }
-    
+
     new("SGSegments", x)
 
 }
 
 ##' Creates an instance of S4 class \code{SGVariants} for storing
 ##' splice variants.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{SGVariants}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
@@ -468,28 +472,32 @@ SGVariants <- function(x)
             geneID = integer(),
             eventID = integer(),
             variantID = integer(),
-            closed3p = logical(),
             closed5p = logical(),
+            closed3p = logical(),
+            closed5pEvent = logical(),
+            closed3pEvent = logical(),
             featureID5p = IntegerList(),
             featureID3p = IntegerList(),
+            featureID5pEvent = IntegerList(),
+            featureID3pEvent = IntegerList(),
             variantType = CharacterList(),
             variantName = character(),
             txName = CharacterList(),
             geneName = CharacterList())
 
     } else {
-    
+
         n <- length(x)
-        
+
         if (is.null(mcols(x)$txName))
             mcols(x)$txName <- CharacterList(vector("list", n))
-        
+
         if (is.null(mcols(x)$geneName))
             mcols(x)$geneName <- CharacterList(vector("list", n))
-        
+
         if (is.null(mcols(x)$variantType))
             mcols(x)$variantType <- CharacterList(vector("list", n))
-        
+
         if (is.null(mcols(x)$variantName))
             mcols(x)$variantName <- vector("character", n)
 
@@ -501,7 +509,7 @@ SGVariants <- function(x)
 
 ##' Creates an instance of S4 class \code{SGFeatureCounts} for storing
 ##' compatible splice graph feature counts.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGFeatures}
 ##'   as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}
@@ -520,7 +528,7 @@ SGFeatureCounts <- function(x)
             FPKM = matrix(numeric(), 0, 0))
 
         x <- SummarizedExperiment(assays, rowRanges = SGFeatures())
-        
+
     }
 
     new("SGFeatureCounts", x)
@@ -529,7 +537,7 @@ SGFeatureCounts <- function(x)
 
 ##' Creates an instance of S4 class \code{SGVariantCounts} for storing
 ##' representative splice variant counts.
-##' 
+##'
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGVariants}
 ##'   as \code{rowRanges} and appropriate assays
@@ -544,16 +552,16 @@ SGVariantCounts <- function(x)
     if (missing(x)) {
 
         assays <- list(
-            countsVariant5p = matrix(integer(), 0, 0),
-            countsVariant3p = matrix(integer(), 0, 0),
-            countsTotal5p = matrix(integer(), 0, 0),
-            countsTotal3p = matrix(integer(), 0, 0),
+            counts5p = matrix(integer(), 0, 0),
+            counts3p = matrix(integer(), 0, 0),
+            counts5pEvent = matrix(integer(), 0, 0),
+            counts3pEvent = matrix(integer(), 0, 0),
             variantFreq = matrix(numeric(), 0, 0))
 
         x <- SummarizedExperiment(assays, rowRanges = SGVariants())
 
     }
-    
+
     new("SGVariantCounts", x)
 
 }

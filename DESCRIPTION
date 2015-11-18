@@ -1,20 +1,39 @@
 Package: SGSeq
 Type: Package
 Title: Splice event prediction and quantification from RNA-seq data
-Version: 1.5.0
+Version: 1.5.1
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: Predict splice junctions and exons from BAM files and obtain
-	     compatible read counts and FPKMs. Identify splice events and
-	     estimate relative usage of splice variants based on compatible
-	     read counts at event boundaries. 
+    compatible read counts and FPKMs. Identify splice events and
+    estimate relative usage of splice variants based on compatible
+    read counts at event boundaries.
 License: Artistic-2.0
 LazyData: yes
-Depends: methods, IRanges, GenomicRanges
-Imports: AnnotationDbi, BiocGenerics, Biostrings, GenomicAlignments,
-         GenomicFeatures, GenomeInfoDb, igraph, parallel, Rsamtools,
-         rtracklayer, RUnit, S4Vectors, SummarizedExperiment (>= 0.2.0)
-Suggests: BiocStyle, BSgenome.Hsapiens.UCSC.hg19, knitr, rmarkdown,
-	  TxDb.Hsapiens.UCSC.hg19.knownGene
+Depends:
+    methods,
+    IRanges,
+    GenomicRanges
+Imports:
+    AnnotationDbi,
+    BiocGenerics,
+    Biostrings,
+    GenomicAlignments,
+    GenomicFeatures,
+    GenomeInfoDb,
+    igraph,
+    parallel,
+    Rsamtools,
+    rtracklayer,
+    RUnit,
+    S4Vectors,
+    SummarizedExperiment (>= 0.2.0)
+Suggests:
+    BiocStyle,
+    BSgenome.Hsapiens.UCSC.hg19,
+    knitr,
+    rmarkdown,
+    TxDb.Hsapiens.UCSC.hg19.knownGene
 VignetteBuilder: knitr
 biocViews: AlternativeSplicing, RNASeq, Transcription
+RoxygenNote: 5.0.1

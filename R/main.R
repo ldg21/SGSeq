@@ -5,21 +5,21 @@
 ##' \code{\link{predictTxFeatures}}.
 ##'
 ##' Known features can be provided as \code{TxFeatures} or
-##' \code{SGFeatures} via argument \code{features}. 
+##' \code{SGFeatures} via argument \code{features}.
 ##'
 ##' If \code{features} is not \code{NULL} and \code{predict} is
 ##' \code{TRUE}, known features are augmented with predictions.
 ##'
 ##' Known and/or predicted transcript features are converted to splice
 ##' graph features. For details, see \code{\link{convertToSGFeatures}}.
-##' 
+##'
 ##' Optionally, splice graph features can be annotated with respect to
 ##' a \code{TxFeatures} object provided via argument \code{annotation}.
 ##' For details, see the help page for function \code{\link{annotate}}.
 ##'
 ##' Finally, compatible fragment counts for splice graph features are
 ##' obtained from BAM files with \code{\link{getSGFeatureCounts}}.
-##' 
+##'
 ##' @title Analysis of splice graph features from BAM files
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
@@ -37,32 +37,32 @@
 ##' @author Leonard Goldstein
 
 analyzeFeatures <- function(sample_info, which = NULL,
-    features = NULL, predict = is.null(features), 
-    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
+    features = NULL, predict = is.null(features),
+    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2, min_anchor = 1,
     min_n_sample = 1, min_overhang = NA, annotation = NULL,
     max_complexity = 20, verbose = FALSE, cores = 1)
 {
 
     checkSampleInfo(sample_info)
-    
+
     if (is.null(features) && !predict) {
-      
+
         stop("cannot have features NULL and predict FALSE")
 
     }
 
     if (!is.null(features) && !is(features, "Features")) {
-      
+
         stop("features must be a TxFeatures or SGFeatures object")
 
     }
 
     if (!is.null(annotation) && !is(annotation, "TxFeatures")) {
-      
+
         stop("annotation must be a TxFeatures object")
 
     }
-    
+
     if (predict) {
 
         message("Predict features...")
@@ -85,17 +85,17 @@ analyzeFeatures <- function(sample_info, which = NULL,
 
                 message("Merge features...")
                 features <- mergeTxFeatures(predicted, features)
-                
+
             } else {
-            
+
                 message("Process features...")
                 predicted <- convertToSGFeatures(predicted)
-                
+
                 message("Merge features...")
                 features <- mergeSGFeatures(predicted, features)
 
             }
-            
+
         } else {
 
             features <- predicted
@@ -108,34 +108,35 @@ analyzeFeatures <- function(sample_info, which = NULL,
 
         message("Process features...")
         features <- convertToSGFeatures(features)
-        
+
     }
-        
+
     if (!is.null(annotation)) {
 
         message("Annotate features...")
         features <- annotate(features, annotation)
 
     }
-    
+
     message("Obtain counts...")
     counts <- getSGFeatureCounts(
         sample_info = sample_info,
         features = features,
+        min_anchor = min_anchor,
         verbose = verbose,
         cores = cores)
-    
+
     return(counts)
-    
+
 }
 
-##' Obtain paired-end status, median aligned read length, 
+##' Obtain paired-end status, median aligned read length,
 ##' median aligned insert size and library size from BAM files.
 ##'
 ##' Library information can be inferred from a subset of BAM records
 ##' by setting the number of records via argument \code{yieldSize}.
 ##' Note that library size is only obtained if \code{yieldSize} is {NULL}.
-##' 
+##'
 ##' @title Obtain library information from BAM files
 ##' @param sample_info Data frame with sample information including
 ##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
@@ -145,7 +146,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##' @return \code{sample_info} with additional columns \dQuote{paired_end},
 ##'   \dQuote{read_length}, \dQuote{frag_length}, and \dQuote{lib_size}
 ##'   if \code{yieldSize} is \code{NULL}
-##' @examples 
+##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(path, "bams", si$file_bam)
 ##' si <- si[, c("sample_name", "file_bam")]
@@ -179,15 +180,15 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 
     cols <- c("paired_end", "read_length", "frag_length", "lib_size")
     cols <- cols[cols %in% names(bamInfo)]
-    
+
     for (col in cols) {
-        
+
         sample_info[[col]] <- bamInfo[[col]]
-        
+
     }
-    
+
     return(sample_info)
-    
+
 }
 
 ##' Splice junctions and exons are predicted for each sample and merged
@@ -195,7 +196,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 ##' For details, see the help pages for
 ##' \code{\link{predictTxFeaturesPerSample}}, \code{\link{mergeTxFeatures}},
 ##' and \code{\link{processTerminalExons}}.
-##' 
+##'
 ##' @title Splice junction and exon prediction from BAM files
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @inheritParams mergeTxFeatures
@@ -220,7 +221,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 
 predictTxFeatures <- function(sample_info, which = NULL,
     alpha = 2, psi = 0, beta = 0.2, gamma = 0.2,
-    min_junction_count = NULL, max_complexity = 20,
+    min_junction_count = NULL, min_anchor = 1, max_complexity = 20,
     min_n_sample = 1, min_overhang = NA, verbose = FALSE,
     cores = 1)
 {
@@ -228,7 +229,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
     checkSampleInfo(sample_info)
 
     cores <- setCores(cores, nrow(sample_info))
-    
+
     list_features <- mcmapply(
         predictTxFeaturesPerSample,
         file_bam = sample_info$file_bam,
@@ -244,6 +245,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
             beta = beta,
             gamma = gamma,
             min_junction_count = min_junction_count,
+            min_anchor = min_anchor,
             include_counts = FALSE,
             retain_coverage = FALSE,
             junctions_only = FALSE,
@@ -271,11 +273,11 @@ predictTxFeatures <- function(sample_info, which = NULL,
     }
 
     return(features)
-    
+
 }
 
 ##' Compatible counts are obtained for each sample and combined into
-##' an \code{SGFeatureCounts} object. 
+##' an \code{SGFeatureCounts} object.
 ##'
 ##' @title Compatible counts for splice graph features from BAM files
 ##' @inheritParams getSGFeatureCountsPerSample
@@ -290,14 +292,14 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' sgfc <- getSGFeatureCounts(si, sgf_pred)
 ##' @author Leonard Goldstein
 
-getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
-    verbose = FALSE, cores = 1)
+getSGFeatureCounts <- function(sample_info, features, min_anchor = 1,
+    counts_only = FALSE, verbose = FALSE, cores = 1)
 {
 
     checkSampleInfo(sample_info)
 
     if (!is(features, "SGFeatures")) {
-      
+
         stop("features must be an SGFeatures object")
 
     }
@@ -311,6 +313,7 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
         sample_name = sample_info$sample_name,
         MoreArgs = list(
             features = features,
+            min_anchor = min_anchor,
             retain_coverage = FALSE,
             verbose = verbose,
             cores = cores$per_sample),
@@ -329,24 +332,26 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
     counts <- do.call(cbind, list_counts)
 
     if (counts_only) return(counts)
-    
+
     sgfc <- makeSGFeatureCounts(
         rowRanges = features,
         colData = sample_info,
-        counts = counts)
-    
+        counts = counts,
+        min_anchor = min_anchor)
+
     return(sgfc)
-        
+
 }
 
-##' High-level function for the analysis of splice variants from 
+##' High-level function for the analysis of splice variants from
 ##' splice graph features. Splice variants are identified with
 ##' \code{\link{findSGVariants}}. Representative counts are obtained
 ##' and variant frequencies estimated with \code{\link{getSGVariantCounts}}.
-##' 
+##'
 ##' @title Analysis of splice variants
 ##' @inheritParams findSGVariants
 ##' @inheritParams getSGVariantCounts
+##' @inheritParams predictTxFeaturesPerSample
 ##' @param object \code{SGFeatureCounts} object
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
@@ -354,11 +359,11 @@ getSGFeatureCounts <- function(sample_info, features, counts_only = FALSE,
 ##' @author Leonard Goldstein
 
 analyzeVariants <- function(object, maxnvariant = 20, include = "default",
-    min_denominator = NA, cores = 1)
+    min_denominator = NA, min_anchor = 1, cores = 1)
 {
 
     if (!is(object, "SGFeatureCounts")) {
-      
+
         stop("object must be an SGFeatureCounts object")
 
     }
@@ -370,98 +375,95 @@ analyzeVariants <- function(object, maxnvariant = 20, include = "default",
         cores = cores)
 
     counts <- getSGVariantCounts(variants, object,
-        min_denominator = min_denominator, cores = cores)
+        min_denominator = min_denominator,
+        min_anchor = min_anchor, cores = cores)
 
     return(counts)
 
 }
 
-##' For splice variants obtain counts of compatible fragments
-##' extending across the start or end of each variant.
+##' For splice variants, obtain counts of compatible fragments spanning
+##' the start and/or end of each variant.
 ##' Counts can be obtained from an \code{SGFeatureCounts} object
-##' or from BAM files. Only one of the two arguments \code{object}
-##' and \code{sample_info} must be specified. Splice variant
-##' frequencies are estimated based on representive counts.
-##' 
+##' or from BAM files. Only one of the two arguments \code{feature_counts}
+##' or \code{sample_info} must be specified. Local estimates of relative
+##' usage are calculated at the start and/or end of each splice variant.
+##' For splice variants with relative usage estimates at both start and end,
+##' these are combined by taking a weighted mean, where weights are
+##' proportional to the total number of reads spanning the respective
+##' boundary.
+##'
 ##' @title Representative counts and frequency estimates for
 ##'   splice variants
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param variants \code{SGVariants} object
-##' @param features \code{SGFeatures} object that must include all features
-##'   included in featureID5p(variants) and featureID3p(variants)
-##' @param object \code{SGFeatureCounts} object
+##' @param feature_counts \code{SGFeatureCounts} object
 ##' @param min_denominator Integer specifying minimum denominator when
-##'   calculating variant frequencies. If the denominator is smaller than
-##'   \code{min_denominator}, variant frequencies are set to \code{NA}.
-##'   If \code{NA}, all variant frequencies are returned.
+##'   calculating variant frequencies. The total number of boundary-spanning
+##'   reads must be equal to or greater than \code{min_denominator} for at
+##'   least one event boundary. Otherwise estimates are set to \code{NA}.
+##'   If \code{NA}, all estimates are returned.
 ##' @param cores Number of cores available for parallel processing
 ##' @return An \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc_from_sgfc <- getSGVariantCounts(sgv_pred, sgfc_pred)
 ##' path <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(path, "bams", si$file_bam)
-##' sgvc_from_bam <- getSGVariantCounts(sgv_pred,
-##'   features = sgf_pred, sample_info = si)
+##' sgvc_from_bam <- getSGVariantCounts(sgv_pred, sample_info = si)
 ##' @author Leonard Goldstein
 
-getSGVariantCounts <- function(variants, object = NULL, features = NULL,
-    sample_info = NULL, min_denominator = NA, verbose = FALSE, cores = 1)
+getSGVariantCounts <- function(variants, feature_counts = NULL,
+    sample_info = NULL, min_denominator = NA, min_anchor = 1,
+    verbose = FALSE, cores = 1)
 {
 
     if (!is(variants, "SGVariants")) {
-      
+
         stop("'variants' must be an SGVariants object")
 
     }
 
-    if ((is.null(object) && is.null(sample_info)) ||
-        (!is.null(object) && !is.null(sample_info))) {
+    if ((is.null(feature_counts) && is.null(sample_info)) ||
+        (!is.null(feature_counts) && !is.null(sample_info))) {
 
-        stop("Either 'object' or 'sample_info' must not be NULL")
-
-    }
-
-    if (!is.null(sample_info) && is.null(features)) {
-
-        stop("For use with 'sample_info', 'features' must be provided.")
-
-    }    
-    
-    if (any(table(eventID(variants)) == 1)) {
-
-        msg <- paste(c(
-            "Detected events with a single variant.",
-            "'variants' must include all variants for a given event to obtain",
-            "accurate countsTotal5p, countsTotal3p and variantFreq."),
-            collapse = "\n")              
-        warning(msg, call. = FALSE)
+        stop("Either 'feature_counts' or 'sample_info' must not be NULL")
 
     }
 
-    if (!is.null(object)) {
-    
+    if (!is.null(feature_counts)) {
+
+        f5p <- featureID5pEvent(variants)
+        f3p <- featureID3pEvent(variants)
+        fid <- unique(c(unlist(f5p), unlist(f3p)))
+
+        if (!all(fid %in% featureID(feature_counts))) {
+
+            stop("feature_counts is missing required features")
+
+        }
+
         sgvc <- getSGVariantCountsFromSGFeatureCounts(
             variants = variants,
-            object = object,
-            min_denominator = min_denominator, 
+            sgfc = feature_counts,
+            min_denominator = min_denominator,
             cores = cores)
 
     } else {
 
         sgvc <- getSGVariantCountsFromBamFiles(
             variants = variants,
-            features = features,
             sample_info = sample_info,
             counts_only = FALSE,
             min_denominator = min_denominator,
+            min_anchor = min_anchor,
             verbose = verbose,
             cores = cores)
 
     }
 
     return(sgvc)
-    
+
 }
 
 checkSampleInfo <- function(sample_info, complete = TRUE)
@@ -482,13 +484,13 @@ checkSampleInfo <- function(sample_info, complete = TRUE)
         err <- paste("sample_info must be a data frame with columns",
             paste(names(col_type), collapse = ", "))
         stop(err, call. = FALSE)
-      
+
     }
 
     missing <- !names(col_type) %in% names(sample_info)
 
     if (any(missing)) {
-      
+
         err <- paste("sample_info is missing column(s)",
             paste(names(col_type)[missing], collapse = ", "))
         stop(err, call. = FALSE)
@@ -498,21 +500,21 @@ checkSampleInfo <- function(sample_info, complete = TRUE)
     invalid <- !mapply(is, sample_info[names(col_type)], col_type)
 
     if (any(invalid)) {
-    
+
         err <- paste("sample_info column(s)",
             paste(names(col_type)[invalid], collapse = ", "), "\n",
             "must be of type", paste(col_type[invalid], collapse = ", "))
         stop(err, call. = FALSE)
-        
+
     }
 
-}    
+}
 
 checkBamInfo <- function(bam_info)
 {
 
     if (!all(bam_info$XS)) {
-      
+
         files <- bam_info$file_bam[!bam_info$XS]
         files <- paste0("'", files, "'")
         msg <- paste("Custom tag 'XS' not found in BAM file:\n  ", files)
@@ -520,20 +522,20 @@ checkBamInfo <- function(bam_info)
         msg <- paste0(msg, "\n\n",
             "Spliced alignments must include a custom tag 'XS'.\n",
             "Compatible BAM files can be obtained with an alignment\n",
-            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")        
+            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")
         warning(msg, call. = FALSE)
 
     }
-  
+
 }
 
 setCores <- function(cores, n_sample)
 {
-  
+
     n <- as.integer(max(floor(cores/n_sample), 1))
     s <- as.integer(floor(cores/n))
     list(n_sample = s, per_sample = n, total = s * n)
-    
+
 }
 
 setPreschedule <- function(cores)

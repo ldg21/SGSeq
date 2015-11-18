@@ -8,7 +8,7 @@
 ##' To facilitate accessing and modifying metadata columns, for each column
 ##' there exists a function with name identical to the column name
 ##' that can be used to access and modify it (see examples).
-##' 
+##'
 ##' @title Accessing and replacing metadata columns
 ##' @param object Object containing metadata column
 ##' @param value Replacement value
@@ -25,7 +25,7 @@ NULL
 ##'
 ##' \code{Counts} objects defined in the \code{SGSeq} package contain
 ##' different types of assay data. For example, class \code{SGFeatureCounts}
-##' contains assays \code{counts} and \code{FPKM}. 
+##' contains assays \code{counts} and \code{FPKM}.
 ##'
 ##' To facilitate accessing and modifying assays, for each assay
 ##' there exists a function with name identical to the assay name
@@ -166,6 +166,22 @@ setGeneric("closed3p<-",
     function(object, value) standardGeneric("closed3p<-"))
 
 ##' @rdname slots
+setGeneric("closed5pEvent",
+    function(object) standardGeneric("closed5pEvent"))
+
+##' @rdname slots
+setGeneric("closed5pEvent<-",
+    function(object, value) standardGeneric("closed5pEvent<-"))
+
+##' @rdname slots
+setGeneric("closed3pEvent",
+    function(object) standardGeneric("closed3pEvent"))
+
+##' @rdname slots
+setGeneric("closed3pEvent<-",
+    function(object, value) standardGeneric("closed3pEvent<-"))
+
+##' @rdname slots
 setGeneric("variantType",
     function(object) standardGeneric("variantType"))
 
@@ -197,6 +213,22 @@ setGeneric("featureID3p",
 setGeneric("featureID3p<-",
     function(object, value) standardGeneric("featureID3p<-"))
 
+##' @rdname slots
+setGeneric("featureID5pEvent",
+    function(object) standardGeneric("featureID5pEvent"))
+
+##' @rdname slots
+setGeneric("featureID5pEvent<-",
+    function(object, value) standardGeneric("featureID5pEvent<-"))
+
+##' @rdname slots
+setGeneric("featureID3pEvent",
+    function(object) standardGeneric("featureID3pEvent"))
+
+##' @rdname slots
+setGeneric("featureID3pEvent<-",
+    function(object, value) standardGeneric("featureID3pEvent<-"))
+
 ## SGFeatureCounts
 
 ##' @rdname assays
@@ -210,52 +242,36 @@ setGeneric("FPKM<-",
 ## SGVariantCounts
 
 ##' @rdname assays
-setGeneric("countsVariant5p",
-    function(object) standardGeneric("countsVariant5p"))
+setGeneric("counts5p",
+    function(object) standardGeneric("counts5p"))
 
 ##' @rdname assays
-setGeneric("countsVariant5p<-",
-    function(object, value) standardGeneric("countsVariant5p<-"))
+setGeneric("counts5p<-",
+    function(object, value) standardGeneric("counts5p<-"))
 
 ##' @rdname assays
-setGeneric("countsVariant3p",
-    function(object) standardGeneric("countsVariant3p"))
+setGeneric("counts3p",
+    function(object) standardGeneric("counts3p"))
 
 ##' @rdname assays
-setGeneric("countsVariant3p<-",
-    function(object, value) standardGeneric("countsVariant3p<-"))
+setGeneric("counts3p<-",
+    function(object, value) standardGeneric("counts3p<-"))
 
 ##' @rdname assays
-setGeneric("countsTotal5p",
-    function(object) standardGeneric("countsTotal5p"))
+setGeneric("counts5pEvent",
+    function(object) standardGeneric("counts5pEvent"))
 
 ##' @rdname assays
-setGeneric("countsTotal5p<-",
-    function(object, value) standardGeneric("countsTotal5p<-"))
+setGeneric("counts5pEvent<-",
+    function(object, value) standardGeneric("counts5pEvent<-"))
 
 ##' @rdname assays
-setGeneric("countsTotal3p",
-    function(object) standardGeneric("countsTotal3p"))
+setGeneric("counts3pEvent",
+    function(object) standardGeneric("counts3pEvent"))
 
 ##' @rdname assays
-setGeneric("countsTotal3p<-",
-    function(object, value) standardGeneric("countsTotal3p<-"))
-
-##' @rdname assays
-setGeneric("countsVariant",
-    function(object) standardGeneric("countsVariant"))
-
-##' @rdname assays
-setGeneric("countsVariant<-",
-    function(object, value) standardGeneric("countsVariant<-"))
-
-##' @rdname assays
-setGeneric("countsTotal",
-    function(object) standardGeneric("countsTotal"))
-
-##' @rdname assays
-setGeneric("countsTotal<-",
-    function(object, value) standardGeneric("countsTotal<-"))
+setGeneric("counts3pEvent<-",
+    function(object, value) standardGeneric("counts3pEvent<-"))
 
 ##' @rdname assays
 setGeneric("variantFreq",
