@@ -1349,8 +1349,8 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
     segmentID(rd) <- expandString(segmentID(variants_selected),
         eventID(variants_selected), maxnvariant, TRUE)$expanded
     i <- which(elementLengths(expanded$nesting) > 1)
-    featureID5p(rd) <- as(vector("list", length(rd)), "CompressedIntegerList")
-    featureID3p(rd) <- as(vector("list", length(rd)), "CompressedIntegerList")
+    featureID5p(rd) <- IntegerList(vector("list", length(rd)))
+    featureID3p(rd) <- IntegerList(vector("list", length(rd)))
     rd <- annotateSGVariants(rd)
     variantName(rd) <- makeVariantNames(rd)
     rd <- annotatePaths(rd)
@@ -1458,7 +1458,7 @@ extractIDs <- function(x)
     x <- gsub("|", ",", x, fixed = TRUE)
     x <- strsplit(x, ",", fixed = TRUE)
     x <- lapply(x, setdiff, "NA")
-    x <- as(x, "CompressedIntegerList")
+    x <- IntegerList(x)
     return(x)
 
 }

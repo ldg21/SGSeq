@@ -261,11 +261,11 @@ completeMcols <- function(x, retain_coverage)
 
         } else if (m == "N_splicesite") {
 
-            mcols(x)[, m] <- IntegerList(as.integer())
+            mcols(x)[, m] <- IntegerList(vector("list", length(x)))
 
         } else if (m == "coverage") {
 
-            mcols(x)[, m] <- RleList(as.integer(), compress = TRUE)
+            mcols(x)[, m] <- IntegerList(vector("list", length(x)))
 
         }
 

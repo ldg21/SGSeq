@@ -130,7 +130,9 @@ splicesiteOverlap <- function(splicesites, side, frag_exonic, frag_intron,
         tmp <- findOverlapsRanges(flanking_intron, frag_intron)
         hits_spliced <- intersect(hits, tmp)
 
-    } else if (include == "unspliced" || include == "all") {
+    }
+
+    if (include == "unspliced" || include == "all") {
 
         tmp <- findOverlapsRanges(flanking_intron, frag_exonic)
         hits_unspliced <- intersect(hits, tmp)
@@ -263,7 +265,6 @@ exonCoverage <- function(exons, exons_i_frag, frag_exonic)
     irl <- split(expanded_frag_exonic, expanded_exon)
 
     coverage <- coverage(irl, shift = -start(exons) + 1, width = width(exons))
-    coverage <- RleList(coverage, compress = TRUE)
 
     return(coverage)
 

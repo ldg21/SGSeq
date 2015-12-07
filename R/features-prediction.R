@@ -527,7 +527,7 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
     if (retain_coverage) {
 
         mcols(exons)$N_splicesite <- candidate_N_splicesite[index]
-        mcols(exons)$coverage <- candidate_coverage[index]
+        mcols(exons)$coverage <- IntegerList(candidate_coverage[index])
 
     }
 
@@ -645,8 +645,8 @@ predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,
     if (retain_coverage) {
 
         mcols(exons)$N_splicesite <- as(N_splicesite, "CompressedIntegerList")
-        mcols(exons)$coverage <- coverage[setNames(split(ir, seq_along(ir)),
-            NULL)]
+        mcols(exons)$coverage <- IntegerList(coverage[
+            setNames(split(ir, seq_along(ir)), NULL)])
 
     }
 

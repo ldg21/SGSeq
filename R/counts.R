@@ -108,8 +108,8 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
     if (retain_coverage) {
 
         counts <- DataFrame(N = N)
-        counts$N_splicesite <- IntegerList(as.integer())
-        counts$coverage <- RleList(as.integer(), compress = TRUE)
+        counts$N_splicesite <- IntegerList(vector("list", nrow(counts)))
+        counts$coverage <- IntegerList(vector("list", nrow(counts)))
 
         if (length(i_J) > 0) {
 
@@ -122,8 +122,8 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
 
             counts$N_splicesite[i_E] <- splicesiteCounts(ir[i_E],
                 frag_exonic, frag_intron, min_anchor, "exon", "spliced")
-            counts$coverage[i_E] <- exonCoverage(ir[i_E],
-                E_index, frag_exonic)
+            counts$coverage[i_E] <- IntegerList(exonCoverage(ir[i_E],
+                E_index, frag_exonic))
 
         }
 
@@ -672,7 +672,7 @@ getSGVariantCountsPerStrand <- function(variants, features,
     spliceL <- mcols(ir)$spliceL
     spliceR <- mcols(ir)$spliceR
 
-    ir_index <- as(vector("list", length(ir)), "CompressedIntegerList")
+    ir_index <- IntegerList(vector("list", length(ir)))
 
     i_J <- which(type == "J")
 
@@ -728,8 +728,8 @@ getSGVariantCountsPerStrand <- function(variants, features,
 
             i <- ir_index[match(unlist(f), featureID(features))]
             v <- vid[togroup(f)]
-            tmp <- as(tapply(unlist(i), v[togroup(i)], unique,
-                simplify = FALSE), "CompressedIntegerList")
+            tmp <- IntegerList(tapply(unlist(i), v[togroup(i)], unique,
+                simplify = FALSE))
             x <- elementLengths(tmp)[match(vid, names(tmp))]
             x[elementLengths(f) == 0] <- NA_integer_
             counts[, paste0("counts", opt_1, opt_2)] <- x

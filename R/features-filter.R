@@ -78,7 +78,7 @@ filterExonsTerminal <- function(features, junctions, type = c("F", "L"),
 
     if (length(Z) == 0) { return(Z) }
 
-    ranges <- mcols(Z)$coverage >= gamma * mcols(Z)$N_splicesite
+    ranges <- RleList(mcols(Z)$coverage) >= gamma * mcols(Z)$N_splicesite
     rl <- runLength(ranges)
 
     if (type == "F") {
