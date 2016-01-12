@@ -41,7 +41,7 @@ getSGFeatureCountsPerSample <- function(features, file_bam, paired_end,
 
     } else {
 
-        counts <- unlist(list_counts)
+        counts <- unlist(list_counts, use.names = FALSE)
         counts <- counts[order(unlist(list_index))]
 
     }
