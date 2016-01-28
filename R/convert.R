@@ -69,7 +69,7 @@ convertToTxFeatures <- function(x)
 
         stop("x includes transcripts with overlapping exons")
 
-    } else if (any(elementLengths(tx) != elementLengths(tx_reduced))) {
+    } else if (any(elementNROWS(tx) != elementNROWS(tx_reduced))) {
 
         warning("Merged adjacent exons")
 
@@ -134,7 +134,7 @@ exonsOnSameChromAndStrand <- function(x)
     sn <- unique(CharacterList(seqnames(x)))
     st <- unique(CharacterList(strand(x)))
 
-    if (any(elementLengths(sn) > 1) || any(elementLengths(st) > 1)) {
+    if (any(elementNROWS(sn) > 1) || any(elementNROWS(st) > 1)) {
 
         valid <- FALSE
 

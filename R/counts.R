@@ -93,7 +93,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
 
         E_index <- exonCompatible(ir[i_E], spliceL[i_E], spliceR[i_E],
             frag_exonic, frag_intron, FALSE)
-        N[i_E] <- elementLengths(E_index)
+        N[i_E] <- elementNROWS(E_index)
 
     }
 
@@ -388,7 +388,7 @@ collapseRows <- function(x, list_i, fun = sum, cores = 1)
 
     y <- matrix(NA_integer_, nrow = length(list_i), ncol = ncol(x))
 
-    j <- which(elementLengths(list_i) == 1)
+    j <- which(elementNROWS(list_i) == 1)
 
     if (length(j) > 0) {
 
@@ -397,7 +397,7 @@ collapseRows <- function(x, list_i, fun = sum, cores = 1)
 
     }
 
-    j <- which(elementLengths(list_i) > 1)
+    j <- which(elementNROWS(list_i) > 1)
 
     if (length(j) > 0) {
 
@@ -431,8 +431,8 @@ getVariantFreq <- function(SE, min_denominator)
     e5p <- featureID5pEvent(variants)
     e3p <- featureID3pEvent(variants)
 
-    d5p <- elementLengths(v5p) > 0 & elementLengths(e5p) > 0
-    d3p <- elementLengths(v3p) > 0 & elementLengths(e3p) > 0
+    d5p <- elementNROWS(v5p) > 0 & elementNROWS(e5p) > 0
+    d3p <- elementNROWS(v3p) > 0 & elementNROWS(e3p) > 0
 
     ixp <- which(d5p & d3p)
     i5p <- which(d5p & !d3p)
@@ -540,13 +540,13 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
     i <- which(!fid_unlisted %in% featureID(features))
     fid <- split(fid_unlisted[i], grp[i])
 
-    if (any(elementLengths(fid) > 1)) {
+    if (any(elementNROWS(fid) > 1)) {
 
         stop("invalid variants")
 
     }
 
-    i <- which(elementLengths(fid) == 1)
+    i <- which(elementNROWS(fid) == 1)
 
     if (length(i) == 0) {
 
@@ -648,7 +648,7 @@ getSGVariantCountsPerStrand <- function(variants, features,
     ## only by changes in the relative usage of the variant, but also by
     ## changes in the relative usage of the intra-variant nested variants)
 
-    i <- which(elementLengths(v5p) > 0 & elementLengths(v3p) > 0 &
+    i <- which(elementNROWS(v5p) > 0 & elementNROWS(v3p) > 0 &
         grep("(", featureID(variants), fixed = TRUE))
 
     if (length(i) > 0) {
@@ -730,8 +730,8 @@ getSGVariantCountsPerStrand <- function(variants, features,
             v <- vid[togroup(f)]
             tmp <- IntegerList(tapply(unlist(i), v[togroup(i)], unique,
                 simplify = FALSE))
-            x <- elementLengths(tmp)[match(vid, names(tmp))]
-            x[elementLengths(f) == 0] <- NA_integer_
+            x <- elementNROWS(tmp)[match(vid, names(tmp))]
+            x[elementNROWS(f) == 0] <- NA_integer_
             counts[, paste0("counts", opt_1, opt_2)] <- x
 
         }

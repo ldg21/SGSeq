@@ -4,7 +4,7 @@ exonGraph <- function(features, tx_view)
     if (tx_view) {
 
         tx_name <- txName(features)
-        i <- which(elementLengths(tx_name) == 0)
+        i <- which(elementNROWS(tx_name) == 0)
         tx_name[i] <- as(feature2name(features[i]), "CompressedCharacterList")
         features <- features[togroup(tx_name)]
         mcols(features)$tx_name <- unlist(tx_name)
@@ -842,7 +842,7 @@ setFeatureColors <- function(features, color, color_novel, alpha)
         if (!is.null(color_novel) && !is.null(txName(features))) {
 
             txName <- txName(features)
-            i_novel <- which(elementLengths(txName) == 0)
+            i_novel <- which(elementNROWS(txName) == 0)
             features_color[i_novel] <- color_novel
 
         }
@@ -1028,8 +1028,8 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 
     X <- transform(variantFreq(x))
 
-    variant_not_quantifiable <- elementLengths(featureID5p(x)) == 0 &
-        elementLengths(featureID3p(x)) == 0
+    variant_not_quantifiable <- elementNROWS(featureID5p(x)) == 0 &
+        elementNROWS(featureID3p(x)) == 0
     event_not_quantifiable <- tapply(variant_not_quantifiable, eventID(x),
         any)
 
@@ -1097,7 +1097,7 @@ extractFeaturesFromVariants <- function(variants)
 
     id2variant <- tapply(togroup(variants),
         featureID(unlist(variants)), unique, simplify = FALSE)
-    id2variant <- id2variant[elementLengths(id2variant) == 1]
+    id2variant <- id2variant[elementNROWS(id2variant) == 1]
     features <- uniqueFeatures(unlist(variants))
     mcols(features)$label <- id2variant[match(
         featureID(features), names(id2variant))]

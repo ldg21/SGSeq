@@ -19,7 +19,7 @@ junctionCompatible <- function(junctions, frag_exonic, frag_intron,
     hits <- findOverlapsRanges(introns, frag_intron, "equal")
     junction_index <- as.list(hits)
 
-    if (counts) elementLengths(junction_index)
+    if (counts) elementNROWS(junction_index)
     else junction_index
 
 }
@@ -91,7 +91,7 @@ exonCompatible <- function(exons, spliceL, spliceR, frag_exonic,
 
     exon_index <- as.list(hits)
 
-    if (counts) elementLengths(exon_index)
+    if (counts) elementNROWS(exon_index)
     else exon_index
 
 }
@@ -164,7 +164,7 @@ splicesiteOverlap <- function(splicesites, side, frag_exonic, frag_intron,
 
     splicesite_index <- as.list(hits)
 
-    if (counts) elementLengths(splicesite_index)
+    if (counts) elementNROWS(splicesite_index)
     else splicesite_index
 
 }

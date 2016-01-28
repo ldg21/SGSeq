@@ -121,11 +121,11 @@ propagateAnnotation <- function(query)
     gv <- nodes(g)
     gd <- edges(g)
 
-    gd_ann <- elementLengths(gd$geneName) > 0
+    gd_ann <- elementNROWS(gd$geneName) > 0
     i <- match(gv$featureID[match(gd$from, gv$name)], featureID(query))
-    from_ann <- elementLengths(geneName(query))[i] > 0
+    from_ann <- elementNROWS(geneName(query))[i] > 0
     i <- match(gv$featureID[match(gd$to, gv$name)], featureID(query))
-    to_ann <- elementLengths(geneName(query))[i] > 0
+    to_ann <- elementNROWS(geneName(query))[i] > 0
 
     excl <- which(
         (is.na(from_ann) | is.na(to_ann)) |
@@ -157,7 +157,7 @@ propagateAnnotation <- function(query)
         cluster = c(gv_cluster, gd_cluster))
 
     cluster_geneName <- splitCharacterList(ann$geneName, factor(ann$cluster))
-    ann <- ann[elementLengths(ann$geneName) == 0, ]
+    ann <- ann[elementNROWS(ann$geneName) == 0, ]
     i <- match(ann$cluster, names(cluster_geneName))
     ann$geneName <- cluster_geneName[i]
     i <- match(ann$featureID, featureID(query))
@@ -176,7 +176,7 @@ annotateSGSegments <- function(ids, features)
     out <- vector("list", length(ids))
 
     segment_ids <- strsplit(ids, ",")
-    segment_n <- elementLengths(segment_ids)
+    segment_n <- elementNROWS(segment_ids)
 
     ids <- unlist(segment_ids)
     ids_segment <- togroup(segment_ids)

@@ -98,7 +98,7 @@ validExtraColumnSlotLengths <- function(object)
 
     l <- length(object)
     slots <- GenomicRanges:::extraColumnSlotNames(object)
-    i <- which(elementLengths(lapply(slots, slot, object = object)) != l)
+    i <- which(elementNROWS(lapply(slots, slot, object = object)) != l)
 
     if (length(i) > 0) {
 

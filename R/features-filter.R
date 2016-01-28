@@ -85,7 +85,7 @@ filterExonsTerminal <- function(features, junctions, type = c("F", "L"),
 
         w <- plast(rl)
         Z <- flank(Z, -w, FALSE)
-        ir <- IRanges(end = elementLengths(ranges), width = w)
+        ir <- IRanges(end = elementNROWS(ranges), width = w)
 
     }
     if (type == "L") {

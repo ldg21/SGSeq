@@ -77,7 +77,7 @@ spliceGraph <- function(features)
         cluster2geneID <- tapply(gd$geneID, gd_cluster, unique,
             simplify = FALSE)
 
-        if (any(elementLengths(cluster2geneID) > 1)) {
+        if (any(elementNROWS(cluster2geneID) > 1)) {
 
             stop("splice graph inconsistent with geneIDs")
 
@@ -300,7 +300,7 @@ findSGSegmentsPerGene <- function(g, geneID)
     if (length(i) > 0) {
 
         segments_2 <- c(segments_2[-i],
-            segments_2[rep(i, elementLengths(segments_1[i]))])
+            segments_2[rep(i, elementNROWS(segments_1[i]))])
         segments_1 <- c(segments_1[-i],
             unlist(segments_1[i], recursive = FALSE))
 
@@ -633,18 +633,18 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hme, mode = "out")) }))) })
-        closed3pVariant <- elementLengths(mapply(intersect,
+        closed3pVariant <- elementNROWS(mapply(intersect,
             paths_nodes_out, paths_ext_nodes)) == 0
-        closed3pEvent <- all(elementLengths(lapply(paths_nodes_out,
+        closed3pEvent <- all(elementNROWS(lapply(paths_nodes_out,
             intersect, event_ext_nodes)) == 0)
         hms <- delete.vertices(h, b$start[k])
         paths_nodes_in <- lapply(paths_int_nodes,
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hms, mode = "in")) }))) })
-        closed5pVariant <- elementLengths(mapply(intersect,
+        closed5pVariant <- elementNROWS(mapply(intersect,
             paths_nodes_in, paths_ext_nodes)) == 0
-        closed5pEvent <- all(elementLengths(lapply(paths_nodes_in,
+        closed5pEvent <- all(elementNROWS(lapply(paths_nodes_in,
             intersect, event_ext_nodes)) == 0)
 
         if (k < nrow(b) && closed3pEvent && closed5pEvent) {
@@ -686,7 +686,7 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
 
     }
 
-    if (all(elementLengths(list_path_info) == 0)) {
+    if (all(elementNROWS(list_path_info) == 0)) {
 
         return()
 
@@ -867,7 +867,7 @@ findAllPaths <- function(from, to, path, ref, nodes)
 
             }
 
-            i <- which(elementLengths(paths) == 0)
+            i <- which(elementNROWS(paths) == 0)
 
             if (length(i) > 0) {
 
@@ -952,7 +952,7 @@ annotateSGVariants <- function(variants)
     ## maximum number of Js in type patterns
 
     t <- c(list_ae_type_1, list_ae_type_2, list_se_type)
-    max_n_J <- max(elementLengths(gregexpr("J", t)))
+    max_n_J <- max(elementNROWS(gregexpr("J", t)))
 
     ## preliminaries
 
@@ -1052,7 +1052,7 @@ expandString <- function(x, event = NULL, maxnvariant = NA,
 
         ## expand event
         b <- strsplit(b, "|", fixed = TRUE)
-        n <- elementLengths(b)
+        n <- elementNROWS(b)
         y <- paste0(rep(u, n), unlist(b), rep(v, n))
         y <- unmaskEvents(y)
         y_index <- x_index[i][togroup(b)]
@@ -1132,7 +1132,7 @@ expandType <- function(x, max_n_J = NA)
 
             u2 <- sub("\\[\\S+$", "", u)
             v2 <- sub("^\\S+\\]", "", v)
-            min_n_J <- elementLengths(gregexpr("J", paste0(u2, v2)))
+            min_n_J <- elementNROWS(gregexpr("J", paste0(u2, v2)))
             excl <- which(min_n_J > max_n_J)
 
             if (length(excl) > 0) {
@@ -1151,7 +1151,7 @@ expandType <- function(x, max_n_J = NA)
 
             ## expand event
             b <- strsplit(b, "|", fixed = TRUE)
-            n <- elementLengths(b)
+            n <- elementNROWS(b)
             y <- paste0(rep(u, n), unlist(b), rep(v, n))
             y <- unmaskEvents(y)
             y_f <- x_f[i][togroup(b)]
@@ -1218,7 +1218,7 @@ getTerminalFeatureIDs <- function(x, start = TRUE)
 
             ## expand event
             b <- strsplit(b, "|", fixed = TRUE)
-            n <- elementLengths(b)
+            n <- elementNROWS(b)
             y <- paste0(rep(u, n), unlist(b), rep(v, n))
             y <- unmaskEvents(y)
             y_f <- x_f[i][togroup(b)]
@@ -1348,7 +1348,7 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
     featureID(rd) <- expanded$expanded
     segmentID(rd) <- expandString(segmentID(variants_selected),
         eventID(variants_selected), maxnvariant, TRUE)$expanded
-    i <- which(elementLengths(expanded$nesting) > 1)
+    i <- which(elementNROWS(expanded$nesting) > 1)
     featureID5p(rd) <- IntegerList(vector("list", length(rd)))
     featureID3p(rd) <- IntegerList(vector("list", length(rd)))
     rd <- annotateSGVariants(rd)
@@ -1400,7 +1400,7 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
 makeVariantNames <- function(variants)
 {
 
-    if (all(elementLengths(geneName(variants)) == 0)) {
+    if (all(elementNROWS(geneName(variants)) == 0)) {
 
         GENE <- geneID(variants)
 
@@ -1419,7 +1419,7 @@ makeVariantNames <- function(variants)
     eventID_n <- table(original_eventID)
     ORDER <- eventID_n[match(original_eventID, names(eventID_n))]
 
-    if (all(elementLengths(variantType(variants)) == 0)) {
+    if (all(elementNROWS(variantType(variants)) == 0)) {
 
         TYPE <- NA
 

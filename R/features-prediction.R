@@ -618,7 +618,7 @@ predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,
         frag_exonic, frag_intron, min_anchor, "spliced")
 
     ranges <- (coverage >= relCov * N_splicesite)
-    el <- elementLengths(ranges)
+    el <- elementNROWS(ranges)
     rl <- runLength(ranges)
 
     if (type == "exon_L") {

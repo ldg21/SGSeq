@@ -73,7 +73,7 @@ predictVariantEffects <- function(sgv, tx, genome, summarize = TRUE, cores = 1)
         "variants on", length(tx), "coding transcripts...")
     message(msg)
 
-    expanded_sgv <- sgv[rep(seq_along(sgv), elementLengths(sgv_tx))]
+    expanded_sgv <- sgv[rep(seq_along(sgv), elementNROWS(sgv_tx))]
     expanded_tx <- tx[match(unlist(sgv_tx), names(tx))]
 
     list_expanded_sgv <- split(expanded_sgv, seq_along(expanded_sgv))

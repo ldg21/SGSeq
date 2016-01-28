@@ -32,7 +32,7 @@ mergeTxFeatures <- function(..., min_n_sample = 1)
     if (all(sapply(x, is, "TxFeatures") | sapply(x, is.null)) &&
         !all(sapply(x, is.null))) {
 
-        x <- x[which(elementLengths(x) > 0)]
+        x <- x[which(elementNROWS(x) > 0)]
         x <- lapply(x, dropMcols)
         features <- do.call(c, x)
 
@@ -151,7 +151,7 @@ mergeSGFeatures <- function(...)
     if (all(sapply(x, is, "SGFeatures") | sapply(x, is.null)) &&
         !all(sapply(x, is.null))) {
 
-        x <- x[which(elementLengths(x) > 0)]
+        x <- x[which(elementNROWS(x) > 0)]
         x <- lapply(x, dropMcols)
         x <- do.call(c, x)
 
