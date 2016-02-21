@@ -1,7 +1,7 @@
 Package: SGSeq
 Type: Package
 Title: Splice event prediction and quantification from RNA-seq data
-Version: 1.5.5
+Version: 1.5.6
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: Predict splice junctions and exons from BAM files and obtain
@@ -13,7 +13,7 @@ LazyData: yes
 Depends:
     methods,
     IRanges,
-    GenomicRanges,
+    GenomicRanges (>= 1.23.21),
     SummarizedExperiment
 Imports:
     AnnotationDbi,

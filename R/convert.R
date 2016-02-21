@@ -264,7 +264,7 @@ exonFrame <- function(ex, ex_tx, tx)
 extractJunctions <- function(tx)
 {
 
-    introns <- psetdiff(range(tx), tx)
+    introns <- setdiff(range(tx), tx)
     junctions <- setNames(unlist(introns), NULL) + 1
     mcols(junctions) <- DataFrame(
         type = rep("J", length(junctions)),

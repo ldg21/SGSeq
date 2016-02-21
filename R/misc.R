@@ -406,7 +406,7 @@ exportFeatures <- function(features, file)
 
     if (length(i_junction) > 0) {
 
-        bed[i_junction] <- psetdiff(
+        bed[i_junction] <- setdiff(
            split(features[i_junction], seq_along(i_junction)),
            split(features[i_junction] - 1, seq_along(i_junction)))
 
