@@ -756,9 +756,9 @@ importTranscripts <- function(file, tag_tx = "transcript_id",
 
 }
 
-togroup0 <- function(x)
-{
+## Starting with IRanges 2.5.31, togroup() does not work on an arbitrary
+## object anymore, only on a ManyToOneGrouping object.
+## S4Vectors:::quick_togroup() is a replacement for the old togroup() that
+## works on any object.
+togroup0 <- S4Vectors:::quick_togroup
 
-    togroup(PartitioningByWidth(x))
-
-}

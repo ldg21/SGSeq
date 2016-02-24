@@ -27,7 +27,7 @@ Imports:
     Rsamtools,
     rtracklayer,
     RUnit,
-    S4Vectors (>= 0.9.25)
+    S4Vectors (>= 0.9.39)
 Suggests:
     BiocStyle,
     BSgenome.Hsapiens.UCSC.hg19,
