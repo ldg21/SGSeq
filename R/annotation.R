@@ -114,7 +114,7 @@ propagateAnnotation <- function(query)
     g <- spliceGraph(query)
 
     ## Remove annotated parts of the splice graph. Specifically,
-    ## remove annotated edges with annotated 'to' and 'from' vertices.
+    ## remove annotated edges with annotated 'from' and 'to' vertices.
     ## Then remove edge-free vertices (vertices that are annotated and with
     ## all incoming and outgoing edges annotated in the original graph)
 
@@ -179,9 +179,9 @@ annotateSGSegments <- function(ids, features)
     segment_n <- elementNROWS(segment_ids)
 
     ids <- unlist(segment_ids)
-    ids_segment <- togroup(segment_ids)
+    ids_segment <- togroup0(segment_ids)
     ids_ann <- vector("list", length(ids))
-    ids_ann <- as(ids_ann, "CompressedCharacterList")
+    ids_ann <- as(ids_ann, "CharacterList")
 
     i <- grep("^\\d+$", ids)
 
@@ -198,13 +198,13 @@ annotateSGSegments <- function(ids, features)
         tmp <- ids[i]
         tmp <- gsub("\\{|\\}", "", tmp)
         tmp <- strsplit(tmp, ";", fixed = TRUE)
-        tmp <- as(tmp, "CompressedCharacterList")
+        tmp <- as(tmp, "CharacterList")
         ids_ann[i] <- tmp
 
     }
 
     ann <- unlist(ids_ann)
-    ann_id <- togroup(ids_ann)
+    ann_id <- togroup0(ids_ann)
     ann_segment <- ids_segment[ann_id]
 
     if (length(ann) == 0) {
@@ -259,10 +259,10 @@ annotatePaths <- function(paths)
         ## annotate event
         list_ids <- strsplit(b, "|", fixed = TRUE)
         ids <- unlist(list_ids)
-        ids_path <- i[togroup(list_ids)]
+        ids_path <- i[togroup0(list_ids)]
         ids_ann <- annotateSGSegments(ids, features)
         ann <- unlist(ids_ann)
-        ann_id <- togroup(ids_ann)
+        ann_id <- togroup0(ids_ann)
         ann_path <- ids_path[ann_id]
 
         path_ann <- vector("list", length(i))
@@ -282,14 +282,14 @@ annotatePaths <- function(paths)
     }
 
     out <- annotateSGSegments(x, features)
-    out <- as(out, "CompressedCharacterList")
+    out <- as(out, "CharacterList")
 
     ## decode txName
     out <- relist(txName_unique[as.integer(unlist(out))], out)
 
     txName(paths) <- out
     geneName(paths) <- geneName(features)[match(seq_along(paths),
-        togroup(paths))]
+        togroup0(paths))]
 
     return(paths)
 
@@ -299,8 +299,8 @@ plintersect <- function(x, y)
 {
 
     n <- length(x)
-    ix <- paste0(togroup(x), ":", unlist(x))
-    iy <- paste0(togroup(y), ":", unlist(y))
+    ix <- paste0(togroup0(x), ":", unlist(x))
+    iy <- paste0(togroup0(y), ":", unlist(y))
     ix <- ix[ix %in% iy]
     i <- sub(":\\S+$", "", ix)
     x <- sub("^\\S+:", "", ix)
@@ -322,15 +322,11 @@ matchTxFeatures <- function(query, subject)
     qH <- which(q %in% names(s2i))
     sH <- match(q[qH], names(s2i))
 
-    qH <- qH[togroup(sH)]
+    qH <- qH[togroup0(sH)]
     sH <- unlist(sH)
 
-    new2("Hits",
-         queryHits = qH,
-         subjectHits = sH,
-         queryLength = length(query),
-         subjectLength = length(subject),
-         check = FALSE)
+    Hits(qH, sH, length(query), length(subject),
+        sort.by.query = TRUE)
 
 }
 
@@ -352,12 +348,11 @@ matchJunction <- function(query, subject) {
 
     hits <- findMatches(query[i_q], subject[i_s])
 
-    new2("Hits",
-        queryHits = i_q[queryHits(hits)],
-        subjectHits = i_s[subjectHits(hits)],
-        queryLength = length(query),
-        subjectLength = length(subject),
-        check = FALSE)
+    qH <- queryHits(hits)
+    sH <- subjectHits(hits)
+
+    Hits(i_q[qH], i_s[sH], length(query), length(subject),
+        sort.by.query = TRUE)
 
 }
 
@@ -374,12 +369,8 @@ matchExon <- function(query, subject, stringent = TRUE) {
     qH <- queryHits(hits)
     sH <- subjectHits(hits)
 
-    hits <- new2("Hits",
-        queryHits = i_q[queryHits(hits)],
-        subjectHits = i_s[subjectHits(hits)],
-        queryLength = length(query),
-        subjectLength = length(subject),
-        check = FALSE)
+    hits <- Hits(i_q[qH], i_s[sH], length(query), length(subject),
+        sort.by.query = TRUE)
 
     if (!stringent) { return(hits) }
 
@@ -471,11 +462,10 @@ matchSplice <- function(query, subject, type = c("D", "A")) {
 
     hits <- findMatches(q, s)
 
-    new2("Hits",
-        queryHits = i_q[queryHits(hits)],
-        subjectHits = i_s[subjectHits(hits)],
-        queryLength = length(query),
-        subjectLength = length(subject),
-        check = FALSE)
+    qH <- queryHits(hits)
+    sH <- subjectHits(hits)
+
+    Hits(i_q[qH], i_s[sH], length(query), length(subject),
+        sort.by.query = TRUE)
 
 }

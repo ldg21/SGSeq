@@ -62,8 +62,8 @@
 ##' @param include_counts Logical indicating whether counts of
 ##'   compatible fragments should be included in metadata column
 ##'   \dQuote{N}
-##' @param retain_coverage Logical indicating whether coverages for each
-##'   exon should be retained as an \code{IntegerList} in metadata
+##' @param retain_coverage Logical indicating whether coverage for each
+##'   exon should be retained as an \code{RleList} in metadata
 ##'   column \dQuote{coverage}. This allows filtering of features
 ##'   using more stringent criteria after the initial prediction.
 ##' @param junctions_only Logical indicating whether predictions
@@ -473,7 +473,7 @@ predictCandidatesInternal <- function(islands, splicesites, frag_coverage,
         ## retain candidate internal exons with sufficient read coverage
 
         candidates_frag_coverage <- split(frag_coverage[candidates],
-            togroup(candidates))
+            togroup0(candidates))
         i <- which(min(candidates_frag_coverage) >=
             relCov * min(mcols(candidates)$N))
         candidates <- candidates[i]
@@ -529,7 +529,7 @@ predictExonsInternal <- function(candidates, frag_exonic, frag_intron, relCov,
     if (retain_coverage) {
 
         mcols(exons)$N_splicesite <- candidate_N_splicesite[index]
-        mcols(exons)$coverage <- IntegerList(candidate_coverage[index])
+        mcols(exons)$coverage <- candidate_coverage[index]
 
     }
 
@@ -646,9 +646,9 @@ predictExonsTerminal <- function(candidates, frag_exonic, frag_intron, relCov,
 
     if (retain_coverage) {
 
-        mcols(exons)$N_splicesite <- as(N_splicesite, "CompressedIntegerList")
-        mcols(exons)$coverage <- IntegerList(coverage[
-            setNames(split(ir, seq_along(ir)), NULL)])
+        mcols(exons)$N_splicesite <- as(N_splicesite, "IntegerList")
+        mcols(exons)$coverage <- coverage[
+            setNames(split(ir, seq_along(ir)), NULL)]
 
     }
 

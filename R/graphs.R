@@ -237,7 +237,7 @@ findSGSegments <- function(features, cores = 1)
 
     segments <- c(segments_1, segments_2)
 
-    segmentID <- togroup(segments)[match(featureID(features),
+    segmentID <- togroup0(segments)[match(featureID(features),
         unlist(segments))]
 
     return(segmentID)
@@ -263,7 +263,7 @@ findSGSegmentsPerGene <- function(g, geneID)
 
     list_neighbors <- neighborhood2(h, 1, starts, "out")
 
-    s <- starts[togroup(list_neighbors)]
+    s <- starts[togroup0(list_neighbors)]
     n <- unlist(list_neighbors)
 
     r <- is.finite(shortest.paths(h, n, ends, "out"))
@@ -432,7 +432,7 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     ## obtain variants in terms of SGFeatures
     variant_featureID <- extractIDs(variant_info$featureID)
     variants <- split(features[match(unlist(variant_featureID),
-        featureID(features))], togroup(variant_featureID))
+        featureID(features))], togroup0(variant_featureID))
     variant_gr <- unlist(range(variants))
 
     ## sort by genomic position
@@ -474,7 +474,7 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     eid <- factor(variant_info$eventID)
 
     ## set 5' representative feature IDs for 3' closed events
-    eid_f5p <- split(unlist(f5p), eid[togroup(f5p)])
+    eid_f5p <- split(unlist(f5p), eid[togroup0(f5p)])
     eid_f5p <- unique(IntegerList(eid_f5p))
     variant_info$featureID5pEvent <- setNames(
         eid_f5p[match(eid, names(eid_f5p))], NULL)
@@ -482,7 +482,7 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     variant_info$featureID5pEvent[i] <- IntegerList(vector("list", length(i)))
 
     ## set 3' representative feature IDs for 5' closed events
-    eid_f3p <- split(unlist(f3p), eid[togroup(f3p)])
+    eid_f3p <- split(unlist(f3p), eid[togroup0(f3p)])
     eid_f3p <- unique(IntegerList(eid_f3p))
     variant_info$featureID3pEvent <- setNames(
         eid_f3p[match(eid, names(eid_f3p))], NULL)
@@ -535,7 +535,7 @@ getRepresentativeFeatureIDs <- function(variant_info, features, start = TRUE)
     if (length(i_E) > 0) {
 
         tmp_rep_id_unlisted_i[i_E] <- match(
-            tmp_node[togroup(tmp_rep_id)][i_E], feature2name(features))
+            tmp_node[togroup0(tmp_rep_id)][i_E], feature2name(features))
 
     }
 
@@ -607,7 +607,7 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
         }
 
         i <- unlist(paths_index_ref)
-        f <- togroup(paths_index_ref)
+        f <- togroup0(paths_index_ref)
 
         paths_type <- unstrsplit(split(ref$type[i], f), "")
         paths_featureID <- unstrsplit(split(ref$featureID[i], f), ",")
@@ -970,14 +970,16 @@ annotateSGVariants <- function(variants)
         type_1 <- list_ae_type_1[k]
         type_2 <- list_ae_type_2[k]
 
-        i_1 <- unique(togroup(path_type)[grep(type_1, unlist(path_type))])
-        i_2 <- unique(togroup(path_type)[grep(type_2, unlist(path_type))])
+        i_1 <- unique(togroup0(path_type)[grep(type_1, unlist(path_type))])
+        i_2 <- unique(togroup0(path_type)[grep(type_2, unlist(path_type))])
         event_id <- intersect(path_event_id[i_1], path_event_id[i_2])
         i_1 <- i_1[path_event_id[i_1] %in% event_id]
         i_2 <- i_2[path_event_id[i_2] %in% event_id]
 
-        path_event[i_1] <- pc(path_event[i_1], rep(event_1, length(i_1)))
-        path_event[i_2] <- pc(path_event[i_2], rep(event_2, length(i_2)))
+        path_event[i_1] <- pc(path_event[i_1],
+            as(rep(event_1, length(i_1)), "CharacterList"))
+        path_event[i_2] <- pc(path_event[i_2],
+            as(rep(event_2, length(i_2)), "CharacterList"))
 
     }
 
@@ -988,7 +990,7 @@ annotateSGVariants <- function(variants)
         event <- list_se_event[k]
         type <- list_se_type[k]
 
-        i <- unique(togroup(path_type)[grep(type, unlist(path_type))])
+        i <- unique(togroup0(path_type)[grep(type, unlist(path_type))])
 
         if (event == "AFE") { i <- i[grep("^S", from(variants)[i])] }
         if (event == "ALE") { i <- i[grep("^E", to(variants)[i])] }
@@ -998,7 +1000,8 @@ annotateSGVariants <- function(variants)
             event_id_n <- table(path_event_id[i])
             event_id <- names(which(event_id_n >= 2))
             i <- i[path_event_id[i] %in% event_id]
-            path_event[i] <- pc(path_event[i], rep(event, length(i)))
+            path_event[i] <- pc(path_event[i],
+                as(rep(event, length(i)), "CharacterList"))
 
         }
 
@@ -1008,11 +1011,13 @@ annotateSGVariants <- function(variants)
 
     i <- intersect(grep("^S", from(variants)),
         which(!any(path_event == "AFE")))
-    path_event[i] <- pc(path_event[i], rep("AS", length(i)))
+    path_event[i] <- pc(path_event[i],
+        as(rep("AS", length(i)), "CharacterList"))
 
     i <- intersect(grep("^E", to(variants)),
         which(!any(path_event == "ALE")))
-    path_event[i] <- pc(path_event[i], rep("AE", length(i)))
+    path_event[i] <- pc(path_event[i],
+        as(rep("AE", length(i)), "CharacterList"))
 
     variantType(variants) <- path_event
 
@@ -1031,7 +1036,7 @@ expandString <- function(x, event = NULL, maxnvariant = NA,
     }
 
     x_index <- seq_along(x)
-    x_nesting <- as(x, "CompressedCharacterList")
+    x_nesting <- as(x, "CharacterList")
 
     i <- grep("(", x, fixed = TRUE)
 
@@ -1055,9 +1060,9 @@ expandString <- function(x, event = NULL, maxnvariant = NA,
         n <- elementNROWS(b)
         y <- paste0(rep(u, n), unlist(b), rep(v, n))
         y <- unmaskEvents(y)
-        y_index <- x_index[i][togroup(b)]
-        y_nesting <- pc(x_nesting[i][togroup(b)], unlist(b))
-        y_nesting <- as(y_nesting, "CompressedCharacterList")
+        y_index <- x_index[i][togroup0(b)]
+        y_nesting <- pc(x_nesting[i][togroup0(b)],
+            as(unlist(b), "CharacterList"))
 
         ## update x, x_index, x_nesting
         x <- c(x[-i], y)
@@ -1096,7 +1101,7 @@ expandString <- function(x, event = NULL, maxnvariant = NA,
     if (return_full) {
 
         out <- DataFrame(index = x_index, expanded = x,
-            nesting = as(x_nesting, "CompressedCharacterList"))
+            nesting = as(x_nesting, "CharacterList"))
 
     } else {
 
@@ -1154,7 +1159,7 @@ expandType <- function(x, max_n_J = NA)
             n <- elementNROWS(b)
             y <- paste0(rep(u, n), unlist(b), rep(v, n))
             y <- unmaskEvents(y)
-            y_f <- x_f[i][togroup(b)]
+            y_f <- x_f[i][togroup0(b)]
 
             ## update x, x_f
             x <- c(x[-i], y)
@@ -1221,7 +1226,7 @@ getTerminalFeatureIDs <- function(x, start = TRUE)
             n <- elementNROWS(b)
             y <- paste0(rep(u, n), unlist(b), rep(v, n))
             y <- unmaskEvents(y)
-            y_f <- x_f[i][togroup(b)]
+            y_f <- x_f[i][togroup0(b)]
 
             ## update x, x_f
             x <- c(x[-i], y)
@@ -1331,7 +1336,7 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
     expanded_featureIDs <- strsplit(expanded$expanded, ",", fixed = TRUE)
     expanded_i <- relist(match(unlist(expanded_featureIDs),
         featureID(features)), expanded_featureIDs)
-    rd <- split(features[unlist(expanded_i)], togroup(expanded_i))
+    rd <- split(features[unlist(expanded_i)], togroup0(expanded_i))
     mcols(rd) <- mcols(variants_selected[expanded$index])
     rd <- SGVariants(rd)
 
@@ -1356,7 +1361,7 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
     rd <- annotatePaths(rd)
 
     ## update counts
-    f <- togroup(expanded$nesting)
+    f <- togroup0(expanded$nesting)
     i <- match(unlist(expanded$nesting), featureID(variants))
     X <- variantFreq(sgvc)[i, , drop = FALSE]
     X <- do.call(cbind, mclapply(seq_len(ncol(X)),

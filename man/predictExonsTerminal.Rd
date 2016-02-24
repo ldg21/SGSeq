@@ -27,8 +27,8 @@ should be identified to the left (\dQuote{exon_L}) or right
 compatible fragments should be included in metadata column
 \dQuote{N}}
 
-\item{retain_coverage}{Logical indicating whether coverages for each
-exon should be retained as an \code{IntegerList} in metadata
+\item{retain_coverage}{Logical indicating whether coverage for each
+exon should be retained as an \code{RleList} in metadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 }

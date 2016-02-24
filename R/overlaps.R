@@ -30,17 +30,17 @@ filterIntrons <- function(frag_intron, frag_exonic, min_anchor)
     unlisted_intron <- unlist(frag_intron)
 
     f_L <- as(flank(unlisted_intron, min_anchor, TRUE), "RangesList")
-    f_L <- intersect(f_L, frag_exonic[togroup(frag_intron)])
+    f_L <- intersect(f_L, frag_exonic[togroup0(frag_intron)])
     w_L <- sum(width(f_L))
 
     f_R <- as(flank(unlisted_intron, min_anchor, FALSE), "RangesList")
-    f_R <- intersect(f_R, frag_exonic[togroup(frag_intron)])
+    f_R <- intersect(f_R, frag_exonic[togroup0(frag_intron)])
     w_R <- sum(width(f_R))
 
     i <- which(w_L == min_anchor & w_R == min_anchor)
 
     filtered <- setNames(split(unlisted_intron[i],
-        factor(togroup(frag_intron)[i], seq_along(frag_intron))), NULL)
+        factor(togroup0(frag_intron)[i], seq_along(frag_intron))), NULL)
 
     return(filtered)
 
@@ -188,7 +188,7 @@ findOverlapsRanges <- function(query, subject, type = "any")
     if (is(query, "IRangesList")) {
 
         query_unlisted <- unlist(query)
-        query_togroup <- togroup(query)
+        query_togroup <- togroup0(query)
 
     } else {
 
@@ -200,7 +200,7 @@ findOverlapsRanges <- function(query, subject, type = "any")
     if (is(subject, "IRangesList")) {
 
         subject_unlisted <- unlist(subject)
-        subject_togroup <- togroup(subject)
+        subject_togroup <- togroup0(subject)
 
     } else {
 
@@ -223,13 +223,8 @@ findOverlapsRanges <- function(query, subject, type = "any")
     qH <- query_togroup[queryHits(hits_unlisted)]
     sH <- subject_togroup[subjectHits(hits_unlisted)]
     hits <- unique(cbind(qH, sH))
-
-    hits <- new2("Hits",
-        queryHits = as.integer(hits[, 1]),
-        subjectHits = as.integer(hits[, 2]),
-        queryLength = length(query),
-        subjectLength = length(subject),
-        check = FALSE)
+    hits <- Hits(as.integer(hits[, 1]), as.integer(hits[, 2]),
+        length(query), length(subject), sort.by.query = TRUE)
 
     return(hits)
 
@@ -256,10 +251,10 @@ splicesiteCounts <- function(x, frag_exonic, frag_intron, min_anchor,
 exonCoverage <- function(exons, exons_i_frag, frag_exonic)
 {
 
-    expanded_exon <- factor(togroup(exons_i_frag), seq_along(exons))
+    expanded_exon <- factor(togroup0(exons_i_frag), seq_along(exons))
     expanded_frag_exonic <- frag_exonic[unlist(exons_i_frag)]
 
-    expanded_exon <- expanded_exon[togroup(expanded_frag_exonic)]
+    expanded_exon <- expanded_exon[togroup0(expanded_frag_exonic)]
     expanded_frag_exonic <- unlist(expanded_frag_exonic)
 
     irl <- split(expanded_frag_exonic, expanded_exon)

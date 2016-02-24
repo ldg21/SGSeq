@@ -21,8 +21,8 @@ to be included}
 
 \item{min_anchor}{Integer specifiying minimum anchor length}
 
-\item{retain_coverage}{Logical indicating whether coverages for each
-exon should be retained as an \code{IntegerList} in metadata
+\item{retain_coverage}{Logical indicating whether coverage for each
+exon should be retained as an \code{RleList} in metadata
 column \dQuote{coverage}. This allows filtering of features
 using more stringent criteria after the initial prediction.}
 }

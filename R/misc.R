@@ -265,7 +265,7 @@ completeMcols <- function(x, retain_coverage)
 
         } else if (m == "coverage") {
 
-            mcols(x)[, m] <- IntegerList(vector("list", length(x)))
+            mcols(x)[, m] <- RleList(vector("list", length(x)))
 
         }
 
@@ -433,7 +433,7 @@ nextFrame <- function(f, w, prev = FALSE)
     if (is(f, "list") || is(f, "List")) {
 
         f_unlisted <- unlist(f)
-        w_unlisted <- w[togroup(f)]
+        w_unlisted <- w[togroup0(f)]
         n_unlisted <- nextFrame(f_unlisted, w_unlisted, prev)
         n <- relist(n_unlisted, f)
 
@@ -465,7 +465,7 @@ splitCharacterList <- function(x, f)
     }
 
     x_unlisted <- setNames(unlist(x), NULL)
-    f_unlisted <- f[togroup(x)]
+    f_unlisted <- f[togroup0(x)]
     y <- CharacterList(split(x_unlisted, f_unlisted))
     y <- unique(y)
 
@@ -493,7 +493,7 @@ reorderFeatures <- function(x)
     x_names <- names(x)
     x_mc <- mcols(x)
     features <- unlist(x, use.names = FALSE)
-    features_x <- togroup(x)
+    features_x <- togroup0(x)
     i_pos <- which(strand(features) == "+" | strand(features) == "*")
     i_neg <- which(strand(features) == "-")
     i_pos <- i_pos[order(features[i_pos])]
@@ -753,5 +753,12 @@ importTranscripts <- function(file, tag_tx = "transcript_id",
   mcols(tx)$cdsEnd <- end(cds)[match(names(tx), names(cds))]
 
   return(tx)
+
+}
+
+togroup0 <- function(x)
+{
+
+    togroup(PartitioningByWidth(x))
 
 }

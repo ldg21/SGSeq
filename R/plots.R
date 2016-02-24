@@ -5,8 +5,8 @@ exonGraph <- function(features, tx_view)
 
         tx_name <- txName(features)
         i <- which(elementNROWS(tx_name) == 0)
-        tx_name[i] <- as(feature2name(features[i]), "CompressedCharacterList")
-        features <- features[togroup(tx_name)]
+        tx_name[i] <- as(feature2name(features[i]), "CharacterList")
+        features <- features[togroup0(tx_name)]
         mcols(features)$tx_name <- unlist(tx_name)
 
     }
@@ -105,6 +105,8 @@ addDummyNodes <- function(v, E, J, tx_view)
         v <- rbindDfsWithoutRowNames(v, v_dummy)
 
     }
+
+    v <- v[order(co2gr(v$coordinates)), ]
 
     return(v)
 
@@ -1020,14 +1022,6 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 
     if (nrow(x) == 0) { return() }
 
-    if (expand_variants) {
-
-        x <- expandSGVariantCounts(x, eventID)
-
-    }
-
-    X <- transform(variantFreq(x))
-
     variant_not_quantifiable <- elementNROWS(featureID5p(x)) == 0 &
         elementNROWS(featureID3p(x)) == 0
     event_not_quantifiable <- tapply(variant_not_quantifiable, eventID(x),
@@ -1042,6 +1036,14 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         warning("one or more splice events could not be quantified")
 
     }
+
+    if (expand_variants) {
+
+        x <- expandSGVariantCounts(x, eventID)
+
+    }
+
+    X <- transform(variantFreq(x))
 
     if (!is.null(RowSideColors) && !is.list(RowSideColors)) {
 
@@ -1095,7 +1097,7 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 extractFeaturesFromVariants <- function(variants)
 {
 
-    id2variant <- tapply(togroup(variants),
+    id2variant <- tapply(togroup0(variants),
         featureID(unlist(variants)), unique, simplify = FALSE)
     id2variant <- id2variant[elementNROWS(id2variant) == 1]
     features <- uniqueFeatures(unlist(variants))

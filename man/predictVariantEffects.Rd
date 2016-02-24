@@ -4,20 +4,30 @@
 \alias{predictVariantEffects}
 \title{Predict the effect of splice variants on protein-coding transcripts}
 \usage{
-predictVariantEffects(sgv, tx, genome, summarize = TRUE, cores = 1)
+predictVariantEffects(sgv, tx, genome, summarize = TRUE, include = c("none",
+  "nt", "aa", "both"), fix_start_codon = TRUE, cores = 1)
 }
 \arguments{
 \item{sgv}{\code{SGVariants} object}
 
-\item{tx}{A \code{TxDb} object or \code{GRangesList} of exons
+\item{tx}{A \code{TxDb} object, or \code{GRangesList} of exons
 grouped by transcript with metadata columns \code{cdsStart} and
 \code{cdsEnd} (by convention, cdsStart < cdsEnd for both strands).
 For import from GFF format, use function \code{importTranscripts}.}
 
 \item{genome}{\code{BSgenome} object}
 
-\item{summarize}{Logical indicating whether results should be
-summarized per variant}
+\item{summarize}{Logical indicating whether results for individual
+annotated transcripts should be summarized per variant}
+
+\item{include}{For \code{summarize = FALSE}, character string indicating
+whether nucleotide or amino acid sequences for the reference and
+variant isoform should be included in the output. Possible values are
+\dQuote{none}, \dQuote{nt}, \dQuote{aa}, or \dQuote{both}.}
+
+\item{fix_start_codon}{Logical indicating whether the annotated start
+codon should be considered fixed and the variant transcript should
+not be scanned for alternative start codons}
 
 \item{cores}{Number of cores available for parallel processing}
 }
@@ -25,16 +35,15 @@ summarized per variant}
 For \code{summarize = FALSE} a \code{data.frame} with rows
   corresponding to a variant-transcript pair. The \code{data.frame}
   includes columns for variant identifier, transcript name, type of
-  alteration, protein sequences for the reference transcript and the
-  transcript variant, protein lengths and coordinates of the variant
-  in the protein sequences. Start and end coordinates are 0- and
-  1-based, respectively, to allow for specification of deletions.
-  For \code{summarize = TRUE} a character vector matching argument
-  \code{sgv} with comma-separated predicted alterations for
-  individual transcripts.
+  alteration, nucleotide and amino acid sequence for the reference
+  and variant isoform, and coordinates of the alteration.
+  Start and end coordinates are 0- and 1-based, respectively
+  (to allow for specification of deletions). For \code{summarize = TRUE}
+  a character vector matching argument \code{sgv} with comma-separated
+  predicted alterations for individual transcripts.
 }
 \description{
-The effect of each splice variant is assessed with respect to individual
+The effect of splice variants is assessed with respect to individual
 protein-coding transcripts.
 }
 \examples{

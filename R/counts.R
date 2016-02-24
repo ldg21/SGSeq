@@ -109,7 +109,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
 
         counts <- DataFrame(N = N)
         counts$N_splicesite <- IntegerList(vector("list", nrow(counts)))
-        counts$coverage <- IntegerList(vector("list", nrow(counts)))
+        counts$coverage <- RleList(vector("list", nrow(counts)))
 
         if (length(i_J) > 0) {
 
@@ -122,8 +122,8 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
 
             counts$N_splicesite[i_E] <- splicesiteCounts(ir[i_E],
                 frag_exonic, frag_intron, min_anchor, "exon", "spliced")
-            counts$coverage[i_E] <- IntegerList(exonCoverage(ir[i_E],
-                E_index, frag_exonic))
+            counts$coverage[i_E] <- exonCoverage(ir[i_E], E_index,
+                frag_exonic)
 
         }
 
@@ -402,7 +402,7 @@ collapseRows <- function(x, list_i, fun = sum, cores = 1)
     if (length(j) > 0) {
 
         i <- unlist(list_i[j])
-        f <- togroup(list_i[j])
+        f <- togroup0(list_i[j])
         y[j, ] <- do.call(cbind, mclapply(seq_len(ncol(x)),
             function(j) { tapply(x[i, j, drop = FALSE], f, fun) },
             mc.cores = cores))
@@ -536,7 +536,7 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
     }
 
     fid_unlisted <- unlist(fid)
-    grp <- factor(togroup(fid), levels = seq_along(variants))
+    grp <- factor(togroup0(fid), levels = seq_along(variants))
     i <- which(!fid_unlisted %in% featureID(features))
     fid <- split(fid_unlisted[i], grp[i])
 
@@ -727,8 +727,8 @@ getSGVariantCountsPerStrand <- function(variants, features,
             }
 
             i <- ir_index[match(unlist(f), featureID(features))]
-            v <- vid[togroup(f)]
-            tmp <- IntegerList(tapply(unlist(i), v[togroup(i)], unique,
+            v <- vid[togroup0(f)]
+            tmp <- IntegerList(tapply(unlist(i), v[togroup0(i)], unique,
                 simplify = FALSE))
             x <- elementNROWS(tmp)[match(vid, names(tmp))]
             x[elementNROWS(f) == 0] <- NA_integer_

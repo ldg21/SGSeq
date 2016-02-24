@@ -12,7 +12,7 @@ import(Rsamtools)
 ## IMPORT FUNCTIONS
 
 importFrom(AnnotationDbi, select)
-importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate)
+importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate, type)
 importFrom(igraph, clusters, degree, delete.edges, delete.vertices,
     edge.connectivity, get.data.frame, get.shortest.paths,
     graph.data.frame, induced.subgraph, neighborhood, plot.igraph,

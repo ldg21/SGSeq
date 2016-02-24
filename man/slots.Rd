@@ -64,7 +64,6 @@
 \alias{featureID<-,Counts-method}
 \alias{featureID<-,Paths-method}
 \alias{featureID<-,SGFeatures-method}
-\alias{from}
 \alias{from,Paths-method}
 \alias{from,SGVariantCounts-method}
 \alias{from<-}
@@ -109,7 +108,6 @@
 \alias{splice5p<-,SGFeatureCounts-method}
 \alias{splice5p<-,SGFeatures-method}
 \alias{splice5p<-,SGSegments-method}
-\alias{to}
 \alias{to,Paths-method}
 \alias{to,SGVariantCounts-method}
 \alias{to<-}
@@ -123,7 +121,6 @@
 \alias{txName<-,Counts-method}
 \alias{txName<-,Features-method}
 \alias{txName<-,Paths-method}
-\alias{type}
 \alias{type,Counts-method}
 \alias{type,Features-method}
 \alias{type,Paths-method}
@@ -151,300 +148,294 @@
 \alias{variantType<-,SGVariants-method}
 \title{Accessing and replacing metadata columns}
 \usage{
-type(object)
+type(x) <- value
 
-type(object) <- value
+txName(x)
 
-txName(object)
+txName(x) <- value
 
-txName(object) <- value
+geneName(x)
 
-geneName(object)
+geneName(x) <- value
 
-geneName(object) <- value
+featureID(x)
 
-featureID(object)
+featureID(x) <- value
 
-featureID(object) <- value
+geneID(x)
 
-geneID(object)
+geneID(x) <- value
 
-geneID(object) <- value
+splice5p(x)
 
-splice5p(object)
+splice5p(x) <- value
 
-splice5p(object) <- value
+splice3p(x)
 
-splice3p(object)
+splice3p(x) <- value
 
-splice3p(object) <- value
+from(x) <- value
 
-from(object)
+to(x) <- value
 
-from(object) <- value
+segmentID(x)
 
-to(object)
+segmentID(x) <- value
 
-to(object) <- value
+variantID(x)
 
-segmentID(object)
+variantID(x) <- value
 
-segmentID(object) <- value
+eventID(x)
 
-variantID(object)
+eventID(x) <- value
 
-variantID(object) <- value
+closed5p(x)
 
-eventID(object)
+closed5p(x) <- value
 
-eventID(object) <- value
+closed3p(x)
 
-closed5p(object)
+closed3p(x) <- value
 
-closed5p(object) <- value
+closed5pEvent(x)
 
-closed3p(object)
+closed5pEvent(x) <- value
 
-closed3p(object) <- value
+closed3pEvent(x)
 
-closed5pEvent(object)
+closed3pEvent(x) <- value
 
-closed5pEvent(object) <- value
+variantType(x)
 
-closed3pEvent(object)
+variantType(x) <- value
 
-closed3pEvent(object) <- value
+variantName(x)
 
-variantType(object)
+variantName(x) <- value
 
-variantType(object) <- value
+featureID5p(x)
 
-variantName(object)
+featureID5p(x) <- value
 
-variantName(object) <- value
+featureID3p(x)
 
-featureID5p(object)
+featureID3p(x) <- value
 
-featureID5p(object) <- value
+featureID5pEvent(x)
 
-featureID3p(object)
+featureID5pEvent(x) <- value
 
-featureID3p(object) <- value
+featureID3pEvent(x)
 
-featureID5pEvent(object)
+featureID3pEvent(x) <- value
 
-featureID5pEvent(object) <- value
+\S4method{type}{Features}(x)
 
-featureID3pEvent(object)
+\S4method{type}{Paths}(x)
 
-featureID3pEvent(object) <- value
+\S4method{type}{Counts}(x)
 
-\S4method{type}{Features}(object)
+\S4method{type}{Features}(x) <- value
 
-\S4method{type}{Paths}(object)
+\S4method{type}{Paths}(x) <- value
 
-\S4method{type}{Counts}(object)
+\S4method{type}{Counts}(x) <- value
 
-\S4method{type}{Features}(object) <- value
+\S4method{txName}{Features}(x)
 
-\S4method{type}{Paths}(object) <- value
+\S4method{txName}{Paths}(x)
 
-\S4method{type}{Counts}(object) <- value
+\S4method{txName}{Counts}(x)
 
-\S4method{txName}{Features}(object)
+\S4method{txName}{Features}(x) <- value
 
-\S4method{txName}{Paths}(object)
+\S4method{txName}{Paths}(x) <- value
 
-\S4method{txName}{Counts}(object)
+\S4method{txName}{Counts}(x) <- value
 
-\S4method{txName}{Features}(object) <- value
+\S4method{geneName}{Features}(x)
 
-\S4method{txName}{Paths}(object) <- value
+\S4method{geneName}{Paths}(x)
 
-\S4method{txName}{Counts}(object) <- value
+\S4method{geneName}{Counts}(x)
 
-\S4method{geneName}{Features}(object)
+\S4method{geneName}{Features}(x) <- value
 
-\S4method{geneName}{Paths}(object)
+\S4method{geneName}{Paths}(x) <- value
 
-\S4method{geneName}{Counts}(object)
+\S4method{geneName}{Counts}(x) <- value
 
-\S4method{geneName}{Features}(object) <- value
+\S4method{featureID}{SGFeatures}(x)
 
-\S4method{geneName}{Paths}(object) <- value
+\S4method{featureID}{Paths}(x)
 
-\S4method{geneName}{Counts}(object) <- value
+\S4method{featureID}{Counts}(x)
 
-\S4method{featureID}{SGFeatures}(object)
+\S4method{featureID}{SGFeatures}(x) <- value
 
-\S4method{featureID}{Paths}(object)
+\S4method{featureID}{Paths}(x) <- value
 
-\S4method{featureID}{Counts}(object)
+\S4method{featureID}{Counts}(x) <- value
 
-\S4method{featureID}{SGFeatures}(object) <- value
+\S4method{geneID}{SGFeatures}(x)
 
-\S4method{featureID}{Paths}(object) <- value
+\S4method{geneID}{Paths}(x)
 
-\S4method{featureID}{Counts}(object) <- value
+\S4method{geneID}{Counts}(x)
 
-\S4method{geneID}{SGFeatures}(object)
+\S4method{geneID}{SGFeatures}(x) <- value
 
-\S4method{geneID}{Paths}(object)
+\S4method{geneID}{Paths}(x) <- value
 
-\S4method{geneID}{Counts}(object)
+\S4method{geneID}{Counts}(x) <- value
 
-\S4method{geneID}{SGFeatures}(object) <- value
+\S4method{splice5p}{SGFeatures}(x)
 
-\S4method{geneID}{Paths}(object) <- value
+\S4method{splice5p}{SGSegments}(x)
 
-\S4method{geneID}{Counts}(object) <- value
+\S4method{splice5p}{SGFeatureCounts}(x)
 
-\S4method{splice5p}{SGFeatures}(object)
+\S4method{splice5p}{SGFeatures}(x) <- value
 
-\S4method{splice5p}{SGSegments}(object)
+\S4method{splice5p}{SGSegments}(x) <- value
 
-\S4method{splice5p}{SGFeatureCounts}(object)
+\S4method{splice5p}{SGFeatureCounts}(x) <- value
 
-\S4method{splice5p}{SGFeatures}(object) <- value
+\S4method{splice3p}{SGFeatures}(x)
 
-\S4method{splice5p}{SGSegments}(object) <- value
+\S4method{splice3p}{SGSegments}(x)
 
-\S4method{splice5p}{SGFeatureCounts}(object) <- value
+\S4method{splice3p}{SGFeatureCounts}(x)
 
-\S4method{splice3p}{SGFeatures}(object)
+\S4method{splice3p}{SGFeatures}(x) <- value
 
-\S4method{splice3p}{SGSegments}(object)
+\S4method{splice3p}{SGSegments}(x) <- value
 
-\S4method{splice3p}{SGFeatureCounts}(object)
+\S4method{splice3p}{SGFeatureCounts}(x) <- value
 
-\S4method{splice3p}{SGFeatures}(object) <- value
+\S4method{segmentID}{Paths}(x)
 
-\S4method{splice3p}{SGSegments}(object) <- value
+\S4method{segmentID}{SGVariantCounts}(x)
 
-\S4method{splice3p}{SGFeatureCounts}(object) <- value
+\S4method{segmentID}{Paths}(x) <- value
 
-\S4method{segmentID}{Paths}(object)
+\S4method{segmentID}{SGVariantCounts}(x) <- value
 
-\S4method{segmentID}{SGVariantCounts}(object)
+\S4method{from}{Paths}(x)
 
-\S4method{segmentID}{Paths}(object) <- value
+\S4method{from}{SGVariantCounts}(x)
 
-\S4method{segmentID}{SGVariantCounts}(object) <- value
+\S4method{from}{Paths}(x) <- value
 
-\S4method{from}{Paths}(object)
+\S4method{from}{SGVariantCounts}(x) <- value
 
-\S4method{from}{SGVariantCounts}(object)
+\S4method{to}{Paths}(x)
 
-\S4method{from}{Paths}(object) <- value
+\S4method{to}{SGVariantCounts}(x)
 
-\S4method{from}{SGVariantCounts}(object) <- value
+\S4method{to}{Paths}(x) <- value
 
-\S4method{to}{Paths}(object)
+\S4method{to}{SGVariantCounts}(x) <- value
 
-\S4method{to}{SGVariantCounts}(object)
+\S4method{eventID}{SGVariants}(x)
 
-\S4method{to}{Paths}(object) <- value
+\S4method{eventID}{SGVariantCounts}(x)
 
-\S4method{to}{SGVariantCounts}(object) <- value
+\S4method{eventID}{SGVariants}(x) <- value
 
-\S4method{eventID}{SGVariants}(object)
+\S4method{eventID}{SGVariantCounts}(x) <- value
 
-\S4method{eventID}{SGVariantCounts}(object)
+\S4method{variantID}{SGVariants}(x)
 
-\S4method{eventID}{SGVariants}(object) <- value
+\S4method{variantID}{SGVariantCounts}(x)
 
-\S4method{eventID}{SGVariantCounts}(object) <- value
+\S4method{variantID}{SGVariants}(x) <- value
 
-\S4method{variantID}{SGVariants}(object)
+\S4method{variantID}{SGVariantCounts}(x) <- value
 
-\S4method{variantID}{SGVariantCounts}(object)
+\S4method{closed5p}{SGVariants}(x)
 
-\S4method{variantID}{SGVariants}(object) <- value
+\S4method{closed5p}{SGVariantCounts}(x)
 
-\S4method{variantID}{SGVariantCounts}(object) <- value
+\S4method{closed5p}{SGVariants}(x) <- value
 
-\S4method{closed5p}{SGVariants}(object)
+\S4method{closed5p}{SGVariantCounts}(x) <- value
 
-\S4method{closed5p}{SGVariantCounts}(object)
+\S4method{closed3p}{SGVariants}(x)
 
-\S4method{closed5p}{SGVariants}(object) <- value
+\S4method{closed3p}{SGVariantCounts}(x)
 
-\S4method{closed5p}{SGVariantCounts}(object) <- value
+\S4method{closed3p}{SGVariants}(x) <- value
 
-\S4method{closed3p}{SGVariants}(object)
+\S4method{closed3p}{SGVariantCounts}(x) <- value
 
-\S4method{closed3p}{SGVariantCounts}(object)
+\S4method{closed5pEvent}{SGVariants}(x)
 
-\S4method{closed3p}{SGVariants}(object) <- value
+\S4method{closed5pEvent}{SGVariantCounts}(x)
 
-\S4method{closed3p}{SGVariantCounts}(object) <- value
+\S4method{closed5pEvent}{SGVariants}(x) <- value
 
-\S4method{closed5pEvent}{SGVariants}(object)
+\S4method{closed5pEvent}{SGVariantCounts}(x) <- value
 
-\S4method{closed5pEvent}{SGVariantCounts}(object)
+\S4method{closed3pEvent}{SGVariants}(x)
 
-\S4method{closed5pEvent}{SGVariants}(object) <- value
+\S4method{closed3pEvent}{SGVariantCounts}(x)
 
-\S4method{closed5pEvent}{SGVariantCounts}(object) <- value
+\S4method{closed3pEvent}{SGVariants}(x) <- value
 
-\S4method{closed3pEvent}{SGVariants}(object)
+\S4method{closed3pEvent}{SGVariantCounts}(x) <- value
 
-\S4method{closed3pEvent}{SGVariantCounts}(object)
+\S4method{variantName}{SGVariants}(x)
 
-\S4method{closed3pEvent}{SGVariants}(object) <- value
+\S4method{variantName}{SGVariantCounts}(x)
 
-\S4method{closed3pEvent}{SGVariantCounts}(object) <- value
+\S4method{variantName}{SGVariants}(x) <- value
 
-\S4method{variantName}{SGVariants}(object)
+\S4method{variantName}{SGVariantCounts}(x) <- value
 
-\S4method{variantName}{SGVariantCounts}(object)
+\S4method{variantType}{SGVariants}(x)
 
-\S4method{variantName}{SGVariants}(object) <- value
+\S4method{variantType}{SGVariantCounts}(x)
 
-\S4method{variantName}{SGVariantCounts}(object) <- value
+\S4method{variantType}{SGVariants}(x) <- value
 
-\S4method{variantType}{SGVariants}(object)
+\S4method{variantType}{SGVariantCounts}(x) <- value
 
-\S4method{variantType}{SGVariantCounts}(object)
+\S4method{featureID5p}{SGVariants}(x)
 
-\S4method{variantType}{SGVariants}(object) <- value
+\S4method{featureID5p}{SGVariantCounts}(x)
 
-\S4method{variantType}{SGVariantCounts}(object) <- value
+\S4method{featureID5p}{SGVariants}(x) <- value
 
-\S4method{featureID5p}{SGVariants}(object)
+\S4method{featureID5p}{SGVariantCounts}(x) <- value
 
-\S4method{featureID5p}{SGVariantCounts}(object)
+\S4method{featureID3p}{SGVariants}(x)
 
-\S4method{featureID5p}{SGVariants}(object) <- value
+\S4method{featureID3p}{SGVariantCounts}(x)
 
-\S4method{featureID5p}{SGVariantCounts}(object) <- value
+\S4method{featureID3p}{SGVariants}(x) <- value
 
-\S4method{featureID3p}{SGVariants}(object)
+\S4method{featureID3p}{SGVariantCounts}(x) <- value
 
-\S4method{featureID3p}{SGVariantCounts}(object)
+\S4method{featureID5pEvent}{SGVariants}(x)
 
-\S4method{featureID3p}{SGVariants}(object) <- value
+\S4method{featureID5pEvent}{SGVariantCounts}(x)
 
-\S4method{featureID3p}{SGVariantCounts}(object) <- value
+\S4method{featureID5pEvent}{SGVariants}(x) <- value
 
-\S4method{featureID5pEvent}{SGVariants}(object)
+\S4method{featureID5pEvent}{SGVariantCounts}(x) <- value
 
-\S4method{featureID5pEvent}{SGVariantCounts}(object)
+\S4method{featureID3pEvent}{SGVariants}(x)
 
-\S4method{featureID5pEvent}{SGVariants}(object) <- value
+\S4method{featureID3pEvent}{SGVariantCounts}(x)
 
-\S4method{featureID5pEvent}{SGVariantCounts}(object) <- value
+\S4method{featureID3pEvent}{SGVariants}(x) <- value
 
-\S4method{featureID3pEvent}{SGVariants}(object)
-
-\S4method{featureID3pEvent}{SGVariantCounts}(object)
-
-\S4method{featureID3pEvent}{SGVariants}(object) <- value
-
-\S4method{featureID3pEvent}{SGVariantCounts}(object) <- value
+\S4method{featureID3pEvent}{SGVariantCounts}(x) <- value
 }
 \arguments{
-\item{object}{Object containing metadata column}
+\item{x}{Object containing metadata column}
 
 \item{value}{Replacement value}
 }

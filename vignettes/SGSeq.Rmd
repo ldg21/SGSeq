@@ -112,7 +112,12 @@ sgfc_ucsc <- analyzeFeatures(si, features = txf_ucsc)
 sgfc_ucsc
 ``` 
 
-*analyzeFeatures* returns an object of class *SGFeatureCounts*, which extends the *RangedSummarizedExperiment* class from the `r Biocpkg("SummarizedExperiment")` package. *SGFeatureCounts* contains the sample information as *colData*, splice graph features as *rowRanges* and assays *counts* and *FPKM*, which store structurally compatible counts and FPKMs, respectively. Accessor functions *colData*, *rowRanges*, *counts* and *FPKM* can be used to access the data.
+*analyzeFeatures* returns an object of class *SGFeatureCounts*, which extends the *RangedSummarizedExperiment* class from the `r Biocpkg("SummarizedExperiment")` package. *SGFeatureCounts* contains the sample information as *colData*, splice graph features as *rowRanges* and assays *counts* and *FPKM*, which store structurally compatible counts and FPKMs, respectively. Accessor functions *colData*, *rowRanges*, *counts* and *FPKM* can be used to access the data. For example, counts and FPKMs can be extracted from an *SGFeatureCounts* object as shown below.
+
+```{r}
+head(counts(sgfc_ucsc))
+head(FPKM(sgfc_ucsc))
+```
 
 Compatible FPKMs for splice graph features can be visualized with function *plotFeatures*. *plotFeatures* generates a two-panel figure with a splice graph shown in the top panel and a heatmap illustrating expression levels of individual features in the bottom panel. For customization of *plotFeatures* output, see section [Visualization]. The plotting function invisibly returns a *data.frame* with information on splice graph features, including genomic coordinates.
 
@@ -155,7 +160,13 @@ sgvc_pred <- analyzeVariants(sgfc_pred)
 sgvc_pred
 ``` 
 
-*analyzeVariants* returns an *SGVariantCounts* object. Similar to *SGFeatureCounts*, *SGVariantCounts* extends the *RangedSummarizedExperiment* class. *SGVariantCounts* contains sample information as *colData* and *SGVariants* as *rowRanges*. Assay *variantFreq* stores estimates of relative usage for each splice variant and sample. Accessor functions *colData*, *rowRanges* and *variantFreq* can be used to access the data. Information on splice variants is stored in columns in the *SGVariants* object and can be accessed as follows.
+*analyzeVariants* returns an *SGVariantCounts* object. Similar to *SGFeatureCounts*, *SGVariantCounts* extends the *RangedSummarizedExperiment* class. *SGVariantCounts* contains sample information as *colData* and *SGVariants* as *rowRanges*. Assay *variantFreq* stores estimates of relative usage for each splice variant and sample. Accessor functions *colData*, *rowRanges* and *variantFreq* can be used to access the data. For example, estimates of relative usage can be extracted from an *SGVariantCounts* object as shown below.
+
+```{r}
+variantFreq(sgvc_pred)
+```
+
+Information on splice variants is stored in metadata columns and can be accessed as follows.
 
 ```{r}
 mcols(sgvc_pred)

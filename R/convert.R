@@ -115,7 +115,7 @@ convertToTxFeatures <- function(x)
 
         i_not_na <- which(!is.na(gene_name_unlisted))
         i_gene_name <- split(gene_name_unlisted[i_not_na],
-            togroup(tx_name)[i_not_na])
+            togroup0(tx_name)[i_not_na])
         i_gene_name <- CharacterList(i_gene_name)
         i_gene_name <- unique(i_gene_name)
         gene_name <- CharacterList(vector("list", length(features)))
@@ -153,7 +153,7 @@ extractExons <- function(tx)
 
     tx <- reorderFeatures(tx)
     exons <- setNames(unlist(tx), NULL)
-    exons_tx <- togroup(tx)
+    exons_tx <- togroup0(tx)
 
     tx_i_exon <- IntegerList(split(seq_along(exons), exons_tx))
     i_X <- pfirst(tx_i_exon)
@@ -166,7 +166,7 @@ extractExons <- function(tx)
 
     mcols(exons) <- DataFrame(
         type = type,
-        txName = names(tx)[exons_tx])
+        txName = as(names(tx)[exons_tx], "CharacterList"))
 
     if (!is.null(mcols(tx)$cdsStart) && !is.null(mcols(tx)$cdsEnd) &&
         !is.null(mcols(tx)$status)) {
@@ -268,7 +268,7 @@ extractJunctions <- function(tx)
     junctions <- setNames(unlist(introns), NULL) + 1
     mcols(junctions) <- DataFrame(
         type = rep("J", length(junctions)),
-        txName = names(introns)[togroup(introns)])
+        txName = as(names(introns)[togroup0(introns)], "CharacterList"))
 
     if (!is.null(mcols(tx)$cdsStart) && !is.null(mcols(tx)$cdsEnd) &&
         !is.null(mcols(tx)$status)) {
@@ -539,9 +539,9 @@ convertToSGSegments <- function(x, cores = 1)
     segments <- reorderFeatures(segments)
 
     list_type <- split(as.character(type(unlist(segments))),
-        togroup(segments))
+        togroup0(segments))
     list_featureID <- CharacterList(split(featureID(unlist(segments)),
-        togroup(segments)))
+        togroup0(segments)))
 
     gd <- edges(spliceGraph(x))
 
