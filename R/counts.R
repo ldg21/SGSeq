@@ -206,12 +206,12 @@ convertSlots <- function(x)
 makeSGFeatureCounts <- function(rowRanges, colData, counts, min_anchor = 1)
 {
 
+    colData <- DataFrame(colData, row.names = colData$sample_name)
     colnames(counts) <- colData$sample_name
     x <- SummarizedExperiment(
         assays = list(counts = counts),
         rowRanges = rowRanges,
-        colData = DataFrame(colData))
-    colnames(x) <- colData$sample_name
+        colData = colData)
     assays(x)$FPKM <- getScaledCounts(SE = x, min_anchor = min_anchor)
     x <- SGFeatureCounts(x)
 
@@ -752,16 +752,18 @@ makeSGVariantCounts <- function(rowRanges, colData, counts, min_denominator,
 
     for (k in colnames(counts[[1]])) {
 
-        assays[[k]] <- do.call(cbind,
-            mclapply(counts, function(x) { x[, k] }, mc.cores = cores))
+        a <- do.call(cbind, mclapply(counts, function(x) { x[, k] },
+            mc.cores = cores))
+        colnames(a) <- colData$sample_name
+        assays[[k]] <- a
 
     }
 
+    colData <- DataFrame(colData, row.names = colData$sample_name)
     x <- SummarizedExperiment(
         assays = assays,
         rowRanges = rowRanges,
-        colData = DataFrame(colData))
-    colnames(x) <- colData$sample_name
+        colData = colData)
     x <- getVariantFreq(x, min_denominator)
     x <- SGVariantCounts(x)
 
