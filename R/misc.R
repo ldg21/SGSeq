@@ -281,13 +281,26 @@ completeMcols <- function(x, retain_coverage)
 getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
 {
 
-    if (is.null(yieldSize)) file <- BamFile(file_bam)
-    else file <- BamFile(file_bam, yieldSize = yieldSize)
+    if (is(file_bam, "BamFile")) {
+
+        file_tmp <- file_bam
+
+    } else {
+
+        file_tmp <- BamFile(file_bam)
+
+    }
+
+    if (!is.null(yieldSize)) {
+
+        yieldSize(file_tmp) <- yieldSize
+
+    }
 
     flag <- scanBamFlag(isUnmappedQuery = FALSE, isSecondaryAlignment = FALSE)
     what <- c("qname", "flag", "qwidth", "isize")
     param <- ScanBamParam(flag = flag, what = what, tag = "XS")
-    bam <- scanBam(file = file, param = param)[[1]]
+    bam <- scanBam(file = file_tmp, param = param)[[1]]
 
     XS <- !is.null(bam$tag$XS)
     paired_end <- any(bamFlagTest(bam$flag, "isPaired"))
@@ -304,13 +317,13 @@ getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
 
     }
 
-    x <- data.frame(
-       sample_name = sample_name,
-       file_bam = file_bam,
-       XS = XS,
-       paired_end = paired_end,
-       read_length = read_length,
-       frag_length = frag_length)
+    x <- DataFrame(
+        sample_name = sample_name,
+        file_bam = file_bam,
+        XS = XS,
+        paired_end = paired_end,
+        read_length = read_length,
+        frag_length = frag_length)
 
     if (is.null(yieldSize)) {
 
@@ -762,3 +775,9 @@ importTranscripts <- function(file, tag_tx = "transcript_id",
 ## works on any object.
 togroup0 <- S4Vectors:::quick_togroup
 
+isOr <- function(object, class2)
+{
+
+    any(sapply(class2, is, object = object))
+
+}

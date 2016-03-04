@@ -114,7 +114,15 @@ predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
 
     }
 
-    si <- seqinfo(BamFile(file_bam))
+    if (is(file_bam, "BamFile")) {
+
+        si <- seqinfo(file_bam)
+
+    } else {
+
+        si <- seqinfo(BamFile(file_bam))
+
+    }
 
     if (is.null(which)) {
 
@@ -193,7 +201,15 @@ predictTxFeaturesPerStrand <- function(file_bam, paired_end, which,
     seqlevel <- as.character(seqnames(which))
     strand <- as.character(strand(which))
 
-    si <- seqinfo(BamFile(file_bam))
+    if (is(file_bam, "BamFile")) {
+
+        si <- seqinfo(file_bam)
+
+    } else {
+
+        si <- seqinfo(BamFile(file_bam))
+
+    }
 
     gap <- readGap(file_bam, paired_end, which, sample_name, verbose)
     frag_exonic <- gap$frag_exonic

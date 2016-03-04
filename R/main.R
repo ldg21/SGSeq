@@ -139,7 +139,9 @@ analyzeFeatures <- function(sample_info, which = NULL,
 ##'
 ##' @title Obtain library information from BAM files
 ##' @param sample_info Data frame with sample information including
-##'   mandatory character columns \dQuote{sample_name} and \dQuote{file_bam}.
+##'   mandatory columns \dQuote{sample_name} and \dQuote{file_bam}.
+##'   Column \dQuote{sample_name} must be a character vector. Column
+##'   \dQuote{file_bam} can be a character vector or \code{BamFileList}.
 ##' @param yieldSize Number of records used for obtaining library
 ##'   information, or \code{NULL} for all records
 ##' @param cores Number of cores available for parallel processing
@@ -174,7 +176,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
         sample_info$sample_name,
         "character")
 
-    bamInfo <- do.call(rbindDfsWithoutRowNames, list_bamInfo)
+    bamInfo <- rbindListOfDFs(list_bamInfo, cores = cores)
 
     checkBamInfo(bamInfo)
 
@@ -469,9 +471,9 @@ getSGVariantCounts <- function(variants, feature_counts = NULL,
 checkSampleInfo <- function(sample_info, complete = TRUE)
 {
 
-    col_type <- c(
+    col_type <- list(
          sample_name = "character",
-         file_bam = "character",
+         file_bam = c("character", "BamFileList"),
          paired_end = "logical",
          read_length = "numeric",
          frag_length = "numeric",
@@ -497,13 +499,14 @@ checkSampleInfo <- function(sample_info, complete = TRUE)
 
     }
 
-    invalid <- !mapply(is, sample_info[names(col_type)], col_type)
+    invalid <- !mapply(isOr, sample_info[names(col_type)], col_type)
 
     if (any(invalid)) {
 
         err <- paste("sample_info column(s)",
             paste(names(col_type)[invalid], collapse = ", "), "\n",
-            "must be of type", paste(col_type[invalid], collapse = ", "))
+            "must be of type",
+            paste(unstrsplit(col_type[invalid], "/"), collapse = ", "))
         stop(err, call. = FALSE)
 
     }
@@ -516,13 +519,14 @@ checkBamInfo <- function(bam_info)
     if (!all(bam_info$XS)) {
 
         files <- bam_info$file_bam[!bam_info$XS]
+        if (is(files, "BamFileList")) files <- path(files)
         files <- paste0("'", files, "'")
         msg <- paste("Custom tag 'XS' not found in BAM file:\n  ", files)
         msg <- paste(msg, collapse = "\n")
         msg <- paste0(msg, "\n\n",
             "Spliced alignments must include a custom tag 'XS'.\n",
             "Compatible BAM files can be obtained with an alignment\n",
-            "program for RNA-seq data (e.g. GSNAP, STAR, TopHat).")
+            "program for RNA-seq data (e.g. GSNAP, HISAT, STAR, TopHat).")
         warning(msg, call. = FALSE)
 
     }
