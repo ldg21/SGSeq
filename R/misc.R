@@ -317,13 +317,12 @@ getBamInfoPerSample <- function(file_bam, yieldSize, sample_name)
 
     }
 
-    x <- DataFrame(
-        sample_name = sample_name,
-        file_bam = file_bam,
+    x <- data.frame(
         XS = XS,
         paired_end = paired_end,
         read_length = read_length,
-        frag_length = frag_length)
+        frag_length = frag_length,
+        stringsAsFactors = FALSE)
 
     if (is.null(yieldSize)) {
 

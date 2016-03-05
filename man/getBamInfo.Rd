@@ -34,8 +34,15 @@ Note that library size is only obtained if \code{yieldSize} is {NULL}.
 \examples{
 path <- system.file("extdata", package = "SGSeq")
 si$file_bam <- file.path(path, "bams", si$file_bam)
+
+## data.frame as sample_info and character vector as file_bam
 si <- si[, c("sample_name", "file_bam")]
 si_complete <- getBamInfo(si)
+
+## DataFrame as sample_info and BamFileList as file_bam
+DF <- DataFrame(si)
+DF$file_bam <- BamFileList(DF$file_bam)
+DF_complete <- getBamInfo(DF)
 }
 \author{
 Leonard Goldstein
