@@ -4,27 +4,12 @@
 \name{assays}
 \alias{FPKM}
 \alias{FPKM,SGFeatureCounts-method}
+\alias{FPKM,SGVariantCounts-method}
 \alias{FPKM<-}
 \alias{FPKM<-,SGFeatureCounts-method}
 \alias{assays}
 \alias{counts,SGFeatureCounts-method}
 \alias{counts,SGVariantCounts-method}
-\alias{counts3p}
-\alias{counts3p,SGVariantCounts-method}
-\alias{counts3p<-}
-\alias{counts3p<-,SGVariantCounts-method}
-\alias{counts3pEvent}
-\alias{counts3pEvent,SGVariantCounts-method}
-\alias{counts3pEvent<-}
-\alias{counts3pEvent<-,SGVariantCounts-method}
-\alias{counts5p}
-\alias{counts5p,SGVariantCounts-method}
-\alias{counts5p<-}
-\alias{counts5p<-,SGVariantCounts-method}
-\alias{counts5pEvent}
-\alias{counts5pEvent,SGVariantCounts-method}
-\alias{counts5pEvent<-}
-\alias{counts5pEvent<-,SGVariantCounts-method}
 \alias{counts<-,SGFeatureCounts-method}
 \alias{counts<-,SGVariantCounts-method}
 \alias{variantFreq}
@@ -33,25 +18,9 @@
 \alias{variantFreq<-,SGVariantCounts-method}
 \title{Accessing and replacing assay data}
 \usage{
-FPKM(object)
+FPKM(object, ...)
 
-FPKM(object) <- value
-
-counts5p(object)
-
-counts5p(object) <- value
-
-counts3p(object)
-
-counts3p(object) <- value
-
-counts5pEvent(object)
-
-counts5pEvent(object) <- value
-
-counts3pEvent(object)
-
-counts3pEvent(object) <- value
+FPKM(object, ...) <- value
 
 variantFreq(object)
 
@@ -65,54 +34,51 @@ variantFreq(object) <- value
 
 \S4method{FPKM}{SGFeatureCounts}(object) <- value
 
-\S4method{counts5p}{SGVariantCounts}(object)
+\S4method{counts}{SGVariantCounts}(object, option)
 
-\S4method{counts5p}{SGVariantCounts}(object) <- value
+\S4method{counts}{SGVariantCounts}(object, option) <- value
 
-\S4method{counts3p}{SGVariantCounts}(object)
-
-\S4method{counts3p}{SGVariantCounts}(object) <- value
-
-\S4method{counts5pEvent}{SGVariantCounts}(object)
-
-\S4method{counts5pEvent}{SGVariantCounts}(object) <- value
-
-\S4method{counts3pEvent}{SGVariantCounts}(object)
-
-\S4method{counts3pEvent}{SGVariantCounts}(object) <- value
+\S4method{FPKM}{SGVariantCounts}(object, option, min_anchor = 1)
 
 \S4method{variantFreq}{SGVariantCounts}(object)
 
 \S4method{variantFreq}{SGVariantCounts}(object) <- value
-
-\S4method{counts}{SGVariantCounts}(object)
-
-\S4method{counts}{SGVariantCounts}(object) <- value
 }
 \arguments{
 \item{object}{Object containing assay data}
 
+\item{...}{Arguments passed to method for \code{SGVariantCounts} objects}
+
 \item{value}{Replacement value}
+
+\item{option}{For \code{SGVariantCounts} objects, \code{option} specifies
+whether output should be based on counts of reads compatible with the
+variant at the start (\dQuote{variant5p}), end (\dQuote{variant3p}) or
+either (\dQuote{variant}), or whether output should be based on counts of
+reads compatible with any variant belonging to the same event
+(\dQuote{event5p} or \dQuote{event3p})}
+
+\item{min_anchor}{For \code{SGVariantCounts} objects, \code{min_anchor}
+specifies the minimum anchor length when computing FPKM values}
 }
 \value{
-Assay data for accessor functions, updated object for replacement
-functions.
+Assay data for accessor functions or updated object for
+replacement functions.
 }
 \description{
 Accessor and replacement functions for assay data.
 }
 \details{
-\code{Counts} objects defined in the \code{SGSeq} package contain
-different types of assay data. For example, class \code{SGFeatureCounts}
-contains assays \code{counts} and \code{FPKM}.
-
-To facilitate accessing and modifying assays, for each assay
-there exists a function with name identical to the assay name
-that can be used to access and modify it (see examples).
+Functions \code{counts} and \code{FPKM} are used to extract counts and
+FPKM values from \code{SGFeatureCounts} and \code{SGVariantCounts}
+objects. Function \code{variantFreq} is used to access relative usage
+estimates from \code{SGVariantCounts} objects.
 }
 \examples{
 x <- counts(sgfc_pred)
 y <- FPKM(sgfc_pred)
+u <- counts(sgvc_pred, "variant5p")
+v <- FPKM(sgvc_pred, "variant5p")
 }
 \author{
 Leonard Goldstein

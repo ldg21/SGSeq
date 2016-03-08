@@ -212,23 +212,32 @@ makeSGFeatureCounts <- function(rowRanges, colData, counts, min_anchor = 1)
         assays = list(counts = counts),
         rowRanges = rowRanges,
         colData = colData)
-    assays(x)$FPKM <- getScaledCounts(SE = x, min_anchor = min_anchor)
+    assays(x)$FPKM <- getScaledCounts(x, min_anchor)
     x <- SGFeatureCounts(x)
 
     return(x)
 
 }
 
-getScaledCounts <- function(SE, min_anchor,
-    features = rowRanges(SE),
-    counts = assays(SE)$counts,
-    paired_end = colData(SE)$paired_end,
-    read_length = colData(SE)$read_length,
-    frag_length = colData(SE)$frag_length,
-    lib_size = colData(SE)$lib_size)
+getScaledCounts <- function(object, min_anchor,
+    features = rowRanges(object),
+    counts = assays(object)$counts,
+    paired_end = colData(object)$paired_end,
+    read_length = colData(object)$read_length,
+    frag_length = colData(object)$frag_length,
+    lib_size = colData(object)$lib_size)
 {
 
-    L <- getFeatureLengths(features, min_anchor)
+    if (is(features, "SGFeatures")) {
+
+        L <- getFeatureLengths(features, min_anchor)
+
+    } else if (is(features, "SGVariants")) {
+
+        L <- rep(-2 * min_anchor + 2, length(features))
+
+    }
+
     E <- getEffectiveLengths(L, paired_end, read_length, frag_length)
     X <- counts / (E * 1e-3)
     X <- sweep(X, 2, lib_size * 1e-6, FUN = "/")
@@ -366,20 +375,20 @@ getSGVariantCountsFromSGFeatureCounts <- function(variants, sgfc,
     event_x_3p <- collapseRows(x, event_i_3p, cores = cores)
 
     assays <- list(
-        "counts5p" = variant_x_5p,
-        "counts3p" = variant_x_3p,
-        "counts5pEvent" = event_x_5p,
-        "counts3pEvent" = event_x_3p)
+        "countsVariant5p" = variant_x_5p,
+        "countsVariant3p" = variant_x_3p,
+        "countsEvent5p" = event_x_5p,
+        "countsEvent3p" = event_x_3p)
 
-    SE <- SummarizedExperiment(
+    object <- SummarizedExperiment(
         assays = assays,
         rowRanges = variants,
         colData = colData(sgfc))
-    colnames(SE) <- colnames(sgfc)
-    SE <- getVariantFreq(SE, min_denominator)
-    SE <- SGVariantCounts(SE)
+    colnames(object) <- colnames(sgfc)
+    object <- getVariantFreq(object, min_denominator)
+    object <- SGVariantCounts(object)
 
-    return(SE)
+    return(object)
 
 }
 
@@ -415,15 +424,15 @@ collapseRows <- function(x, list_i, fun = sum, cores = 1)
 
 }
 
-getVariantFreq <- function(SE, min_denominator)
+getVariantFreq <- function(object, min_denominator)
 {
 
-    U5p <- assay(SE, "counts5p")
-    U3p <- assay(SE, "counts3p")
-    V5p <- assay(SE, "counts5pEvent")
-    V3p <- assay(SE, "counts3pEvent")
+    U5p <- assay(object, "countsVariant5p")
+    U3p <- assay(object, "countsVariant3p")
+    V5p <- assay(object, "countsEvent5p")
+    V3p <- assay(object, "countsEvent3p")
 
-    variants <- rowRanges(SE)
+    variants <- rowRanges(object)
 
     v5p <- featureID5p(variants)
     v3p <- featureID3p(variants)
@@ -438,12 +447,12 @@ getVariantFreq <- function(SE, min_denominator)
     i5p <- which(d5p & !d3p)
     i3p <- which(!d5p & d3p)
 
-    U <- matrix(NA_integer_, nrow = nrow(SE), ncol = ncol(SE))
+    U <- matrix(NA_integer_, nrow = nrow(object), ncol = ncol(object))
     U[ixp, ] <- U5p[ixp, ] + U3p[ixp, ]
     U[i5p, ] <- U5p[i5p, ]
     U[i3p, ] <- U3p[i3p, ]
 
-    V <- matrix(NA_integer_, nrow = nrow(SE), ncol = ncol(SE))
+    V <- matrix(NA_integer_, nrow = nrow(object), ncol = ncol(object))
     V[ixp, ] <- V5p[ixp, ] + V3p[ixp, ]
     V[i5p, ] <- V5p[i5p, ]
     V[i3p, ] <- V3p[i3p, ]
@@ -453,7 +462,7 @@ getVariantFreq <- function(SE, min_denominator)
 
     if (!is.na(min_denominator)) {
 
-        I <- matrix(FALSE, nrow = nrow(SE), ncol = ncol(SE))
+        I <- matrix(FALSE, nrow = nrow(object), ncol = ncol(object))
         I[ixp, ] <- V5p[ixp, ] < min_denominator & V3p[ixp, ] < min_denominator
         I[i5p, ] <- V5p[i5p, ] < min_denominator
         I[i3p, ] <- V3p[i3p, ] < min_denominator
@@ -461,9 +470,9 @@ getVariantFreq <- function(SE, min_denominator)
 
     }
 
-    assay(SE, "variantFreq") <- X
+    assay(object, "variantFreq") <- X
 
-    return(SE)
+    return(object)
 
 }
 
@@ -694,47 +703,29 @@ getSGVariantCountsPerStrand <- function(variants, features,
     }
 
     assay_names <- c(
-        "counts5p",
-        "counts3p",
-        "counts5pEvent",
-        "counts3pEvent",
-        "counts")
+        "countsVariant5p",
+        "countsVariant3p",
+        "countsEvent5p",
+        "countsEvent3p",
+        "countsVariant")
 
     counts <- matrix(NA_integer_, nrow = length(vid),
         ncol = length(assay_names))
     colnames(counts) <- assay_names
 
-    list_opt_1 <- c("5p", "3p", "")
+    list_opt <- c("Variant5p", "Variant3p", "Event5p", "Event3p", "Variant")
+    
+    for (opt in list_opt) {
 
-    for (opt_1 in list_opt_1) {
-
-        if (opt_1 == "") list_opt_2 <- c("")
-        else list_opt_2 <- c("", "Event")
-
-        for (opt_2 in list_opt_2) {
-
-            if (opt_2 == "") {
-
-                if (opt_1 == "5p") f <- v5p
-                else if (opt_1 == "3p") f <- v3p
-                else if (opt_1 == "") f <- vxp
-
-            } else if (opt_2 == "Event") {
-
-                if (opt_1 == "5p") f <- e5p
-                else if (opt_1 == "3p") f <- e3p
-
-            }
-
-            i <- ir_index[match(unlist(f), featureID(features))]
-            v <- vid[togroup0(f)]
-            tmp <- IntegerList(tapply(unlist(i), v[togroup0(i)], unique,
-                simplify = FALSE))
-            x <- elementNROWS(tmp)[match(vid, names(tmp))]
-            x[elementNROWS(f) == 0] <- NA_integer_
-            counts[, paste0("counts", opt_1, opt_2)] <- x
-
-        }
+        f <- switch(opt, Variant5p = v5p, Variant3p = v3p,
+            Event5p = e5p, Event3p = e3p, Variant = vxp)
+        i <- ir_index[match(unlist(f), featureID(features))]
+        v <- vid[togroup0(f)]
+        tmp <- IntegerList(tapply(unlist(i), v[togroup0(i)], unique,
+            simplify = FALSE))
+        x <- elementNROWS(tmp)[match(vid, names(tmp))]
+        x[elementNROWS(f) == 0] <- NA_integer_
+        counts[, paste0("counts", opt)] <- x
 
     }
 

@@ -91,10 +91,6 @@ exportMethods(
     featureID3pEvent,
     counts,
     FPKM,
-    counts5p,
-    counts3p,
-    counts5pEvent,
-    counts3pEvent,
     variantFreq
 )
 
@@ -123,9 +119,5 @@ exportMethods(
     'featureID3pEvent<-',
     'counts<-',
     'FPKM<-',
-    'counts5p<-',
-    'counts3p<-',
-    'counts5pEvent<-',
-    'counts3pEvent<-',
     'variantFreq<-'
 )

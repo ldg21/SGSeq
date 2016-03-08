@@ -437,36 +437,93 @@ setReplaceMethod("FPKM", "SGFeatureCounts",
 ## SGVariantCounts
 
 ##' @rdname assays
-setMethod("counts5p", "SGVariantCounts",
-    function(object) { assay(object, "counts5p") })
+setMethod("counts", "SGVariantCounts",
+    function(object, option) {
+
+        valid <- c("variant5p", "variant3p", "event5p", "event3p", "variant")
+
+        if (missing(option) || !option %in% valid) {
+
+            msg <- paste("argument option must be one of", 
+                paste(paste0("\"", valid, "\""), collapse = ", "))
+            stop(msg)
+
+        }
+
+        if (option == "variant" &&
+            !"countsVariant" %in% names(assays(object))) {
+
+            msg <- paste("object is missing assay \"countsVariant\",", 
+                "run getSGVariantCounts() first")
+            stop(msg)
+
+        }
+
+        assay_name <- switch(option,
+            variant5p = "countsVariant5p",
+            variant3p = "countsVariant3p",
+            event5p = "countsEvent5p",
+            event3p = "countsEvent3p",
+            variant = "countsVariant")
+
+        assay(object, assay_name)
+
+})
 
 ##' @rdname assays
-setReplaceMethod("counts5p", "SGVariantCounts",
-    function(object, value) { assays(object)$counts5p <- value; object })
+setReplaceMethod("counts", "SGVariantCounts",
+    function(object, option, value) {
+
+        valid <- c("variant5p", "variant3p", "event5p", "event3p", "variant")
+
+        if (missing(option) || !option %in% valid) {
+
+            msg <- paste("argument option must be one of",
+                paste(paste0("\"", valid, "\""), collapse = ", "))
+            stop(msg)
+
+        }
+
+        if (option == "variant" &&
+            !"countsVariant" %in% names(assays(object))) {
+
+            msg <- paste("object is missing assay \"countsVariant\",",
+                "run getSGVariantCounts() first")
+            stop(msg)
+
+        }
+
+        assay_name <- switch(option,
+            variant5p = "countsVariant5p",
+            variant3p = "countsVariant3p",
+            event5p = "countsEvent5p",
+            event3p = "countsEvent3p",
+            variant = "countsVariant")
+
+        assays(object)[[assay_name]] <- value
+
+        object
+
+})
 
 ##' @rdname assays
-setMethod("counts3p", "SGVariantCounts",
-    function(object) { assay(object, "counts3p") })
+setMethod("FPKM", "SGVariantCounts",
+    function(object, option, min_anchor = 1) {
 
-##' @rdname assays
-setReplaceMethod("counts3p", "SGVariantCounts",
-    function(object, value) { assays(object)$counts3p <- value; object })
+        valid <- c("variant5p", "variant3p", "event5p", "event3p")
 
-##' @rdname assays
-setMethod("counts5pEvent", "SGVariantCounts",
-    function(object) { assay(object, "counts5pEvent") })
+        if (missing(option) || !option %in% valid) {
 
-##' @rdname assays
-setReplaceMethod("counts5pEvent", "SGVariantCounts",
-    function(object, value) { assays(object)$counts5pEvent <- value; object })
+            msg <- paste("argument option must be one of", 
+                paste(paste0("\"", valid, "\""), collapse = ", "))
+            stop(msg)
 
-##' @rdname assays
-setMethod("counts3pEvent", "SGVariantCounts",
-    function(object) { assay(object, "counts3pEvent") })
+        }
 
-##' @rdname assays
-setReplaceMethod("counts3pEvent", "SGVariantCounts",
-    function(object, value) { assays(object)$counts3pEvent <- value; object })
+        getScaledCounts(object = object, min_anchor = min_anchor,
+            counts = counts(object, option))
+
+})
 
 ##' @rdname assays
 setMethod("variantFreq", "SGVariantCounts",
@@ -475,11 +532,3 @@ setMethod("variantFreq", "SGVariantCounts",
 ##' @rdname assays
 setReplaceMethod("variantFreq", "SGVariantCounts",
     function(object, value) { assays(object)$variantFreq <- value; object })
-
-##' @rdname assays
-setMethod("counts", "SGVariantCounts",
-    function(object) { assay(object, "counts") })
-
-##' @rdname assays
-setReplaceMethod("counts", "SGVariantCounts",
-    function(object, value) { assays(object)$counts <- value; object })

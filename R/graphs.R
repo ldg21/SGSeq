@@ -1371,10 +1371,10 @@ expandSGVariantCounts <- function(sgvc, eventID = NULL, maxnvariant = NA,
     M <- matrix(NA_integer_, ncol = ncol(X), nrow = nrow(X))
     sgvc_expanded <- SummarizedExperiment(
         assays = list(
-            "counts5p" = M,
-            "counts3p" = M,
-            "counts5pEvent" = M,
-            "counts3pEvent" = M,
+            "countsVariant5p" = M,
+            "countsVariant3p" = M,
+            "countsEvent5p" = M,
+            "countsEvent3p" = M,
             "variantFreq" = X),
         rowRanges = rd,
         colData = colData(sgvc))

@@ -5,10 +5,6 @@
 ##' \code{TxFeatures} contains a column \code{type} that indicates feature
 ##' type. The specific columns contained in an object depend on its class.
 ##'
-##' To facilitate accessing and modifying metadata columns, for each column
-##' there exists a function with name identical to the column name
-##' that can be used to access and modify it (see examples).
-##'
 ##' @title Accessing and replacing metadata columns
 ##' @param x Object containing metadata column
 ##' @param value Replacement value
@@ -23,22 +19,30 @@ NULL
 
 ##' Accessor and replacement functions for assay data.
 ##'
-##' \code{Counts} objects defined in the \code{SGSeq} package contain
-##' different types of assay data. For example, class \code{SGFeatureCounts}
-##' contains assays \code{counts} and \code{FPKM}.
-##'
-##' To facilitate accessing and modifying assays, for each assay
-##' there exists a function with name identical to the assay name
-##' that can be used to access and modify it (see examples).
+##' Functions \code{counts} and \code{FPKM} are used to extract counts and
+##' FPKM values from \code{SGFeatureCounts} and \code{SGVariantCounts}
+##' objects. Function \code{variantFreq} is used to access relative usage
+##' estimates from \code{SGVariantCounts} objects.
 ##'
 ##' @title Accessing and replacing assay data
 ##' @param object Object containing assay data
+##' @param ... Arguments passed to method for \code{SGVariantCounts} objects
+##' @param option For \code{SGVariantCounts} objects, \code{option} specifies
+##' whether output should be based on counts of reads compatible with the
+##' variant at the start (\dQuote{variant5p}), end (\dQuote{variant3p}) or
+##' either (\dQuote{variant}), or whether output should be based on counts of
+##' reads compatible with any variant belonging to the same event
+##' (\dQuote{event5p} or \dQuote{event3p})
+##' @param min_anchor For \code{SGVariantCounts} objects, \code{min_anchor}
+##' specifies the minimum anchor length when computing FPKM values
 ##' @param value Replacement value
-##' @return Assay data for accessor functions, updated object for replacement
-##' functions.
+##' @return Assay data for accessor functions or updated object for
+##' replacement functions.
 ##' @examples
 ##' x <- counts(sgfc_pred)
 ##' y <- FPKM(sgfc_pred)
+##' u <- counts(sgvc_pred, "variant5p")
+##' v <- FPKM(sgvc_pred, "variant5p")
 ##' @author Leonard Goldstein
 ##' @name assays
 NULL
@@ -231,45 +235,13 @@ setGeneric("featureID3pEvent<-",
 
 ##' @rdname assays
 setGeneric("FPKM",
-    function(object) standardGeneric("FPKM"))
+    function(object, ...) standardGeneric("FPKM"))
 
 ##' @rdname assays
 setGeneric("FPKM<-",
-    function(object, value) standardGeneric("FPKM<-"))
+    function(object, ..., value) standardGeneric("FPKM<-"))
 
 ## SGVariantCounts
-
-##' @rdname assays
-setGeneric("counts5p",
-    function(object) standardGeneric("counts5p"))
-
-##' @rdname assays
-setGeneric("counts5p<-",
-    function(object, value) standardGeneric("counts5p<-"))
-
-##' @rdname assays
-setGeneric("counts3p",
-    function(object) standardGeneric("counts3p"))
-
-##' @rdname assays
-setGeneric("counts3p<-",
-    function(object, value) standardGeneric("counts3p<-"))
-
-##' @rdname assays
-setGeneric("counts5pEvent",
-    function(object) standardGeneric("counts5pEvent"))
-
-##' @rdname assays
-setGeneric("counts5pEvent<-",
-    function(object, value) standardGeneric("counts5pEvent<-"))
-
-##' @rdname assays
-setGeneric("counts3pEvent",
-    function(object) standardGeneric("counts3pEvent"))
-
-##' @rdname assays
-setGeneric("counts3pEvent<-",
-    function(object, value) standardGeneric("counts3pEvent<-"))
 
 ##' @rdname assays
 setGeneric("variantFreq",

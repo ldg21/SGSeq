@@ -82,10 +82,10 @@ validSGVariantCounts <- function(object)
 {
 
     assay_type <- c(
-        counts5p = "integer",
-        counts3p = "integer",
-        counts5pEvent = "integer",
-        counts3pEvent = "integer",
+        countsVariant5p = "integer",
+        countsVariant3p = "integer",
+        countsEvent5p = "integer",
+        countsEvent3p = "integer",
         variantFreq = "numeric")
     validAssays(object, assay_type)
 
@@ -543,10 +543,10 @@ SGVariantCounts <- function(x)
     if (missing(x)) {
 
         assays <- list(
-            counts5p = matrix(integer(), 0, 0),
-            counts3p = matrix(integer(), 0, 0),
-            counts5pEvent = matrix(integer(), 0, 0),
-            counts3pEvent = matrix(integer(), 0, 0),
+            countsVariant5p = matrix(integer(), 0, 0),
+            countsVariant3p = matrix(integer(), 0, 0),
+            countsEvent5p = matrix(integer(), 0, 0),
+            countsEvent3p = matrix(integer(), 0, 0),
             variantFreq = matrix(numeric(), 0, 0))
 
         x <- SummarizedExperiment(assays, rowRanges = SGVariants())

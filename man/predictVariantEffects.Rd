@@ -4,8 +4,8 @@
 \alias{predictVariantEffects}
 \title{Predict the effect of splice variants on protein-coding transcripts}
 \usage{
-predictVariantEffects(sgv, tx, genome, summarize = TRUE, include = c("none",
-  "nt", "aa", "both"), fix_start_codon = TRUE, cores = 1)
+predictVariantEffects(sgv, tx, genome, fix_start_codon = TRUE,
+  output = c("short", "full"), cores = 1)
 }
 \arguments{
 \item{sgv}{\code{SGVariants} object}
@@ -17,33 +17,29 @@ For import from GFF format, use function \code{importTranscripts}.}
 
 \item{genome}{\code{BSgenome} object}
 
-\item{summarize}{Logical indicating whether results for individual
-annotated transcripts should be summarized per variant}
-
-\item{include}{For \code{summarize = FALSE}, character string indicating
-whether nucleotide or amino acid sequences for the reference and
-variant isoform should be included in the output. Possible values are
-\dQuote{none}, \dQuote{nt}, \dQuote{aa}, or \dQuote{both}.}
-
 \item{fix_start_codon}{Logical indicating whether the annotated start
 codon should be considered fixed and the variant transcript should
 not be scanned for alternative start codons}
 
+\item{output}{Character string indicating whether short results or
+full results (with additional columns) should be returned}
+
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-For \code{summarize = FALSE} a \code{data.frame} with rows
-  corresponding to a variant-transcript pair. The \code{data.frame}
-  includes columns for variant identifier, transcript name, type of
-  alteration, nucleotide and amino acid sequence for the reference
-  and variant isoform, and coordinates of the alteration.
-  Start and end coordinates are 0- and 1-based, respectively
-  (to allow for specification of deletions). For \code{summarize = TRUE}
-  a character vector matching argument \code{sgv} with comma-separated
-  predicted alterations for individual transcripts.
+A \code{data.frame} with rows corresponding to a
+  variant-transcript pair. The output includes columns for
+  variant identifier, transcript name, type of alteration at the
+  RNA and protein level, and variant description at the RNA
+  and protein level in HGVS notation.
+  For \code{output = "full"} additional information is returned.
+  Event start and end coordinates in the full output are 0- and 1-based,
+  respectively (to allow for description of deletions).
+  Coordinates for the last junction in a transcript refer to the last
+  base of the second-to-last exon.
 }
 \description{
-The effect of splice variants is assessed with respect to individual
+The effect of a splice variant is predicted for individual
 protein-coding transcripts.
 }
 \examples{
