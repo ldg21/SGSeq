@@ -34,7 +34,7 @@ variantFreq(object) <- value
 
 \S4method{FPKM}{SGFeatureCounts}(object) <- value
 
-\S4method{counts}{SGVariantCounts}(object, option)
+\S4method{counts}{SGVariantCounts}(object, option = "variant5pOr3p")
 
 \S4method{counts}{SGVariantCounts}(object, option) <- value
 

@@ -10,7 +10,7 @@ test_getSGVariantCounts <- function()
     SGSeq:::checkIdenticalSummarizedExperiment(
         sgvc_pred_from_bam, sgvc_from_bam)
 
-    counts(sgvc_from_bam, "variant") <- NULL
+    counts(sgvc_from_bam, "variant5pOr3p") <- NULL
     SGSeq:::checkIdenticalSummarizedExperiment(sgvc_from_sgfc, sgvc_from_bam)
 
 }

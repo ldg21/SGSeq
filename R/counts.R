@@ -707,18 +707,19 @@ getSGVariantCountsPerStrand <- function(variants, features,
         "countsVariant3p",
         "countsEvent5p",
         "countsEvent3p",
-        "countsVariant")
+        "countsVariant5pOr3p")
 
     counts <- matrix(NA_integer_, nrow = length(vid),
         ncol = length(assay_names))
     colnames(counts) <- assay_names
 
-    list_opt <- c("Variant5p", "Variant3p", "Event5p", "Event3p", "Variant")
-    
+    list_opt <- c("Variant5p", "Variant3p", "Event5p", "Event3p",
+        "Variant5pOr3p")
+
     for (opt in list_opt) {
 
         f <- switch(opt, Variant5p = v5p, Variant3p = v3p,
-            Event5p = e5p, Event3p = e3p, Variant = vxp)
+            Event5p = e5p, Event3p = e3p, Variant5pOr3p = vxp)
         i <- ir_index[match(unlist(f), featureID(features))]
         v <- vid[togroup0(f)]
         tmp <- IntegerList(tapply(unlist(i), v[togroup0(i)], unique,
