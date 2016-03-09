@@ -763,8 +763,59 @@ importTranscripts <- function(file, tag_tx = "transcript_id",
   mcols(tx)$geneName <- df[match(names(tx), df[, 1]), 2]
   mcols(tx)$cdsStart <- start(cds)[match(names(tx), names(cds))]
   mcols(tx)$cdsEnd <- end(cds)[match(names(tx), names(cds))]
-
+  rownames(mcols(tx)) <- NULL
+  
   return(tx)
+
+}
+
+convertToTranscripts <- function(txdb)
+{
+
+    tx <- exonsBy(txdb, "tx", use.names = TRUE)
+    mcols(tx)$txName <- names(tx)
+    df <- silent_select(txdb, names(tx), "GENEID", "TXNAME")
+    mcols(tx)$geneName <- df$GENEID[match(names(tx), df$TXNAME)]
+    cds <- unlist(range(cdsBy(txdb, "tx", use.names = TRUE)))
+    cdsLeft(tx) <- start(cds)[match(names(tx), names(cds))]
+    cdsRight(tx) <- end(cds)[match(names(tx), names(cds))]
+    rownames(mcols(tx)) <- NULL
+    
+    return(tx)
+
+}
+
+checkTranscriptFormat <- function(x)
+{
+
+    if (!exonsOnSameChromAndStrand(x)) {
+
+        msg <- "All exons for the same transcript must\n
+            be on the same chromosome and strand"
+        stop(msg, call. = FALSE)
+
+    }
+
+    mcol_type <- c(
+        txName = "character",
+        geneName = "character",
+        cdsStart = "integer",
+        cdsEnd = "integer")
+    
+    msg <- validMcols(x, mcol_type)
+
+    if (!is.null(msg)) {
+
+        stop(msg, call. = FALSE)
+
+    }
+    
+    if (any(mcols(x)$cdsStart > mcols(x)$cdsEnd, na.rm = TRUE)) {
+
+        msg <- "All coding transcripts must have cdsStart < cdsEnd"
+        stop(msg, call. = FALSE)
+
+    }
 
 }
 
@@ -778,5 +829,12 @@ isOr <- function(object, class2)
 {
 
     any(sapply(class2, is, object = object))
+
+}
+
+silent_select <- function(...)
+{
+
+    suppressMessages(select(...))
 
 }

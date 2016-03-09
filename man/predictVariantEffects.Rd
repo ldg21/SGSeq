@@ -11,8 +11,9 @@ predictVariantEffects(sgv, tx, genome, fix_start_codon = TRUE,
 \item{sgv}{\code{SGVariants} object}
 
 \item{tx}{A \code{TxDb} object, or \code{GRangesList} of exons
-grouped by transcript with metadata columns \code{cdsStart} and
-\code{cdsEnd} (by convention, cdsStart < cdsEnd for both strands).
+grouped by transcript with metadata columns \code{txName},
+\code{geneName}, \code{cdsStart} and \code{cdsEnd}
+(by convention, cdsStart < cdsEnd for both strands).
 For import from GFF format, use function \code{importTranscripts}.}
 
 \item{genome}{\code{BSgenome} object}
@@ -28,15 +29,16 @@ full results (with additional columns) should be returned}
 }
 \value{
 A \code{data.frame} with rows corresponding to a
-  variant-transcript pair. The output includes columns for
-  variant identifier, transcript name, type of alteration at the
-  RNA and protein level, and variant description at the RNA
-  and protein level in HGVS notation.
-  For \code{output = "full"} additional information is returned.
-  Event start and end coordinates in the full output are 0- and 1-based,
-  respectively (to allow for description of deletions).
-  Coordinates for the last junction in a transcript refer to the last
-  base of the second-to-last exon.
+  variant-transcript pair. The output includes columns for variant
+  identifier, transcript name, gene name, type of alteration at the
+  RNA and protein level, and variant description at the RNA and
+  protein level in HGVS notation. For \code{output = "full"}
+  additional columns are returned. These include the full-length RNA
+  and protein sequence for the reference and variant transcript.
+  Event start and end coordinates in the full output are 0- and
+  1-based, respectively (to allow for description of deletions).
+  Coordinates for the last junction in a transcript refer to the
+  last base of the second-to-last exon.
 }
 \description{
 The effect of a splice variant is predicted for individual

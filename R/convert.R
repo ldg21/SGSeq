@@ -5,6 +5,7 @@
 ##' can be specified as character vectors in metadata
 ##' columns \code{txName} and \code{geneName}, respectively.
 ##' If missing, transcript names are based on \code{names(x)}.
+##' For import from GFF format, use function \code{importTranscripts}.
 ##'
 ##' In the returned \code{TxFeatures} object, column \code{type} takes
 ##' values \dQuote{J} (splice junction), \dQuote{I} (internal exon),
@@ -27,7 +28,7 @@ convertToTxFeatures <- function(x)
 
     if (is(x, "TxDb")) {
 
-        tx <- exonsBy(x, "tx", use.names = TRUE)
+        tx <- convertToTranscripts(x)
 
     } else if (is(x, "GRangesList")) {
 
@@ -103,8 +104,8 @@ convertToTxFeatures <- function(x)
 
         if (is(x, "TxDb")) {
 
-            gene_name_unlisted <- suppressMessages(select(x, tx_name_unlisted,
-                "GENEID", "TXNAME")$GENEID)
+            gene_name_unlisted <- silent_select(x, tx_name_unlisted,
+                "GENEID", "TXNAME")$GENEID
 
         } else {
 

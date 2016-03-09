@@ -23,6 +23,7 @@ If \code{x} is a \code{GRangesList}, transcript names and gene names
 can be specified as character vectors in metadata
 columns \code{txName} and \code{geneName}, respectively.
 If missing, transcript names are based on \code{names(x)}.
+For import from GFF format, use function \code{importTranscripts}.
 
 In the returned \code{TxFeatures} object, column \code{type} takes
 values \dQuote{J} (splice junction), \dQuote{I} (internal exon),

@@ -6,15 +6,16 @@ test_predictVariantEffects <- function()
 
     current <- predictVariantEffects(sgv_pred, tx, Hsapiens, FALSE)
     target <- data.frame(
-        variantID = c(2L, 2L, 2L),
+        variantID = rep(2L, 3),
         txName = c(
             "uc002fjv.3",
             "uc002fjw.3",
             "uc010vot.2"),
+        geneName = rep("79791", 3),
         RNA_change = c(
-            "r.88_89ins88+1798_89-11161",
-            "r.412_413ins412+1798_413-11161",
-            "r.-105_-104ins-105+1798_-104-11161"),
+            "r.88_89ins88+1798_88+1884",
+            "r.412_413ins412+1798_412+1884",
+            "r.-105_-104ins-105+1798_-105+1884"),
         RNA_variant_type = c("insertion", "insertion", "insertion"),
         protein_change = c(
             "p.K29_L30insRINPRVKSGRFVKILPDYEHMAYRDVYTC",
@@ -37,11 +38,12 @@ test_predictVariantEffects <- function()
             "uc002fjw.3",
             "uc002fjw.3",
             "uc010vot.2"),
+        geneName = rep("79791", 6),
         RNA_change = c(
-            "r.-573_16delins89-36538_89-36155",
-            "r.-308_-177delins-177+5949_-176-23039",
-            "r.-573_16delins[89-44852_89-44833;89-42598_89-42487]",
-            "r.-44_340delins[341-31736_341-31717;341-29482_341-29371]",
+            "r.-573_16delins-573-22833_-573-22450",
+            "r.-308_-177delins-177+5949_-177+6332",
+            "r.-573_16delins[-573-31147_-573-31128;-573-28893_-573-28782]",
+            "r.-44_340delins[-44-8314_-44-8295;-44-6060_-44-5949]",
             "r.-44_340delins341-589_341-1",
             "r.-308_-177delins-176-589_-176-1"),
         RNA_variant_type = c(

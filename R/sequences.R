@@ -4,8 +4,9 @@
 ##' @title Predict the effect of splice variants on protein-coding transcripts
 ##' @param sgv \code{SGVariants} object
 ##' @param tx A \code{TxDb} object, or \code{GRangesList} of exons
-##'   grouped by transcript with metadata columns \code{cdsStart} and
-##'   \code{cdsEnd} (by convention, cdsStart < cdsEnd for both strands).
+##'   grouped by transcript with metadata columns \code{txName},
+##'   \code{geneName}, \code{cdsStart} and \code{cdsEnd}
+##'   (by convention, cdsStart < cdsEnd for both strands).
 ##'   For import from GFF format, use function \code{importTranscripts}.
 ##' @param genome \code{BSgenome} object
 ##' @param fix_start_codon Logical indicating whether the annotated start
@@ -15,15 +16,16 @@
 ##'   full results (with additional columns) should be returned
 ##' @param cores Number of cores available for parallel processing
 ##' @return A \code{data.frame} with rows corresponding to a
-##'   variant-transcript pair. The output includes columns for
-##'   variant identifier, transcript name, type of alteration at the
-##'   RNA and protein level, and variant description at the RNA
-##'   and protein level in HGVS notation.
-##'   For \code{output = "full"} additional information is returned.
-##'   Event start and end coordinates in the full output are 0- and 1-based,
-##'   respectively (to allow for description of deletions).
-##'   Coordinates for the last junction in a transcript refer to the last
-##'   base of the second-to-last exon.
+##'   variant-transcript pair. The output includes columns for variant
+##'   identifier, transcript name, gene name, type of alteration at the
+##'   RNA and protein level, and variant description at the RNA and
+##'   protein level in HGVS notation. For \code{output = "full"}
+##'   additional columns are returned. These include the full-length RNA
+##'   and protein sequence for the reference and variant transcript.
+##'   Event start and end coordinates in the full output are 0- and
+##'   1-based, respectively (to allow for description of deletions).
+##'   Coordinates for the last junction in a transcript refer to the
+##'   last base of the second-to-last exon.
 ##' @examples
 ##' require(BSgenome.Hsapiens.UCSC.hg19)
 ##' seqlevelsStyle(Hsapiens) <- "NCBI"
@@ -44,7 +46,6 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
 
     if (is(tx, "TxDb")) {
 
-        message("Obtaining transcripts from TxDb...")
         tx <- convertToTranscripts(tx)
 
     } else if (is(tx, "GRangesList")) {
@@ -280,7 +281,8 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
 
     res <- data.frame(
         variantID = rep(variantID(sgv), n),
-        txName = rep(names(ref), n),
+        txName = rep(mcols(ref)$txName, n),
+        geneName = rep(mcols(ref)$geneName, n),
         RNA_change = rep(alt_RNA$HGVS, n),
         RNA_variant_type = rep(alt_RNA$type, n),
         protein_change = alt_protein$HGVS,
@@ -294,6 +296,7 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
         res <- res[c(
             "variantID",
             "txName",
+            "geneName",
             "RNA_change",
             "RNA_variant_type",
             "protein_change",
@@ -304,6 +307,7 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
         res <- res[c(
             "variantID",
             "txName",
+            "geneName",
             "RNA_change",
             "RNA_variant_type",
             "RNA_ref_length",
@@ -434,27 +438,25 @@ getHGVSVariantDeletionInsertion <- function(var)
 
     if (grepl("*", hgvs, fixed = TRUE)) {
 
-        prefix <- "nonsense"
+        out <- getHGVSVariantFrameshift(var)
 
     } else {
 
-        prefix <- "in-frame"
-
+        out <- list(
+            type = paste0("in-frame_", paste(type, collapse = "/")),
+            HGVS = hgvs)
+        
     }
 
-    type <- paste0(prefix, "_", paste(type, collapse = "/"))
-
-    list(type = type, HGVS = hgvs)
-
+    return(out)
+    
 }
 
 getHGVSVariantFrameshift <- function(var)
 {
 
     ref_start <- mcols(var)$protein_ref_event_start
-    ref_end <- mcols(var)$protein_ref_event_end
     var_start <- mcols(var)$protein_var_event_start
-    var_end <- mcols(var)$protein_var_event_end
 
     res <- getHGVSRefPos(var, ref_start + 1, "protein")
     alt <- substr(mcols(var)$protein_var_seq, var_start + 1, var_start + 1)
@@ -462,7 +464,8 @@ getHGVSVariantFrameshift <- function(var)
 
     if (!is.na(cdsEnd(var))) {
 
-        ext <- mcols(var)$protein_var_length - var_start
+        ## need to add 1 since sequence does not include stop codon
+        ext <- mcols(var)$protein_var_length - var_start + 1
         hgvs <- paste0(hgvs, ext)
 
     } else {
@@ -518,19 +521,7 @@ getHGVSInsertion <- function(var, type, ref)
 
     if (type == "RNA") {
 
-        names(ref) <- "1"
         strand <- as.character(strand(ref[[1]][1]))
-
-        E <- ref[[1]]
-        E <- sort(E, decreasing = (strand == "-"))
-        E5p <- flank(E[-1], -1, TRUE)
-        E3p <- flank(E[-length(E)], -1, FALSE)
-        R5p <- start(mapToTranscripts(E5p, ref))
-        R3p <- start(mapToTranscripts(E3p, ref))
-        E5p <- start(E5p)
-        E3p <- start(E3p)
-        R5p <- sapply(R5p, getHGVSRefPos, var = var, type = "RNA")
-        R3p <- sapply(R3p, getHGVSRefPos, var = var, type = "RNA")
 
         I <- setdiff(var[[1]], ref[[1]])
         I <- sort(I, decreasing = (strand == "-"))
@@ -541,35 +532,11 @@ getHGVSInsertion <- function(var, type, ref)
 
             I5p <- start(flank(I[i], -1, TRUE))
             I3p <- start(flank(I[i], -1, FALSE))
-
-            w <- width(I[i])
-
-            d_us <- (I5p - E3p) * ifelse(strand == "-", -1, 1)
-            d_ds <- (E5p - I3p) * ifelse(strand == "-", -1, 1)
-
-            if (!any(d_us > 0) || any(d_ds == 1)) {
-
-                j <- which(d_ds == min(d_ds[which(d_ds > 0)]))
-                ins <- c(ins, paste0(
-                    R5p[j], "-", d_ds[j] + w - 1, "_",
-                    R5p[j], "-", d_ds[j]))
-
-            } else if (!any(d_ds > 0) || any(d_us == 1)) {
-
-                j <- which(d_us == min(d_us[which(d_us > 0)]))
-                ins <- c(ins, paste0(
-                    R3p[j], "+", d_us[j], "_",
-                    R3p[j], "+", d_us[j] + w - 1))
-
-            } else {
-
-                j <- which(d_us == min(d_us[which(d_us > 0)]))
-                ins <- c(ins, paste0(
-                    R3p[j], "+", d_us[j], "_",
-                    R5p[j], "-", d_ds[j]))
-
-            }
-
+            
+            ins <- c(ins, paste0(
+                getHGVSRefPosIntronic(I5p, ref, var), "_",
+                getHGVSRefPosIntronic(I3p, ref, var)))
+            
         }
 
         if (length(ins) > 1) {
@@ -624,6 +591,44 @@ getHGVSRefPos <- function(var, pos, type)
 
     return(pos)
 
+}
+
+getHGVSRefPosIntronic <- function(pos, ref, var)
+{
+
+    names(ref) <- "1"
+    strand <- as.character(strand(ref[[1]][1]))
+
+    E <- ref[[1]]
+    E <- sort(E, decreasing = (strand == "-"))
+
+    E5p <- flank(E, -1, TRUE)
+    E3p <- flank(E, -1, FALSE)
+
+    R5p <- c(start(mapToTranscripts(E5p, ref)), NA)
+    R3p <- c(NA, start(mapToTranscripts(E3p, ref)))
+
+    E5p <- c(start(E5p), NA)
+    E3p <- c(NA, start(E3p))
+
+    d5p <- (pos - E3p) * ifelse(strand == "-", -1, 1)
+    d3p <- (E5p - pos) * ifelse(strand == "-", -1, 1)
+    
+    i <- which((is.na(d5p) | d5p > 0) & (is.na(d3p) | d3p > 0))
+    
+    if (is.na(d3p[i]) ||
+        (!is.na(d5p[i]) && !is.na(d3p[i]) && d5p[i] <= d3p[i])) {
+      
+        pos <- paste0(getHGVSRefPos(var, R3p[i], "RNA"), "+", d5p[i])
+
+    } else {
+
+        pos <- paste0(getHGVSRefPos(var, R5p[i], "RNA"), "-", d3p[i])
+
+    }
+
+    return(pos)
+    
 }
 
 getVariant <- function(var, ref, sgv, genome, fix = c("start", "stop"))
@@ -1065,52 +1070,6 @@ mapEventToProtein <- function(tx, event)
     }
 
     return(out)
-
-}
-
-convertToTranscripts <- function(txdb)
-{
-
-    tx <- exonsBy(txdb, "tx", use.names = TRUE)
-    cds <- unlist(range(cdsBy(txdb, "tx", use.names = TRUE)))
-    cdsLeft(tx) <- start(cds)[match(names(tx), names(cds))]
-    cdsRight(tx) <- end(cds)[match(names(tx), names(cds))]
-
-    return(tx)
-
-}
-
-checkTranscriptFormat <- function(tx)
-{
-
-    if (!exonsOnSameChromAndStrand(tx)) {
-
-        msg <- "All ranges in the same element of tx\n
-            must be on the same chromosome and strand"
-        stop(msg, call. = FALSE)
-
-    }
-
-    if (is.null(mcols(tx)$cdsStart) || is.null(mcols(tx)$cdsEnd)) {
-
-        msg <- "tx must have metadata columns cdsStart and cdsEnd"
-        stop(msg, call. = FALSE)
-
-    }
-
-    if (any(mcols(tx)$cdsStart > mcols(tx)$cdsEnd, na.rm = TRUE)) {
-
-        msg <- "All coding transcripts must have cdsStart < cdsEnd"
-        stop(msg, call. = FALSE)
-
-    }
-
-    if (is.null(names(tx))) {
-
-        msg <- "names(tx) must not be NULL"
-        stop(msg, call. = FALSE)
-
-    }
 
 }
 
