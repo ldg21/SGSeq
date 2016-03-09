@@ -109,7 +109,7 @@ getSGFeatureCountsPerStrand <- function(features, file_bam, paired_end,
 
         counts <- DataFrame(N = N)
         counts$N_splicesite <- IntegerList(vector("list", nrow(counts)))
-        counts$coverage <- RleList(vector("list", nrow(counts)))
+        counts$coverage <- RleList(IntegerList(vector("list", nrow(counts))))
 
         if (length(i_J) > 0) {
 

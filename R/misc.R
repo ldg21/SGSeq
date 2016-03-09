@@ -265,7 +265,7 @@ completeMcols <- function(x, retain_coverage)
 
         } else if (m == "coverage") {
 
-            mcols(x)[, m] <- RleList(vector("list", length(x)))
+            mcols(x)[, m] <- RleList(IntegerList(vector("list", length(x))))
 
         }
 
