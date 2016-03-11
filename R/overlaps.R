@@ -258,9 +258,11 @@ exonCoverage <- function(exons, exons_i_frag, frag_exonic)
     expanded_frag_exonic <- unlist(expanded_frag_exonic)
 
     irl <- split(expanded_frag_exonic, expanded_exon)
-
     coverage <- coverage(irl, shift = -start(exons) + 1, width = width(exons))
-
+    ## coverage() returns a SimpleRleList
+    ## need RleList() to obtain a CompressedRleList
+    coverage <- RleList(coverage)
+    
     return(coverage)
 
 }

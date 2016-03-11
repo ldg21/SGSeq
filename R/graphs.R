@@ -433,6 +433,7 @@ findSGVariantsFromSGFeatures <- function(features, maxnvariant, cores = 1)
     variant_featureID <- extractIDs(variant_info$featureID)
     variants <- split(features[match(unlist(variant_featureID),
         featureID(features))], togroup0(variant_featureID))
+    names(variants) <- NULL
     variant_gr <- unlist(range(variants))
 
     ## sort by genomic position
