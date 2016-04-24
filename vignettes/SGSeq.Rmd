@@ -4,13 +4,13 @@ author: "Leonard D Goldstein"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SGSeq')`"
 abstract: >
-  *SGSeq* provides a framework for analyzing annotated and previously uncharacterized splice events from RNA-seq data. Input data must be provided as BAM files containing RNA-seq reads aligned against a reference genome. Exons and splice junctions are predicted from aligned reads and are assembled into a genome-wide splice graph. Splice events are identified from the graph and quantified using reads spanning event boundaries. This vignette provides an introduction to *SGSeq*, including splice event prediction, quantification, annotation and visualization.
+  *SGSeq* is a software package for analyzing splice events from short read RNA-seq data. Input data are sequence reads aligned against a reference genome in BAM format. Genes and their transcript variants are represented as a genome-wide splice graph, which can be obtained from existing annotation or can be predicted from the data. Splice events are identified from the graph and are quantified locally using structurally compatible reads overlapping the start or end of each splice variant. *SGSeq* includes functions for splice variant prediction, quantification, visualization and interpretation.
 vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{SGSeq}
   %\VignettePackage{SGSeq}
-output: 
+output:
   BiocStyle::html_document:
     toc: true
 bibliography: SGSeq.bib
@@ -25,174 +25,222 @@ opts_chunk$set(error = FALSE)
 ##BiocStyle::markdown()
 ```
 
+# Overview
+
+The *SGSeq* software package implements data structures for storing information relevant to splice variant analysis. An overview of *SGSeq* classes and how they are related is illustrated in Figure 1.
+
+* The *TxFeatures* class stores transcript features (exons and splice junctions) observed in RNA molecules. These can be extracted from annotation or predicted from aligned RNA-seq reads.
+* The *SGFeatures* class stores features defining a splice graph [@Heber:2002aa]. The splice graph is a directed acyclic graph, with edges corresponding to exonic regions and splice junctions, and nodes corresponding to transcript starts, ends, and splice sites. It is directed from the 5$^\prime$-end to the 3$^\prime$-end of a gene.
+* The *SGVariants* class stores splice variants. If two nodes in the splice graph are connected by two or more paths, and there are no intervening nodes with all paths intersecting, the alternative paths are referred to as splice variants. Splice variants that share the same start and end node together form a splice event.
+
+*SGSeq* makes extensive use of the *Bioconductor* infrastructure for genomic ranges [@Lawrence:2013hi]. In particular, *TxFeatures* and *SGFeatures* inherit from *GRanges*, while *SGVariants* inherit from *GRangesList*. In addition, *SGSeq* implements *SGFeatureCounts* and *SGVariantCounts* (inheriting from the *SummarizedExperiment* class). These are containers for storing per-sample counts (or other expression values), along with the corresponding *SGFeatures* or *SGVariants* objects.
+
+![Overview of *SGSeq* data structures. Classes are shown in bold, function names in italics. $\ast$ *SGVariantCounts* assay "countsVarian5pOr3p" can be obtained from BAM files only, for details see section [Testing for differential splice variant usage].](classes.png)
+
 # Preliminaries
 
 ```{r, message = FALSE}
 library(SGSeq)
 ```
 
-This vignette illustrates an analysis of paired-end RNA-seq data from four tumor and four normal colorectal samples, which are part of a data set published in [@Seshagiri:2012gr]. For the purpose of this vignette, we created BAM files that only include reads mapping to a single gene of interest (*FBXO31*).
+When starting a new project, *SGSeq* requires information about the samples to be analyzed. This information is obtained once initially, and can then be used for all subsequent analyses. Sample information is provided as a data frame with the following columns:
 
-When starting a new project, *SGSeq* requires information about the samples to be analyzed. This information can be provided as a *data.frame*, which must include columns *sample_name* (specificying a unique name for each sample) and *file_bam* (specifying the location of the BAM file). Function *getBamInfo* can be used to extract additional required information from BAM files, including paired-end status, median read length, median insert size and the total number of aligned reads. This information must be obtained once initially and can then be used for all subsequent analyses. It is essential that BAM files are generated using a splice-aware alignment program that generates the custom tag 'XS' indicating the direction of transcription for spliced reads. In the following, we work with a *data.frame* *si* previously generated from the original (complete) BAM files with function *getBamInfo*. 
+* *sample_name* Character vector with a unique name for each sample
+* *file_bam* Character vector or *BamFileList* specifying BAM files generated with a splice-aware alignment program
+* *paired_end* Logical vector indicating whether data are paired-end or single-end
+* *read_length* Numeric vector with read lengths
+* *frag_length* Numeric vector with average fragment lengths (for paired-end data)
+* *lib_size* Numeric vector with the total number of aligned reads for single-end data, or the total number of concordantly aligned read pairs for paired-end data
+
+Sample information can be stored in either a *data.frame* or *DataFrame* object (if BAM files are specified as a *BamFileList*, it must be stored in a *DataFrame*). Sample information can be obtained automatically with function *getBamInfo()*, which takes as input a data frame with columns *sample_name* and *file_bam* and extracts the required information from the specified BAM files.
+
+This vignette illustrates an analysis of paired-end RNA-seq data from four tumor and four normal colorectal samples, which are part of a data set published in [@Seshagiri:2012gr]. The analysis is based on BAM files that include reads mapping to a single gene of interest (*FBXO31*). A *data.frame* *si* with sample information was generated from the original BAM files with function *getBamInfo()*. Note the column *lib_size* reflects the total number of aligned fragments in the original BAM files.
 
 ```{r}
 si
-``` 
+```
 
-The following code block sets the correct BAM file paths in the sample information for this vignette.
+The following code block sets the correct BAM file paths for the current *SGSeq* installation.
 
 ```{r}
 path <- system.file("extdata", package = "SGSeq")
 si$file_bam <- file.path(path, "bams", si$file_bam)
-``` 
+```
 
-# Transcript features and the *TxFeatures* class
+Note that for *SGSeq* to work correctly, it is essential that BAM files were generated with a splice-aware alignment program that generates the custom tag 'XS' (indicating the direction of transcription for spliced reads). Also note that *lib_size* should be the total number of sequenced and aligned fragments, even if the BAM files used for analysis were subset to genomic regions of interest. The total number of fragments is required for accurate calculation of FPKM values (the number of fragments per kilobase and million sequenced fragments). Here the term 'fragment' denotes a sequenced cDNA fragment, which is represented by a single read in single-end data, or a pair of reads in paired-end data.
 
-We use the UCSC knownGene table as reference annotation, which is available as a *Bioconductor* annotation package `r Biocannopkg("TxDb.Hsapiens.UCSC.hg19.knownGene")`. We retain transcripts on chromosome 16, where the *FBXO31* gene is located, and change chromosome names in the annotation to match chromosome names in the BAM files.
+# RNA transcripts and the *TxFeatures* class
+
+Transcript annotation can be obtained via a *TxDb* object or imported from GFF format using function *importTranscripts()*. Alternatively, transcripts can be specified as a *GRangesList* of exons grouped by transcript. In the following code block, we load the UCSC knownGene table as a *TxDb* object, retain transcripts on chromosome 16 (where the *FBXO31* gene is located), and change chromosome names to match the naming convention used in the BAM files.
 
 ```{r, message = FALSE}
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 txdb <- keepSeqlevels(txdb, "chr16")
-seqlevelsStyle(txdb) <- "NCBI"
-``` 
+```
 
-To work with transcript annotation in the *SGSeq* framework, we first extract exons and splice junctions from the *TxDb* object using function *convertToTxFeatures*. We only retain features overlapping the *FBXO31* gene (genomic coordinates of the *FBXO31* gene are stored in the *GRanges* object *gr*).
+To work with annotation in the *SGSeq* framework, we extract transcript features from the *TxDb* object. We only retain features overlapping the genomic locus of the *FBXO31* gene, which is stored in *GRanges* object *gr*.
 
 ```{r}
+seqlevelsStyle(txdb) <- "NCBI"
 txf_ucsc <- convertToTxFeatures(txdb)
 txf_ucsc <- txf_ucsc[txf_ucsc %over% gr]
 txf_ucsc
 ```
 
-*SGSeq* makes extensive use of the *Bioconductor* infrastructure for genomic ranges [@Lawrence:2013hi]. The *TxFeatures* class shown above extends the *GRanges* class with additional columns. Column *type* can take values 
+As can be seen from the output, *TxFeatures* is a *GRanges*-like object with additional columns. Column *type* indicates the feature type and can take values
 
 * *J* (splice junction)
 * *I* (internal exon)
 * *F* (first/5$^\prime$-terminal exon)
-* *L* (last/3$^\prime$-terminal exon)
-* *U* (unspliced).
+* *L* (last/5$^\prime$-terminal exon)
+* *U* (unspliced/single-exon transcript).
 
-Columns *txName* and *geneName* indicate the transcript and the gene that each feature derives from. Note that a feature can belong to more than one transcript. Accordingly these columns can store multiple values for each feature.
+Columns *txName* and *geneName* indicate the transcript and gene that each feature belongs to. Note that a feature can belong to more than one transcript, and accordingly these columns can store multiple values for each feature. For *TxFeatures*, and other data structures defined in *SGSeq*, additional columnns be accessed using functions named after the columns they access.
 
-columns can be accessed using accessor functions named after the columns they access (e.g. use function *type* to obtain feature type). 
+```{r}
+type(txf_ucsc)
+txName(txf_ucsc)
+geneName(txf_ucsc)
+```
 
-If transcript annotation is not available as a *TxDb* object, function *importTranscripts* can be used to import annotation in GFF format. Function *convertToTxFeatures* can construct *TxFeatures* from a *GRangesList* of exons grouped by transcript.
+# The splice graph and the *SGFeatures* class
 
-# Splice graph features and the *SGFeatures* class
-
-Exons stored as *TxFeatures* can be overlapping (e.g. due to alternative splice sites). Overlapping exons can result in ambiguities when attempting to assign reads to individual exons. We therefore partition exonic regions into disjoint exon bins. Splice junctions and disjoint exon bins uniquely determine a genome-wide splice graph [@Heber:2002aa]. To store splice graph features, *SGSeq* implements the *SGFeatures* class. 
+The exons in *TxFeatures* correspond to the exons spliced together in an RNA molecule. Exons from different transcripts can be overlapping but distinct (e.g. due to alternative splice sites). In the context of the splice graph however, exons are represented by unique non-overlapping exonic regions. Function *convertToSGFeatures()* converts *TxFeatures* to *SGFeatures*, partitioning exons into disjoint exon bins in the process.
 
 ```{r}
 sgf_ucsc <- convertToSGFeatures(txf_ucsc)
 sgf_ucsc
-``` 
+```
 
-Similar to *TxFeatures*, *SGFeatures* extends the *GRanges* class with additional columns. Column *type* for an *SGFeatures* object takes values
+Similar to *TxFeatures*, *SGFeatures* extend the *GRanges* class with additional columns. Column *type* for an *SGFeatures* object takes values
 
 * *J* (splice junction)
 * *E* (disjoint exon bin)
 * *D* (splice donor site)
 * *A* (splice acceptor site).
 
-By convention, splice donor and acceptor sites correspond to exonic positions immediately upstream and downstream of the intron, respectively. Note that splice sites are redundant in the sense that they are determined by the splice junctions included in the *SGFeatures* object. When assigning read counts to each feature (see below), counts for exons and splice junctions are based on structurally compatible reads. In the case of splice donor and acceptor sites, counts indicate the number of reads that extend across the spliced boundary (i.e. overlapping the splice site, as well as the flanking intronic position). Splice sites are included in the *SGFeatures* object as their counts are subsequently used for splice variant quantification.  
+By convention, splice donor and acceptor sites correspond to the exonic positions immediately flanking the intron. *SGFeatures* has additional columns not included in *TxFeatures*. For example, *spliced5p* and *spliced3p* indicate whether exon bins have a mandatory splice at the 5$^\prime$ and 3$^\prime$ end, respectively. This information is used to determine whether a read is structurally compatible with an exon bin and whether an exon bin is consistent with an annotated transcript. Column *featureID* provides a unique identifier for each feature, while columnn *geneID* indicates the unique connected component of the splice graph a feature belongs to.
 
-*SGFeatures* includes additional columns not included in *TxFeatures*. *spliced5p* and *spliced3p* indicate whether exon bins have a mandatory splice at the 5$^\prime$ and 3$^\prime$ boundary, respectively. This information is used to determine whether a read is structurally compatible with an exon bin, as well as to determine whether an exon bin is consistent with an annotated transcript. 
+# Splice graph analysis based on annotated transcripts
 
-Column *featureID* provides a unique identifier for each feature, while columnn *geneID* indicates the unique connected component of the splice graph a feature belongs to. 
+Here we illustrate an analysis based on annotated transcripts. Function *analyzeFeatures()* converts transcript features to splice graph features and obtains compatible fragment counts for each feature and each sample.
 
-Both *TxFeatures* and *SGFeatures* objects can be exported to BED files using function *exportFeatures*.
-
-# Analysis based on annotated transcripts
-
-We can now start analyzing the RNA-seq data at the *FBXO31* gene locus. We first perform an analysis based on annotated transcripts. The following example converts the transcript features into splice graph features and obtains counts of compatible RNA-seq reads for each feature and each sample. 
-
-```{r}
+```{r, message = FALSE}
 sgfc_ucsc <- analyzeFeatures(si, features = txf_ucsc)
 sgfc_ucsc
-``` 
+```
 
-*analyzeFeatures* returns an object of class *SGFeatureCounts*, which extends the *RangedSummarizedExperiment* class from the `r Biocpkg("SummarizedExperiment")` package. *SGFeatureCounts* contains the sample information as *colData*, splice graph features as *rowRanges* and assays *counts* and *FPKM*, which store structurally compatible counts and FPKMs, respectively. Accessor functions *colData*, *rowRanges*, *counts* and *FPKM* can be used to access the data. For example, counts and FPKMs can be extracted from an *SGFeatureCounts* object as shown below.
+*analyzeFeatures()* returns an object of class *SGFeatureCounts*, which extends the *SummarizedExperiment* class. *SGFeatureCounts* contains the sample information as *colData*, splice graph features as *rowRanges* and assays *counts* and *FPKM*, which store compatible fragment counts and FPKMs, respectively. The different data types can be accessed using accessor functions with the same name.
 
 ```{r}
+colData(sgfc_ucsc)
+rowRanges(sgfc_ucsc)
 head(counts(sgfc_ucsc))
 head(FPKM(sgfc_ucsc))
 ```
 
-Compatible FPKMs for splice graph features can be visualized with function *plotFeatures*. *plotFeatures* generates a two-panel figure with a splice graph shown in the top panel and a heatmap illustrating expression levels of individual features in the bottom panel. For customization of *plotFeatures* output, see section [Visualization]. The plotting function invisibly returns a *data.frame* with information on splice graph features, including genomic coordinates.
+Counts for exons and splice junctions are based on structurally compatible fragments. In the case of splice donors and acceptors, counts indicate the number of fragments with reads spanning the spliced boundary (i.e. overlapping the splice site, as well as the flanking intronic position).
+
+FPKM values are calculated as $\frac{x}{NL}10^6$, where $x$ is the number of compatible fragments, $N$ is the library size (stored as *lib_size*) and *L* is the effective feature length, which is the number of possible positions for a compatible fragment. For paired-end data, $L$ is calculcated assuming fragment length *frag_length*.
+
+FPKMs for splice graph features can be visualized with function *plotFeatures*. *plotFeatures* generates a two-panel figure with a splice graph shown in the top panel and a heatmap of expression levels for individual features in the bottom panel. For customization of the *plotFeatures* output, see section [Visualization]. The plotting function invisibly returns a *data.frame* with details about the splice graph features included in the plot.
 
 ```{r figure-1, fig.width=4.5, fig.height=4.5}
 df <- plotFeatures(sgfc_ucsc, geneID = 1)
 df
-``` 
+```
 
-Note that the splice graph derived from annotated transcripts includes three alternative transcript start sites (TSSs). However, the heatmap indicates that the first TSS is not used in the samples in our data set.
+Note that the splice graph based on annotated transcripts includes three alternative transcript start sites (TSSs). However, the heatmap indicates that the first TSS is not used in the samples in our data set.
 
-# Analysis based on *de novo* prediction
+# Splice graph analysis based on *de novo* prediction
 
-Instead of relying on existing annotation, *SGSeq* can predict features from BAM files directly. The following code block predicts splice graph features with read evidence in our data set.
+Instead of relying on existing annotation, annotation can be augmented with predictions from RNA-seq data, or the splice graph can be constructed solely from RNA-seq data, without use of annotation. The following code block predicts transcript features supported by RNA-seq reads, converts them into splice graph features, and then obtains compatible fragment counts.
 
-```{r}
+```{r, message = FALSE}
 sgfc_pred <- analyzeFeatures(si, which = gr)
-``` 
+rowRanges(sgfc_pred)
+```
 
-For interpretability, we annotate predicted features with respect to transcripts included in the UCSC knownGene table. The *annotate* function assigns compatible transcripts to each feature and stores them in column *txName*. column *geneName* behaves transitively, meaning all features belonging to the same connected component of the splice graph (with identical *geneID*) have the same value for *geneName*. This behavior makes it easy to identify unannotated features (with empty *txName*) that belong to an annotated gene (non-empty *geneName*).
+For interpretability, we can annotate predicted features using transcripts in the UCSC knownGene table. The *annotate()* function assigns compatible transcripts to each feature and stores the corresponding transcript and gene name in columns *txName* and *geneName*, respectively. Column *geneName* behaves transitively, meaning all features belonging to the same connected component of the splice graph (with identical *geneID*) are assigned the same value for *geneName*.
 
 ```{r}
 sgfc_pred <- annotate(sgfc_pred, txf_ucsc)
-``` 
+rowRanges(sgfc_pred)
+```
 
-Predicted splice graph features and compatible FPKMs can be visualized as previously. Splice graph features with missing annotation can be highlighted using argument *color_novel*.
+The predicted splice graph features and their FPKMs can be visualized as previously. Splice graph features with missing annotation are highlighted using argument *color_novel*.
 
 ```{r figure-2, fig.width=4.5, fig.height=4.5}
 df <- plotFeatures(sgfc_pred, geneID = 1, color_novel = "red")
 df
-``` 
+```
 
-Note that most exons and splice junctions predicted from the RNA-seq data are consistent with transcripts in the UCSC knownGene table (shown in gray). However, in contrast to the previous figure, the predicted gene model does not include parts of the splice graph that are not expressed in our data set. Also, an unannotated exon (E3, shown in red) was discovered from the RNA-seq data, which is expressed in three of the four normal colorectal samples (N2, N3, N4). 
+Note that most exons and splice junctions predicted from RNA-seq data are consistent with transcripts in the UCSC knownGene table (shown in gray). However, in contrast to the previous figure, the predicted gene model does not include parts of the splice graph that are not expressed in our data set. Also, an unannotated exon (E3, shown in red) was discovered from the RNA-seq data, which is expressed in three of the four normal colorectal samples (N2, N3, N4).
 
-# Analysis of predicted splice variants
+# Splice variant identification
 
-Instead of considering the complete splice graph of a gene, we can focus the analysis on individual splice events. In the *SGSeq* framework, the splice graph is a directed acyclic graph with nodes corresponding to transcript starts, ends and splice sites, and edges corresponding to disjoint exon bins and splice junctions, directed from 5$^\prime$ to the 3$^\prime$ end. A splice event is defined by a start node and an end node connected by two or more paths and no intervening nodes with all paths intersecting. *SGSeq* identifies splice events recursively from the graph, and estimates relative usage of splice variants based on compatible reads spanning the event boundaries. The following example identifies splice events from the splice graph and obtains representative counts for each splice variant.
+Instead of considering the complete splice graph of a gene, the analysis can be focused on individual splice events. Function *analyzeVariants()* identifies splice events recursively from the splice graph, obtains representative counts for each splice variant, and estimates their relative usage.
 
-```{r}
+```{r, message = FALSE}
 sgvc_pred <- analyzeVariants(sgfc_pred)
 sgvc_pred
-``` 
+```
 
-*analyzeVariants* returns an *SGVariantCounts* object. Similar to *SGFeatureCounts*, *SGVariantCounts* extends the *RangedSummarizedExperiment* class. *SGVariantCounts* contains sample information as *colData* and *SGVariants* as *rowRanges*. Assay *variantFreq* stores estimates of relative usage for each splice variant and sample. Accessor functions *colData*, *rowRanges* and *variantFreq* can be used to access the data. For example, estimates of relative usage can be extracted from an *SGVariantCounts* object as shown below.
+*analyzeVariants() returns an *SGVariantCounts* object. Similar to *SGFeatureCounts*, *SGVariantCounts* extends the *SummarizedExperiment* class. Sample information is stored as *colData* and *SGVariants* as *rowRanges*. Assay *variantFreq* stores estimates of relative usage for each splice variant and sample. As previously, the different data types can be accessed using accessor functions with the same name.
+
+Information on splice variants is stored in *SGVariants* metadata columns and can be accessed as follows.
+
+```{r}
+mcols(sgvc_pred)
+```
+
+* *from* and *to* indicate splice graph nodes corresponding the the variant start and end, respectively. *from* nodes are splice donor sites (*D*) or transcript starts (*S*), while *to* nodes are splice acceptor sites (*A*) or transcript ends (*E*).
+* Columns *type* and *featureID* describe the variant in terms of the splice graph features that make up the variant.
+* Column *segmentID* specifies unique identifiers labelling unbranched segments of the splice graph.
+* *closed5p* indicates whether the nodes belonging to a splice variant can be reached from nodes outside of the variant exclusively through the *from* node
+* *closed3p* indicates whether the nodes belonging to a splice variant can reach nodes outside of the variant exclusively through the *to* node
+* *closed5pEvent* indicates whether the nodes belonging to a splice variant can be reached from nodes outside of the event exclusively through the *from* node
+* *closed3pEvent* indicates whether the nodes belonging to a splice variant can reach nodes outside of the event exclusively through the *to* node
+* *geneID* has the same interpretation as for *SGFeatures*
+* *eventID* and *variantID* are unique identifiers for each splice event and splice variant, respectively
+* *featureID5p* and *featureID3p* indicate the representative features used for variant quantification at the start and end of the variant, respectively
+* *featureID5pEvent* and *featureID5pEvent* indicate the ensemble of representativ features at the start and end of the event, respectively
+* *txName* indicates structurally compatible transcripts
+* *geneName* behaves as for *SGFeatures*
+* *variantType* indicates whether a splice variant is consistent with a canonical splice event (for a list of possible values, see the manual page for *annotateSGVariants*)
+* *variantName* provides a unique identifier for each splice variant that is more human-readable than the numeric identifier stored in *variantID* (for details, see the manual page for *makeVariantNames*)
+
+Splice variants are quantified locally, in terms of fragment counts overlapping the start or end of each variant. Local estimates of relative usage $\psi_i$ for variant $i$ are obtained as the number of fragments compatible with $i$, divided by the number of fragments compatible with any of the variants belonging to the same event. At the variant start $S$, $\psi_i^S = x_i^S / x_.^S$. At the variant end $E$, $\psi_i^E = x_i^E / x_.^E$. For variants with valid estimates $\psi^S$ and $\psi^E$, a single estimate is calculated as a weighted mean of local estimates $\psi_i = x_.^S/(x_.^S + x_.^E) \psi^S + x_.^E/(x_.^S + x_.^E) \psi^E$.
 
 ```{r}
 variantFreq(sgvc_pred)
 ```
 
-Information on splice variants is stored in metadata columns and can be accessed as follows.
-
-```{r}
-mcols(sgvc_pred)
-``` 
-
-* *from* and *to* indicate the variant start and end node, respectively, *from* nodes are splice donor sites (*D*) or transcript starts (*S*), while *to* nodes are splice acceptor sites (*A*) or transcript ends (*E*)
-* columns *type* and *featureID* describe the variant in terms of the splice graph features that make up the variant
-* *segmentID* are unique identifiers labelling unbranched segments of the splice graph (internal use only)
-* *closed5p* indicates whether the nodes belonging to a splice variant can be reached from nodes outside of the splice event exclusively through the *from* node
-* *closed3p* indicates whether the nodes belonging to a splice variant can reach nodes outside of the splice event exclusively through the *to* node
-* *eventID* and *variantID* are unique identifiers for each splice event and splice variant, respectively
-* *featureID5p* and *featureID3p* indicate representative features that are used for obtaining relative usage estimates at the variant start and end, respectively
-* *variantType* indicates whether a splice variant is consistent with a canonical splice event (for a list of possible values, see the manual page for *annotateSGVariants*)
-* *variantName* provides a unique identifier for each splice variant that is intended to be more human-readable than the numeric identifier stored in *variantID* (for details, see the manual page for *makeVariantNames*)
-
 Splice variants and estimates of relative usage can be visualized with function *plotVariants*.
 
 ```{r figure-3, fig.width=1.5, fig.height=4.5}
 plotVariants(sgvc_pred, eventID = 1, color_novel = "red")
-``` 
+```
 
-*plotVariants* generates a two-panel figure similar to *plotFeatures*. The splice graph in the top panel illustrates the selected splice event. In this example, the splice event consists of two splice variants that correspond to a skip or inclusion of the unannotated exon. The heatmap illustrates estimates of relative usage for each splice variant. We observe that samples N2, N3 and N4 show evidence for both transcripts that include the exon as well as transcripts that skip the exon. The remaining samples show little evidence for exon inclusion.
+*plotVariants* generates a two-panel figure similar to *plotFeatures*. The splice graph in the top panel illustrates the selected splice event. In this example, the splice event consists of two splice variants, corresponding to a skip or inclusion of the unannotated exon. The heatmap illustrates estimates of relative usage for each splice variant. We observe that samples N2, N3 and N4 show evidence for both transcripts that include the exon as well as transcripts that skip the exon. The remaining samples show little evidence for exon inclusion.
+
+# Splice variant interpretation
+
+The functional consequences of a splice variant can be interpreted further, by asessing its effect on protein-coding potential. Function *predictVariantEffects()* takes as input an *SGVariants* object with splice variants of interest, a set of annotated transcripts, and a matching reference genome stored as a *BSgenome* object.
+
+```{r, message = FALSE}
+library(BSgenome.Hsapiens.UCSC.hg19)
+seqlevelsStyle(Hsapiens) <- "NCBI"
+vep <- predictVariantEffects(sgv_pred, txdb, Hsapiens)
+vep
+```
+
+The output is a data frame, with each row describing the effect of a particular splice variant on an annotated protein-coding transcript. The effect of the variants is described following [HGVS recommendations](http://www.hgvs.org/mutnomen/recs.html). In its current implementation, variant effect prediction is relatively slow, and it is recommended to run *predictVariantEffects()* on select variants only.
 
 # Visualization
 
-Functions *plotFeatures* and *plotVariants* support many options for customizing figures. Note that the splice graph in the top figure panel is plotted by function *plotSpliceGraph*, which can be called directly. 
+Functions *plotFeatures* and *plotVariants* support many options for customizing figures. The splice graph in the top figure panel is plotted by function *plotSpliceGraph*, which can also be called directly.
 
 *plotFeatures* includes multiple alternative arguments for selecting features to be displayed. The following code illustrates three different ways of selecting and plotting the splice graph and expression levels for *FBXO31* (Entrez ID 79791).
 
@@ -210,7 +258,7 @@ plotFeatures(sgfc_pred, geneID = 1, include = "exons")
 plotFeatures(sgfc_pred, geneID = 1, include = "both")
 ```
 
-Argument *toscale* controls which parts of the gene model are drawn to scale. 
+Argument *toscale* controls which parts of the gene model are drawn to scale.
 
 ```{r, eval = FALSE}
 plotFeatures(sgfc_pred, geneID = 1, toscale = "gene")
@@ -228,25 +276,47 @@ for (j in 1:4) {
 }
 ```
 
-# Advanced use
+# Testing for differential splice variant usage
 
-Functions *analyzeFeatures* and *analyzeVariants* wrap multiple analysis steps for convenience. Alternatively, the functions performing individual steps can be called directly. For example, the previous analysis using *de novo* prediction can be performed as follows.
+*SGSeq* does not implement statistical tests for differential splice variant usage. However, existing software packages such as `r Biocpkg("DEXSeq")` [@Anders:2012es] and `r Biocpkg("limma")` [@Ritchie:2015fa] can be used for this purpose. In particular, these packages include statistical tests to assess whether the expression change observed for a particular exon (between groups of samples) is different from changes for other exons belonging to the same gene. In the *SGSeq* framework, these methods can be used to test whether an observed expression change for an individual splice variant is different from changes observed for other splice variants belonging to the same event.
+
+For these methods to be applicable, a single count is required for each splice variant. *SGVariantCounts* objects, as described above, store two counts for each splice variant (one for the 5$^\prime$ and one for the 3$^\prime$ end of the variant). These counts can be readily obtained from *SGFeatureCounts* objects, but are impractical for differential testing. A single count for each variant, based on fragments compatible at either end of the variant, can be obtained using function *getSGVariantCounts()*. The output is an *SGVariantCounts* object with additional assay *countsVariant5pOr3p*.
+
+```{r, message = FALSE}
+sgv <- rowRanges(sgvc_pred)
+sgvc <- getSGVariantCounts(sgv, sample_info = si)
+sgvc
+```
+
+Performing differential tests requires the per-variant counts, unique identifiers for each variant, and a variable indicating how variants are grouped by events. All three can be readily obtained from the *SGVariantCounts* object.
 
 ```{r}
+x <- counts(sgvc)
+vid <- variantID(sgvc)
+eid <- eventID(sgvc)
+```
+
+These objects can then be used to construct a *DEXSeqDataSet* object for use with `r Biocpkg("DEXSeq")` or as input for function *diffSplice()* in combination with *voom()* for use with `r Biocpkg("limma")`.
+
+# Advanced use
+
+Functions *analyzeFeatures()* and *analyzeVariants()* wrap multiple analysis steps for convenience. Alternatively, the functions performing individual steps can be called directly. For example, the analysis based on *de novo* prediction can be performed as follows.
+
+```{r, message = FALSE}
 txf <- predictTxFeatures(si, gr)
 sgf <- convertToSGFeatures(txf)
 sgf <- annotate(sgf, txf_ucsc)
 sgfc <- getSGFeatureCounts(si, sgf)
 sgv <- findSGVariants(sgf)
 sgvc <- getSGVariantCounts(sgv, sgfc)
-``` 
+```
 
-*predictTxFeatures* and *getSGFeatureCounts* can be run on individual samples (e.g. for distribution across a high-performance computing cluster). *predictTxFeatures* predicts features for each sample, merges features across samples and finally performs filtering and processing of predicted terminal exons. When using *predictTxFeatures* for individual samples, with predictions intended to be merged at a later point in time, run *predictTxFeatures* with argument *min_overhang = NULL* to suppress processing of terminal exons. Then predictions can subsequently be merged and processed with functions *mergeTxFeatures* and *processTerminalExons*, respectively.
+*predictTxFeatures()* and *getSGFeatureCounts()* can be run on individual samples (e.g. for distribution across a high-performance computing cluster). *predictTxFeatures()* predicts features for each sample, merges features across samples and finally performs filtering and processing of predicted terminal exons. When using *predictTxFeatures()* for individual samples, with predictions intended to be merged at a later point in time, run *predictTxFeatures()* with argument *min_overhang = NULL* to suppress processing of terminal exons. Then predictions can subsequently be merged and processed with functions *mergeTxFeatures()* and *processTerminalExons()*, respectively.
 
 # Session information
 
 ```{r}
 sessionInfo()
-``` 
+```
 
 # References

@@ -9,7 +9,7 @@
 ##' @param x Object containing metadata column
 ##' @param value Replacement value
 ##' @return Content of metadata column for accessor functions or updated
-##' object for replacement functions.
+##'   object for replacement functions.
 ##' @examples
 ##' head(type(txf_ann))
 ##' head(type(sgf_ann))
@@ -17,8 +17,6 @@
 ##' @name slots
 NULL
 
-##' Accessor and replacement functions for assay data.
-##'
 ##' Functions \code{counts} and \code{FPKM} are used to extract counts and
 ##' FPKM values from \code{SGFeatureCounts} and \code{SGVariantCounts}
 ##' objects. Function \code{variantFreq} is used to access relative usage
@@ -26,23 +24,23 @@ NULL
 ##'
 ##' @title Accessing and replacing assay data
 ##' @param object Object containing assay data
-##' @param ... Arguments passed to method for \code{SGVariantCounts} objects
-##' @param option For \code{SGVariantCounts} objects, \code{option} specifies
-##' whether output should be based on counts of reads compatible with the
-##' variant at the start (\dQuote{variant5p}), end (\dQuote{variant3p}) or
-##' either (\dQuote{variant}), or whether output should be based on counts of
-##' reads compatible with any variant belonging to the same event
-##' (\dQuote{event5p} or \dQuote{event3p})
-##' @param min_anchor For \code{SGVariantCounts} objects, \code{min_anchor}
-##' specifies the minimum anchor length when computing FPKM values
+##' @param ... Arguments passed to method for \code{SGVariantCounts} objects.
+##'   Argument \code{option} specifies whether the output should be based
+##'   on the count of fragments compatible with the variant at the start
+##'   (\dQuote{variant5p}), end (\dQuote{variant3p}) or either
+##'   (\dQuote{variant5pOr3p}) (the default), or whether output should be
+##'   based on the count of fragments compatible with any variant belonging
+##'   to the same event (\dQuote{event5p} or \dQuote{event3p}).
+##'   Argument \code{min_anchor} specifies the minimum anchor length when
+##'   computing FPKM values (defaults to 1).
 ##' @param value Replacement value
 ##' @return Assay data for accessor functions or updated object for
-##' replacement functions.
+##'   replacement functions.
 ##' @examples
 ##' x <- counts(sgfc_pred)
 ##' y <- FPKM(sgfc_pred)
-##' u <- counts(sgvc_pred, "variant5p")
-##' v <- FPKM(sgvc_pred, "variant5p")
+##' u <- counts(sgvc_pred, option = "variant5p")
+##' v <- FPKM(sgvc_pred, option = "variant5p")
 ##' @author Leonard Goldstein
 ##' @name assays
 NULL

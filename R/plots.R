@@ -223,7 +223,7 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' @param color_labels Logical indicating whether label colors should
 ##'   be the same as feature colors
 ##' @param border Determines the color of exon borders, can be \dQuote{fill}
-##'   (same as exon color), \dQuote{none} (no border) or a valid color name
+##'   (same as exon color), \dQuote{none} (no border), or a valid color name
 ##' @param curvature Numeric determining curvature of plotted splice junctions.
 ##' @param ypos Numeric vector of length two, indicating the vertical
 ##'   position and height of the exon bins in the splice graph,
@@ -249,6 +249,8 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' @param tx_view Plot transcripts instead of splice graph (experimental)
 ##' @param tx_dist Vertical distance between transcripts as fraction of height
 ##'   of plotting region
+##' @param short_output Logical indicating whether the returned data frame
+##'   should only include information that is likely useful to the user
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -272,7 +274,7 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     score_ylim = NULL, score_ypos = c(0.3, 0.1), score_nbin = 200,
     score_summary = mean, score_label = NULL, ranges = NULL,
     ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-    main = NULL, tx_view = FALSE, tx_dist = 0.2)
+    main = NULL, tx_view = FALSE, tx_dist = 0.2, short_output = TRUE)
 {
 
     toscale <- match.arg(toscale)
@@ -333,6 +335,8 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
     }
 
     text(x = 0, y = 0.95, labels = main, pos = 1, offset = 0, font = 2)
+
+    if (short_output) { df <- df[c("id", "name", "type", "featureID")] }
 
     invisible(df)
 
@@ -572,9 +576,9 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
     bin_y <- bin_y / diff(range(ylim)) * ypos_2[2]
     bin_y <- bin_y + ypos_2[1]
 
-    mapply(rect, xleft = bin_breaks[-length(bin_breaks)],
-        xright = bin_breaks[-1], ytop = bin_y,
-        MoreArgs = list(ybottom = ypos_2[1], col = color, border = NA))
+    px <- rep(bin_breaks, rep(2, length(bin_breaks)))
+    py <- c(ypos_2[1], rep(bin_y, rep(2, length(bin_y))), ypos_2[1])
+    polygon(px, py, border = NA, col = color)
 
     axis(side = 2, at = c(ypos_2[1], ypos_2[1] + ypos_2[2]), labels = ylim,
         mgp = c(3, 0.5, 0.5), tcl = -0.25, las = 1)
@@ -959,8 +963,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
     par(cex = cex, mai = pars$mai)
 
-    df <- plotSpliceGraph(x = features,
-        label = "id", tx_view = tx_view, ...)
+    df <- plotSpliceGraph(x = features, label = "id", tx_view = tx_view,
+        short_output = FALSE, ...)
 
     i_df <- switch(include,
         exons = which(df$type == "E"),
@@ -978,6 +982,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
         cexRow = cexRow, cexCol = cexCol, labRow = labRow,
         labCol = labCol, colLabCol = colLabCol,
         col = col, zlim = zlim)
+
+    df <- df[c("id", "name", "type", "featureID")]
 
     invisible(df)
 
@@ -1097,9 +1103,8 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
 extractFeaturesFromVariants <- function(variants)
 {
 
-    id2variant <- tapply(togroup0(variants),
-        featureID(unlist(variants)), unique, simplify = FALSE)
-    id2variant <- id2variant[elementNROWS(id2variant) == 1]
+    id2variant <- split(togroup0(variants), featureID(unlist(variants)))
+    id2variant <- unstrsplit(sort(unique(CharacterList(id2variant))), ",")
     features <- uniqueFeatures(unlist(variants))
     mcols(features)$label <- id2variant[match(
         featureID(features), names(id2variant))]

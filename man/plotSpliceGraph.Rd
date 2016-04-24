@@ -12,7 +12,7 @@ plotSpliceGraph(x, geneID = NULL, geneName = NULL, eventID = NULL,
   score_color = "darkblue", score_ylim = NULL, score_ypos = c(0.3, 0.1),
   score_nbin = 200, score_summary = mean, score_label = NULL,
   ranges = NULL, ranges_color = "darkblue", ranges_ypos = c(0.1, 0.1),
-  main = NULL, tx_view = FALSE, tx_dist = 0.2)
+  main = NULL, tx_view = FALSE, tx_dist = 0.2, short_output = TRUE)
 }
 \arguments{
 \item{x}{\code{SGFeatures} or \code{SGVariants} object}
@@ -49,7 +49,7 @@ metadata column \dQuote{color} is not \code{NULL}.}
 be the same as feature colors}
 
 \item{border}{Determines the color of exon borders, can be \dQuote{fill}
-(same as exon color), \dQuote{none} (no border) or a valid color name}
+(same as exon color), \dQuote{none} (no border), or a valid color name}
 
 \item{curvature}{Numeric determining curvature of plotted splice junctions.}
 
@@ -90,6 +90,9 @@ height of the plotting region}
 
 \item{tx_dist}{Vertical distance between transcripts as fraction of height
 of plotting region}
+
+\item{short_output}{Logical indicating whether the returned data frame
+should only include information that is likely useful to the user}
 }
 \value{
 \code{data.frame} with information on exon bins and

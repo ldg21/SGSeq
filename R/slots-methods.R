@@ -437,94 +437,101 @@ setReplaceMethod("FPKM", "SGFeatureCounts",
 ## SGVariantCounts
 
 ##' @rdname assays
-setMethod("counts", "SGVariantCounts",
-    function(object, option = "variant5pOr3p") {
+setMethod("counts", "SGVariantCounts", function(object, ...) {
 
-        valid <- c("variant5p", "variant3p", "event5p", "event3p",
-            "variant5pOr3p")
+    dots <- list(...)
+    option <- dots$option
+    if (is.null(option)) { option <- "variant5pOr3p" }
 
-        if (missing(option) || !option %in% valid) {
+    valid <- c("variant5p", "variant3p", "event5p", "event3p", "variant5pOr3p")
 
-            msg <- paste("argument option must be one of\n",
-                paste(paste0("\"", valid, "\""), collapse = ", "))
-            stop(msg)
+    if (!option %in% valid) {
 
-        }
+        msg <- paste("argument option must be one of\n",
+            paste(paste0("\"", valid, "\""), collapse = ", "))
+        stop(msg)
 
-        if (option == "variant5pOr3p" &&
-            !"countsVariant5pOr3p" %in% names(assays(object))) {
+    }
 
-            msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
-                "run getSGVariantCounts() first")
-            stop(msg)
+    if (option == "variant5pOr3p" &&
+        !"countsVariant5pOr3p" %in% names(assays(object))) {
 
-        }
+        msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
+            "run getSGVariantCounts() first")
+        stop(msg)
 
-        assay_name <- switch(option,
-            variant5p = "countsVariant5p",
-            variant3p = "countsVariant3p",
-            event5p = "countsEvent5p",
-            event3p = "countsEvent3p",
-            variant5pOr3p = "countsVariant5pOr3p")
+    }
+
+    assay_name <- switch(option,
+        variant5p = "countsVariant5p",
+        variant3p = "countsVariant3p",
+        event5p = "countsEvent5p",
+        event3p = "countsEvent3p",
+        variant5pOr3p = "countsVariant5pOr3p")
 
 
-        assay(object, assay_name)
-
-})
-
-##' @rdname assays
-setReplaceMethod("counts", "SGVariantCounts",
-    function(object, option, value) {
-
-        valid <- c("variant5p", "variant3p", "event5p", "event3p",
-            "variant5pOr3p")
-
-        if (missing(option) || !option %in% valid) {
-
-            msg <- paste("argument option must be one of\n",
-                paste(paste0("\"", valid, "\""), collapse = ", "))
-            stop(msg)
-
-        }
-
-        if (option == "variant5pOr3p" &&
-            !"countsVariant5pOr3p" %in% names(assays(object))) {
-
-            msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
-                "run getSGVariantCounts() first")
-            stop(msg)
-
-        }
-
-        assay_name <- switch(option,
-            variant5p = "countsVariant5p",
-            variant3p = "countsVariant3p",
-            event5p = "countsEvent5p",
-            event3p = "countsEvent3p",
-            variant5pOr3p = "countsVariant5pOr3p")
-
-        assays(object)[[assay_name]] <- value
-
-        object
+    assay(object, assay_name)
 
 })
 
 ##' @rdname assays
-setMethod("FPKM", "SGVariantCounts",
-    function(object, option, min_anchor = 1) {
+setReplaceMethod("counts", "SGVariantCounts", function(object, ..., value) {
 
-        valid <- c("variant5p", "variant3p", "event5p", "event3p")
+    dots <- list(...)
+    option <- dots$option
 
-        if (missing(option) || !option %in% valid) {
+    valid <- c("variant5p", "variant3p", "event5p", "event3p", "variant5pOr3p")
 
-            msg <- paste("argument option must be one of\n",
-                paste(paste0("\"", valid, "\""), collapse = ", "))
-            stop(msg)
+    if (is.null(option) || !option %in% valid) {
 
-        }
+        msg <- paste("argument option must be one of\n",
+            paste(paste0("\"", valid, "\""), collapse = ", "))
+        stop(msg)
 
-        getScaledCounts(object = object, min_anchor = min_anchor,
-            counts = counts(object, option))
+    }
+
+    if (option == "variant5pOr3p" &&
+        !"countsVariant5pOr3p" %in% names(assays(object))) {
+
+        msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
+            "run getSGVariantCounts() first")
+        stop(msg)
+
+    }
+
+    assay_name <- switch(option,
+        variant5p = "countsVariant5p",
+        variant3p = "countsVariant3p",
+        event5p = "countsEvent5p",
+        event3p = "countsEvent3p",
+        variant5pOr3p = "countsVariant5pOr3p")
+
+    assays(object)[[assay_name]] <- value
+
+    object
+
+})
+
+##' @rdname assays
+setMethod("FPKM", "SGVariantCounts", function(object, ...) {
+
+    dots <- list(...)
+    option <- dots$option
+    min_anchor <- dots$min_anchor
+    if (is.null(min_anchor)) { min_anchor <- 1 }
+
+    valid <- c("variant5p", "variant3p", "event5p", "event3p")
+
+    if (is.null(option) || !option %in% valid) {
+
+        msg <- paste("argument option must be one of\n",
+            paste(paste0("\"", valid, "\""), collapse = ", "))
+        stop(msg)
+
+    }
+
+    getScaledCounts(object = object, min_anchor = min_anchor,
+        counts = counts(object, option = option))
 
 })
 

@@ -38,8 +38,8 @@
 
 analyzeFeatures <- function(sample_info, which = NULL,
     features = NULL, predict = is.null(features),
-    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2, min_anchor = 1,
-    min_n_sample = 1, min_overhang = NA, annotation = NULL,
+    alpha = 2, psi = 0, beta = 0.2, gamma = 0.2, min_junction_count = NULL,
+    min_anchor = 1, min_n_sample = 1, min_overhang = NA, annotation = NULL,
     max_complexity = 20, verbose = FALSE, cores = 1)
 {
 
@@ -73,6 +73,7 @@ analyzeFeatures <- function(sample_info, which = NULL,
             psi = psi,
             beta = beta,
             gamma = gamma,
+            min_junction_count = min_junction_count,
             min_n_sample = min_n_sample,
             min_overhang = min_overhang,
             max_complexity = max_complexity,

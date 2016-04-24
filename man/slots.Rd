@@ -441,7 +441,7 @@ featureID3pEvent(x) <- value
 }
 \value{
 Content of metadata column for accessor functions or updated
-object for replacement functions.
+  object for replacement functions.
 }
 \description{
 Accessor and replacement functions for metadata columns.

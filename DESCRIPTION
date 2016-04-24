@@ -1,7 +1,7 @@
 Package: SGSeq
 Type: Package
 Title: Splice event prediction and quantification from RNA-seq data
-Version: 1.5.15
+Version: 1.5.16
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: Predict splice junctions and exons from BAM files and obtain
@@ -11,11 +11,11 @@ Description: Predict splice junctions and exons from BAM files and obtain
 License: Artistic-2.0
 LazyData: yes
 Depends:
-    methods,
     IRanges,
     GenomicRanges (>= 1.23.21),
     Rsamtools,
-    SummarizedExperiment
+    SummarizedExperiment,
+    methods
 Imports:
     AnnotationDbi,
     BiocGenerics,
@@ -23,17 +23,20 @@ Imports:
     GenomicAlignments,
     GenomicFeatures,
     GenomeInfoDb,
+    RUnit,
+    S4Vectors (>= 0.9.39),
+    grDevices,
+    graphics,
     igraph,
     parallel,
     rtracklayer,
-    RUnit,
-    S4Vectors (>= 0.9.39)
+    stats
 Suggests:
     BiocStyle,
     BSgenome.Hsapiens.UCSC.hg19,
+    TxDb.Hsapiens.UCSC.hg19.knownGene,
     knitr,
-    rmarkdown,
-    TxDb.Hsapiens.UCSC.hg19.knownGene
+    rmarkdown
 VignetteBuilder: knitr
 biocViews: AlternativeSplicing, RNASeq, Transcription
 RoxygenNote: 5.0.1

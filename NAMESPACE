@@ -1,6 +1,5 @@
 ## IMPORT NAMESPACES
 
-import(methods)
 import(BiocGenerics)
 import(S4Vectors)
 import(IRanges)
@@ -8,21 +7,25 @@ import(GenomicRanges)
 import(GenomicAlignments)
 import(SummarizedExperiment)
 import(Rsamtools)
+import(methods)
 
 ## IMPORT FUNCTIONS
 
 importFrom(AnnotationDbi, select)
 importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate, type)
+importFrom(GenomicFeatures, cdsBy, exonsBy, mapFromTranscripts,
+    mapToTranscripts)
+importFrom(GenomeInfoDb, keepSeqlevels, seqinfo, seqlengths, seqlevels)
+importFrom(RUnit, checkIdentical, checkTrue)
+importFrom(grDevices, col2rgb, colorRampPalette, dev.size, rgb)
+importFrom(graphics, axis, layout, mtext, par, plot, polygon, rect, text)
 importFrom(igraph, clusters, degree, delete.edges, delete.vertices,
     edge.connectivity, get.data.frame, get.shortest.paths,
     graph.data.frame, induced.subgraph, neighborhood, plot.igraph,
     shortest.paths, subcomponent)
-importFrom(GenomicFeatures, cdsBy, exonsBy, mapFromTranscripts,
-    mapToTranscripts)
-importFrom(GenomeInfoDb, keepSeqlevels, seqinfo, seqlengths, seqlevels)
 importFrom(parallel, mclapply, mcmapply)
 importFrom(rtracklayer, export, import)
-importFrom(RUnit, checkIdentical, checkTrue)
+importFrom(stats, dist, hclust, setNames)
 
 ## IMPORT CLASSES
 
