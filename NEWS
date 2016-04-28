@@ -1,3 +1,32 @@
+CHANGES IN VERSION 1.6.0
+------------------------
+
+    o New vignette
+
+    o Added predictVariantEffects() for predicting the effect of a
+      splice variant on annotated protein-coding transcripts
+
+    o Changes in the SGVariants and SGVariantCounts class. Instances
+      created with previous versions of SGSeq have to be updated. 
+
+    o Replaced functions for accessing assay data with two generic functions
+      counts() and FPKM()
+
+    o Support BamFileLists in sample info
+
+    o Changed behavior of the annotate() function when assigning gene names
+
+    o Changed behavior of the min_denominator argument in
+      analyzeVariants() and getSGVariantCounts(). The specfied minimum
+      count now has to be achieved at either the start or end of the event.
+
+    o Adjacent exons no longer cause a warning in convertToTxFeatures()
+
+    o Deprecated legacy classes TxVariants, TxVariantCounts
+
+    o Bug fixes and other improvements
+
+
 CHANGES IN VERSION 1.4.0
 ------------------------
 

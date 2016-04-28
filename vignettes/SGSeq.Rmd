@@ -35,7 +35,7 @@ The *SGSeq* software package implements data structures for storing information 
 
 *SGSeq* makes extensive use of the *Bioconductor* infrastructure for genomic ranges [@Lawrence:2013hi]. In particular, *TxFeatures* and *SGFeatures* inherit from *GRanges*, while *SGVariants* inherit from *GRangesList*. In addition, *SGSeq* implements *SGFeatureCounts* and *SGVariantCounts* (inheriting from the *SummarizedExperiment* class). These are containers for storing per-sample counts (or other expression values), along with the corresponding *SGFeatures* or *SGVariants* objects.
 
-![Overview of *SGSeq* data structures. Classes are shown in bold, function names in italics. $\ast$ *SGVariantCounts* assay "countsVarian5pOr3p" can be obtained from BAM files only, for details see section [Testing for differential splice variant usage].](classes.png)
+![Overview of *SGSeq* data structures. Classes are shown in bold, function names in italics. Dashed arrows indicate functions *analyzeFeatures()* and *analyzeVariants()*, which wrap multiple analysis steps. $\ast$ *SGVariantCounts* assay "countsVarian5pOr3p" can be obtained from BAM files only, for details see section [Testing for differential splice variant usage].](classes.png)
 
 # Preliminaries
 
