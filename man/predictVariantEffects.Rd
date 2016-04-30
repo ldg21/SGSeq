@@ -10,7 +10,7 @@ predictVariantEffects(sgv, tx, genome, fix_start_codon = TRUE,
 \arguments{
 \item{sgv}{\code{SGVariants} object}
 
-\item{tx}{A \code{TxDb} object, or \code{GRangesList} of exons
+\item{tx}{\code{TxDb} object, or \code{GRangesList} of exons
 grouped by transcript with metadata columns \code{txName},
 \code{geneName}, \code{cdsStart} and \code{cdsEnd}
 (by convention, cdsStart < cdsEnd for both strands).
@@ -28,7 +28,7 @@ full results (with additional columns) should be returned}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{data.frame} with rows corresponding to a
+\code{data.frame} with rows corresponding to a
   variant-transcript pair. The output includes columns for variant
   identifier, transcript name, gene name, type of alteration at the
   RNA and protein level, and variant description at the RNA and

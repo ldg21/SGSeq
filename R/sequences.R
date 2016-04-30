@@ -3,7 +3,7 @@
 ##'
 ##' @title Predict the effect of splice variants on protein-coding transcripts
 ##' @param sgv \code{SGVariants} object
-##' @param tx A \code{TxDb} object, or \code{GRangesList} of exons
+##' @param tx \code{TxDb} object, or \code{GRangesList} of exons
 ##'   grouped by transcript with metadata columns \code{txName},
 ##'   \code{geneName}, \code{cdsStart} and \code{cdsEnd}
 ##'   (by convention, cdsStart < cdsEnd for both strands).
@@ -15,7 +15,7 @@
 ##' @param output Character string indicating whether short results or
 ##'   full results (with additional columns) should be returned
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{data.frame} with rows corresponding to a
+##' @return \code{data.frame} with rows corresponding to a
 ##'   variant-transcript pair. The output includes columns for variant
 ##'   identifier, transcript name, gene name, type of alteration at the
 ##'   RNA and protein level, and variant description at the RNA and
@@ -43,6 +43,8 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
     }
 
     output <- match.arg(output)
+
+    sgv <- updateObject(sgv, verbose = TRUE)
 
     if (is(tx, "TxDb")) {
 
@@ -445,11 +447,11 @@ getHGVSVariantDeletionInsertion <- function(var)
         out <- list(
             type = paste0("in-frame_", paste(type, collapse = "/")),
             HGVS = hgvs)
-        
+
     }
 
     return(out)
-    
+
 }
 
 getHGVSVariantFrameshift <- function(var)
@@ -532,11 +534,11 @@ getHGVSInsertion <- function(var, type, ref)
 
             I5p <- start(flank(I[i], -1, TRUE))
             I3p <- start(flank(I[i], -1, FALSE))
-            
+
             ins <- c(ins, paste0(
                 getHGVSRefPosIntronic(I5p, ref, var), "_",
                 getHGVSRefPosIntronic(I3p, ref, var)))
-            
+
         }
 
         if (length(ins) > 1) {
@@ -613,12 +615,12 @@ getHGVSRefPosIntronic <- function(pos, ref, var)
 
     d5p <- (pos - E3p) * ifelse(strand == "-", -1, 1)
     d3p <- (E5p - pos) * ifelse(strand == "-", -1, 1)
-    
+
     i <- which((is.na(d5p) | d5p > 0) & (is.na(d3p) | d3p > 0))
-    
+
     if (is.na(d3p[i]) ||
         (!is.na(d5p[i]) && !is.na(d3p[i]) && d5p[i] <= d3p[i])) {
-      
+
         pos <- paste0(getHGVSRefPos(var, R3p[i], "RNA"), "+", d5p[i])
 
     } else {
@@ -628,7 +630,7 @@ getHGVSRefPosIntronic <- function(pos, ref, var)
     }
 
     return(pos)
-    
+
 }
 
 getVariant <- function(var, ref, sgv, genome, fix = c("start", "stop"))

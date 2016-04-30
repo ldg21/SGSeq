@@ -99,7 +99,9 @@ should only include information that is likely useful to the user}
   splice junctions included in the splice graph
 }
 \description{
-Plot splice graph implied by splice junctions and exon bins.
+Plot the splice graph implied by splice junctions and exon bins.
+Invisibly returns a \code{data.frame} with details of plotted
+features, including genomic coordinates.
 }
 \details{
 By default, the color of features in the splice graph is
@@ -108,9 +110,6 @@ determined by annotation status (see arguments \code{color},
 (see argument \code{label}). Alternatively, colors and labels can
 be specified via metadata columns \dQuote{color} and
 \dQuote{label}, respectively.
-
-A \code{data.frame} with information on plotted features, including
-genomic coordinates, is returned invisibly.
 }
 \examples{
 \dontrun{

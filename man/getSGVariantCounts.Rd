@@ -32,7 +32,7 @@ If \code{NA}, all estimates are returned.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-An \code{SGVariantCounts} object
+\code{SGVariantCounts} object
 }
 \description{
 For splice variants, obtain counts of compatible fragments spanning

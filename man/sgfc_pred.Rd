@@ -3,7 +3,7 @@
 \name{sgfc_pred}
 \alias{sgfc_pred}
 \title{Example splice graph feature counts (predicted)}
-\format{An \code{SGFeatureCounts} object.}
+\format{\code{SGFeatureCounts} object}
 \description{
 Compatible counts and FPKMs for FBXO31 splice graph features,
 predicted from example BAM files.

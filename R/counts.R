@@ -193,11 +193,11 @@ convertSlots <- function(x)
 ##' Create \code{SGFeatureCounts} object from rowRanges, colData and counts.
 ##'
 ##' @title Create \code{SGFeatureCounts} object
-##' @param rowRanges An \code{SGFeatures} object
+##' @param rowRanges \code{SGFeatures} object
 ##' @param colData Data frame with sample information
 ##' @param counts Integer matrix of counts
 ##' @param min_anchor Integer specifiying minimum anchor length
-##' @return An \code{SGFeatureCounts} object
+##' @return \code{SGFeatureCounts} object
 ##' @examples
 ##' sgfc <- makeSGFeatureCounts(sgf_pred, si,
 ##'   matrix(0L, length(sgf_pred), nrow(si)))

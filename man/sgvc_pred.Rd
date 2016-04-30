@@ -3,7 +3,7 @@
 \name{sgvc_pred}
 \alias{sgvc_pred}
 \title{Example splice variant counts (predicted)}
-\format{A \code{SGVariantCounts} object.}
+\format{\code{SGVariantCounts} object}
 \description{
 Splice variant counts and frequencies for FBXO31.
 Splice variants were predicted from example BAM files.

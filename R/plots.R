@@ -187,7 +187,9 @@ exonGraphEdges <- function(v, J, tx_view)
 
 }
 
-##' Plot splice graph implied by splice junctions and exon bins.
+##' Plot the splice graph implied by splice junctions and exon bins.
+##' Invisibly returns a \code{data.frame} with details of plotted
+##' features, including genomic coordinates.
 ##'
 ##' By default, the color of features in the splice graph is
 ##' determined by annotation status (see arguments \code{color},
@@ -195,9 +197,6 @@ exonGraphEdges <- function(v, J, tx_view)
 ##' (see argument \code{label}). Alternatively, colors and labels can
 ##' be specified via metadata columns \dQuote{color} and
 ##' \dQuote{label}, respectively.
-##'
-##' A \code{data.frame} with information on plotted features, including
-##' genomic coordinates, is returned invisibly.
 ##'
 ##' @title Plot splice graph
 ##' @param x \code{SGFeatures} or \code{SGVariants} object
@@ -285,6 +284,8 @@ plotSpliceGraph <- function(x, geneID = NULL, geneName = NULL,
         stop("x must be an SGFeatures or SGVariants object")
 
     }
+
+    if (is(x, "SGVariants")) x <- updateObject(x, verbose = TRUE)
 
     if (!is.null(score) && !is(score, "RleList")) {
 
@@ -1022,6 +1023,8 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         stop("x must be an SGVariantCounts object")
 
     }
+
+    x <- updateObject(x, verbose = TRUE)
 
     x <- restrictFeatures(x, eventID = eventID,
         expand_variants = expand_variants)

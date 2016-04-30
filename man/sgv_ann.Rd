@@ -3,7 +3,7 @@
 \name{sgv_ann}
 \alias{sgv_ann}
 \title{Example splice variants (annotation-based)}
-\format{A \code{SGVariants} object.}
+\format{\code{SGVariants} object}
 \description{
 Splice variants for FBXO31, based on UCSC knownGene annotation.
 }

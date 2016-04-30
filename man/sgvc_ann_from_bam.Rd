@@ -3,7 +3,7 @@
 \name{sgvc_ann_from_bam}
 \alias{sgvc_ann_from_bam}
 \title{Example splice variant counts (annotated) from BAM files}
-\format{A \code{SGVariantCounts} object.}
+\format{\code{SGVariantCounts} object}
 \description{
 Splice variant counts and frequencies for FBXO31.
 Splice variants are based on UCSC knownGene annotation.

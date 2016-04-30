@@ -11,7 +11,7 @@ SGVariants(x)
 outer metadata columns}
 }
 \value{
-A \code{SGVariants} object
+\code{SGVariants} object
 }
 \description{
 Creates an instance of S4 class \code{SGVariants} for storing

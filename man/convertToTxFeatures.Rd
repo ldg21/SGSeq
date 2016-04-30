@@ -12,7 +12,7 @@ by transcript. For import from GFF format, use function
 \code{importTranscripts}.}
 }
 \value{
-A \code{TxFeatures} object
+\code{TxFeatures} object
 }
 \description{
 Convert a \code{TxDb} object or a \code{GRangesList} of exons

@@ -3,7 +3,7 @@
 \name{txf_pred}
 \alias{txf_pred}
 \title{Example transcript features (predicted)}
-\format{A \code{TxFeatures} object.}
+\format{\code{TxFeatures} object}
 \description{
 Transcript features for FBXO31, predicted from example BAM files.
 }

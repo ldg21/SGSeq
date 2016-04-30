@@ -3,7 +3,7 @@
 \name{gr}
 \alias{gr}
 \title{Example genomic region of interest}
-\format{A \code{GRanges} object.}
+\format{\code{GRanges} object}
 \description{
 FBXO31 gene locus, based on UCSC knownGene annotation.
 }

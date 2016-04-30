@@ -14,7 +14,7 @@ importTranscripts(file, tag_tx = "transcript_id", tag_gene = "gene_id")
 \item{tag_gene}{GFF attribute tag for gene identifier}
 }
 \value{
-A \code{GRangesList} of exons grouped by transcipts with
+\code{GRangesList} of exons grouped by transcipts with
   metadata columns txName, geneName, cdsStart, cdsEnd.
 }
 \description{

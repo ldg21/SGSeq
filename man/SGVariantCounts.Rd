@@ -11,11 +11,11 @@ SGVariantCounts(x)
 as \code{rowRanges} and appropriate assays}
 }
 \value{
-A \code{SGVariantCounts} object
+\code{SGVariantCounts} object
 }
 \description{
 Creates an instance of S4 class \code{SGVariantCounts} for storing
-representative splice variant counts.
+splice variant counts.
 }
 \examples{
 sgvc <- SGVariantCounts()

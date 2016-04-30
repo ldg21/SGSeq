@@ -57,6 +57,11 @@ export(
     processTerminalExons
 )
 
+## EXPORT METHODS
+
+exportMethods(
+    updateObject)
+
 ## EXPORT CONSTRUCTORS
 
 export(

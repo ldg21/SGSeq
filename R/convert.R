@@ -16,7 +16,7 @@
 ##' @param x \code{TxDb} object or \code{GRangesList} of exons grouped
 ##'   by transcript. For import from GFF format, use function
 ##'   \code{importTranscripts}.
-##' @return A \code{TxFeatures} object
+##' @return \code{TxFeatures} object
 ##' @examples
 ##' gr <- GRanges(c(1, 1), IRanges(c(1, 201), c(100, 300)), c("+", "+"))
 ##' grl <- split(gr, 1)
@@ -350,7 +350,7 @@ collapseFeatures <- function(features)
 ##' @param coerce Logical indicating whether transcript features
 ##'   should be coerced to splice graph features without disjoining
 ##'   exons and omitting splice donor and acceptor sites
-##' @return An \code{SGFeatures} object
+##' @return \code{SGFeatures} object
 ##' @examples
 ##' sgf <- convertToSGFeatures(txf_ann)
 ##' @author Leonard Goldstein

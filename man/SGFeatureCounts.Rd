@@ -11,7 +11,7 @@ SGFeatureCounts(x)
 as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}}
 }
 \value{
-An \code{SGFeatureCounts} object
+\code{SGFeatureCounts} object
 }
 \description{
 Creates an instance of S4 class \code{SGFeatureCounts} for storing

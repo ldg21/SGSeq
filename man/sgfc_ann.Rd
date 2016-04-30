@@ -3,7 +3,7 @@
 \name{sgfc_ann}
 \alias{sgfc_ann}
 \title{Example splice graph feature counts (annotation-based)}
-\format{An \code{SGFeatureCounts} object.}
+\format{\code{SGFeatureCounts} object}
 \description{
 Compatible counts and FPKMs for FBXO31 splice graph features,
 based on UCSC knownGene annotation.

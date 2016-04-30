@@ -3,7 +3,7 @@
 \name{sgf_pred}
 \alias{sgf_pred}
 \title{Example splice graph features (predicted)}
-\format{An \code{SGFeatures} object.}
+\format{\code{SGFeatures} object}
 \description{
 Splice graph features for FBXO31, predicted from example BAM files.
 }

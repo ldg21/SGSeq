@@ -3,7 +3,7 @@
 \name{sgv_pred}
 \alias{sgv_pred}
 \title{Example splice variants (predicted)}
-\format{A \code{SGVariants} object.}
+\format{\code{SGVariants} object}
 \description{
 Splice variants for FBXO31, predicted from example BAM files.
 }

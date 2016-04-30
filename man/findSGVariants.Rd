@@ -27,7 +27,7 @@ variants should be filtered. Possible options are \dQuote{default}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-An \code{SGVariants} object
+\code{SGVariants} object
 }
 \description{
 Identify splice variants from splice graph.

@@ -3,7 +3,7 @@
 \name{si}
 \alias{si}
 \title{Example sample information}
-\format{A \code{data.frame} with columns \dQuote{sample_name},
+\format{\code{data.frame} with columns \dQuote{sample_name},
 \dQuote{file_bam}, \dQuote{paired_end}, \dQuote{read_length},
 \dQuote{frag_length} and \dQuote{lib_size}.}
 \description{

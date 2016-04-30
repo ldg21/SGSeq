@@ -7,7 +7,7 @@
 makeSGFeatureCounts(rowRanges, colData, counts, min_anchor = 1)
 }
 \arguments{
-\item{rowRanges}{An \code{SGFeatures} object}
+\item{rowRanges}{\code{SGFeatures} object}
 
 \item{colData}{Data frame with sample information}
 
@@ -16,7 +16,7 @@ makeSGFeatureCounts(rowRanges, colData, counts, min_anchor = 1)
 \item{min_anchor}{Integer specifiying minimum anchor length}
 }
 \value{
-An \code{SGFeatureCounts} object
+\code{SGFeatureCounts} object
 }
 \description{
 Create \code{SGFeatureCounts} object from rowRanges, colData and counts.

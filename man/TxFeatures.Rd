@@ -18,7 +18,7 @@ TxFeatures(x, type = mcols(x)$type, txName = mcols(x)$txName,
 \item{geneName}{\code{CharacterList} of gene names or \code{NULL}}
 }
 \value{
-A \code{TxFeatures} object
+\code{TxFeatures} object
 }
 \description{
 Creates an instance of S4 class \code{TxFeatures} for storing

@@ -3,7 +3,7 @@
 \name{txf_ann}
 \alias{txf_ann}
 \title{Example transcript features (annotation-based)}
-\format{A \code{TxFeatures} object.}
+\format{\code{TxFeatures} object}
 \description{
 Transcript features for FBXO31, based on UCSC knownGene annotation.
 }

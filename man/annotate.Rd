@@ -17,18 +17,12 @@ annotate(query, subject)
   column slots
 }
 \description{
-Features in \code{query} are annotated with respect to transcript
-features in \code{subject}.
+Features in \code{query} are assigned transcript names and gene names
+of structurally compatible features in \code{subject} (see below).
+If a feature in \code{query} does not match any features in
+\code{subject}, its geneName inherits from connected annotated features.
 }
 \details{
-Annotation is performed at the gene and transcript level.
-For transcript-level annotation, query features are assigned all
-transcript names associated with matching subject features.
-For gene-level annotation, query features are assigned all gene
-names associated with subject features that belong to the same
-gene (connected component of the splice graph) as matching
-query features.
-
 Feature matching is performed as follows:
 Query splice junctions are matched with identical subject splice
 junctions. Query splice sites are matched with splice sites

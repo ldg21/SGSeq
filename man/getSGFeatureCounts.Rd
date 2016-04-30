@@ -25,7 +25,7 @@ function \code{getBamInfo}.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-An \code{SGFeatureCounts} object or integer matrix of counts
+code{SGFeatureCounts} object, or integer matrix of counts
   if \code{counts_only = TRUE}
 }
 \description{

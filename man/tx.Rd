@@ -3,7 +3,7 @@
 \name{tx}
 \alias{tx}
 \title{Example transcripts}
-\format{A \code{GRangesList} object.}
+\format{\code{GRangesList} object}
 \description{
 FBXO31 transcripts, based on UCSC knownGene annotation.
 Suitable as input for \code{convertToTxFeatures} and

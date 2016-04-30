@@ -77,7 +77,7 @@
 ##' @param sample_name Sample name used in messages
 ##' @param verbose If \code{TRUE}, generate messages indicating progress
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{TxFeatures} object
+##' @return \code{TxFeatures} object
 ##' @keywords internal
 ##' @author Leonard Goldstein
 

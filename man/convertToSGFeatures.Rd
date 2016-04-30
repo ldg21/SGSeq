@@ -14,7 +14,7 @@ should be coerced to splice graph features without disjoining
 exons and omitting splice donor and acceptor sites}
 }
 \value{
-An \code{SGFeatures} object
+\code{SGFeatures} object
 }
 \description{
 Convert transcript features (predicted from RNA-seq data or

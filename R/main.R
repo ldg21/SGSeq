@@ -222,7 +222,7 @@ getBamInfo <- function(sample_info, yieldSize = NULL, cores = 1)
 ##'   with other predictions and processing is postponed until after the
 ##'   merging step).
 ##' @param cores Number of cores available for parallel processing
-##' @return A \code{TxFeatures} object
+##' @return \code{TxFeatures} object
 ##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
 ##' si$file_bam <- file.path(path, "bams", si$file_bam)
@@ -294,7 +294,7 @@ predictTxFeatures <- function(sample_info, which = NULL,
 ##' @inheritParams predictTxFeatures
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param counts_only Logical indicating only counts should be returned
-##' @return An \code{SGFeatureCounts} object or integer matrix of counts
+##' @return code{SGFeatureCounts} object, or integer matrix of counts
 ##'   if \code{counts_only = TRUE}
 ##' @examples
 ##' path <- system.file("extdata", package = "SGSeq")
@@ -363,7 +363,7 @@ getSGFeatureCounts <- function(sample_info, features, min_anchor = 1,
 ##' @inheritParams getSGVariantCounts
 ##' @inheritParams predictTxFeaturesPerSample
 ##' @param object \code{SGFeatureCounts} object
-##' @return An \code{SGVariantCounts} object
+##' @return \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- analyzeVariants(sgfc_pred)
 ##' @author Leonard Goldstein
@@ -415,7 +415,7 @@ analyzeVariants <- function(object, maxnvariant = 20, include = "default",
 ##'   least one event boundary. Otherwise estimates are set to \code{NA}.
 ##'   If \code{NA}, all estimates are returned.
 ##' @param cores Number of cores available for parallel processing
-##' @return An \code{SGVariantCounts} object
+##' @return \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc_from_sgfc <- getSGVariantCounts(sgv_pred, sgfc_pred)
 ##' path <- system.file("extdata", package = "SGSeq")
@@ -433,6 +433,8 @@ getSGVariantCounts <- function(variants, feature_counts = NULL,
         stop("'variants' must be an SGVariants object")
 
     }
+
+    variants <- updateObject(variants, verbose = TRUE)
 
     if ((is.null(feature_counts) && is.null(sample_info)) ||
         (!is.null(feature_counts) && !is.null(sample_info))) {

@@ -32,7 +32,7 @@ the 3' boundary must be spliced to be considered compatible)}
 \item{geneName}{\code{CharacterList} of gene names or \code{NULL}}
 }
 \value{
-An \code{SGFeatures} object
+\code{SGFeatures} object
 }
 \description{
 Creates an instance of S4 class \code{SGFeatures} for storing

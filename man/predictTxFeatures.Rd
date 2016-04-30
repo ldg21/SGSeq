@@ -61,7 +61,7 @@ merging step).}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{TxFeatures} object
+\code{TxFeatures} object
 }
 \description{
 Splice junctions and exons are predicted for each sample and merged

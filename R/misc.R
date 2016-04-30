@@ -739,7 +739,7 @@ rbindDfsWithoutRowNames <- function(...)
 ##' @param file Character string specifying input GFF file
 ##' @param tag_tx GFF attribute tag for transcript identifier
 ##' @param tag_gene GFF attribute tag for gene identifier
-##' @return A \code{GRangesList} of exons grouped by transcipts with
+##' @return \code{GRangesList} of exons grouped by transcipts with
 ##'   metadata columns txName, geneName, cdsStart, cdsEnd.
 ##' @examples
 ##' \dontrun{
@@ -764,7 +764,7 @@ importTranscripts <- function(file, tag_tx = "transcript_id",
   mcols(tx)$cdsStart <- start(cds)[match(names(tx), names(cds))]
   mcols(tx)$cdsEnd <- end(cds)[match(names(tx), names(cds))]
   rownames(mcols(tx)) <- NULL
-  
+
   return(tx)
 
 }
@@ -780,7 +780,7 @@ convertToTranscripts <- function(txdb)
     cdsLeft(tx) <- start(cds)[match(names(tx), names(cds))]
     cdsRight(tx) <- end(cds)[match(names(tx), names(cds))]
     rownames(mcols(tx)) <- NULL
-    
+
     return(tx)
 
 }
@@ -801,7 +801,7 @@ checkTranscriptFormat <- function(x)
         geneName = "character",
         cdsStart = "integer",
         cdsEnd = "integer")
-    
+
     msg <- validMcols(x, mcol_type)
 
     if (!is.null(msg)) {
@@ -809,7 +809,7 @@ checkTranscriptFormat <- function(x)
         stop(msg, call. = FALSE)
 
     }
-    
+
     if (any(mcols(x)$cdsStart > mcols(x)$cdsEnd, na.rm = TRUE)) {
 
         msg <- "All coding transcripts must have cdsStart < cdsEnd"
@@ -823,6 +823,7 @@ checkTranscriptFormat <- function(x)
 ## object anymore, only on a ManyToOneGrouping object.
 ## S4Vectors:::quick_togroup() is a replacement for the old togroup() that
 ## works on any object.
+
 togroup0 <- S4Vectors:::quick_togroup
 
 isOr <- function(object, class2)

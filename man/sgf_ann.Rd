@@ -3,7 +3,7 @@
 \name{sgf_ann}
 \alias{sgf_ann}
 \title{Example splice graph features (annotation-based)}
-\format{An \code{SGFeatures} object.}
+\format{\code{SGFeatures} object}
 \description{
 Splice graph features for FBXO31, based on UCSC knownGene annotation.
 }

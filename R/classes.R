@@ -278,7 +278,7 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 ##'   \code{J}, \code{I}, \code{F}, \code{L}, \code{U}
 ##' @param txName \code{CharacterList} of transcript names or \code{NULL}
 ##' @param geneName \code{CharacterList} of gene names or \code{NULL}
-##' @return A \code{TxFeatures} object
+##' @return \code{TxFeatures} object
 ##' @examples
 ##' gr <- GRanges(1, IRanges(101, 200), "+")
 ##' txf <- TxFeatures(gr, type = "J")
@@ -350,7 +350,7 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 ##' @param geneID Integer vector of gene IDs
 ##' @param txName \code{CharacterList} of transcript names or \code{NULL}
 ##' @param geneName \code{CharacterList} of gene names or \code{NULL}
-##' @return An \code{SGFeatures} object
+##' @return \code{SGFeatures} object
 ##' @examples
 ##' sgf <- SGFeatures()
 ##' @author Leonard Goldstein
@@ -397,7 +397,7 @@ SGFeatures <- function(x, type = mcols(x)$type,
 ##' @title Constructor function for S4 class \code{SGSegments}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
-##' @return A \code{SGSegments} object
+##' @return \code{SGSegments} object
 ##' @keywords internal
 ##' @author Leonard Goldstein
 
@@ -442,7 +442,7 @@ SGSegments <- function(x)
 ##' @title Constructor function for S4 class \code{SGVariants}
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
-##' @return A \code{SGVariants} object
+##' @return \code{SGVariants} object
 ##' @examples
 ##' sgv <- SGVariants()
 ##' @author Leonard Goldstein
@@ -504,7 +504,7 @@ SGVariants <- function(x)
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGFeatures}
 ##'   as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}
-##' @return An \code{SGFeatureCounts} object
+##' @return \code{SGFeatureCounts} object
 ##' @examples
 ##' sgfc <- SGFeatureCounts()
 ##' @author Leonard Goldstein
@@ -527,12 +527,12 @@ SGFeatureCounts <- function(x)
 }
 
 ##' Creates an instance of S4 class \code{SGVariantCounts} for storing
-##' representative splice variant counts.
+##' splice variant counts.
 ##'
 ##' @title Constructor function for S4 class \code{SGFeatureCounts}
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGVariants}
 ##'   as \code{rowRanges} and appropriate assays
-##' @return A \code{SGVariantCounts} object
+##' @return \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- SGVariantCounts()
 ##' @author Leonard Goldstein
@@ -556,3 +556,147 @@ SGVariantCounts <- function(x)
     new("SGVariantCounts", x)
 
 }
+
+##' Update object created with previous version of SGSeq.
+##'
+##' @title Update object
+##' @param object Object to be updated
+##' @param verbose Should a warning message be generated
+##' @return Updated object
+##' @author Leonard Goldstein
+##' @name updateObject
+NULL
+
+##' @rdname updateObject
+setMethod("updateObject", "SGVariants", function(object, verbose) {
+
+    current <- names(mcols(object))
+
+    required <- c(
+        "from",
+        "to",
+        "type",
+        "featureID",
+        "segmentID",
+        "geneID",
+        "eventID",
+        "variantID",
+        "closed5p",
+        "closed3p",
+        "closed5pEvent",
+        "closed3pEvent",
+        "featureID5p",
+        "featureID3p",
+        "featureID5pEvent",
+        "featureID3pEvent",
+        "variantType",
+        "variantName",
+        "txName",
+        "geneName")
+
+    if (all(required %in% current)) return(object)
+
+    if (verbose) {
+
+        msg <- c(
+        "SGVariants object was created with previous version of SGSeq.",
+        "Please use updateObject() to update. Note that for each event",
+        "all variants must be included for updated object to be valid.")
+        msg <- paste(msg, collapse = "\n")
+        warning(msg, call. = FALSE)
+
+    }
+
+    object <- as(object, "GRangesList")
+    object_eventID <- as.factor(mcols(object)$eventID)
+
+    ## add closed5pEvent
+    event_closed5p <- tapply(mcols(object)$closed5p, object_eventID, all)
+    mcols(object)$closed5pEvent <- as.logical(event_closed5p[match(
+        object_eventID, names(event_closed5p))])
+
+    ## add closed3pEvent
+    event_closed3p <- tapply(mcols(object)$closed3p, object_eventID, all)
+    mcols(object)$closed3pEvent <- as.logical(event_closed3p[match(
+        object_eventID, names(event_closed3p))])
+
+    ## add featureID5pEvent
+    event_featureID5p <- split(unlist(mcols(object)$featureID5p),
+       object_eventID[togroup0(mcols(object)$featureID5p)])
+    event_featureID5p <- unique(IntegerList(event_featureID5p))
+    mcols(object)$featureID5pEvent <- event_featureID5p[match(
+        object_eventID, names(event_featureID5p))]
+
+    ## add featureID3pEvent
+    event_featureID3p <- split(unlist(mcols(object)$featureID3p),
+       object_eventID[togroup0(mcols(object)$featureID3p)])
+    event_featureID3p <- unique(IntegerList(event_featureID3p))
+    mcols(object)$featureID3pEvent <- event_featureID3p[match(
+        object_eventID, names(event_featureID3p))]
+
+    ## reorder columns
+    j <- which(!names(mcols(object)) %in% required)
+    if (length(j) > 0) {
+
+        mcols(object) <- cbind(mcols(object)[required], mcols(object)[j])
+
+    } else {
+
+        mcols(object) <- mcols(object)[required]
+
+    }
+
+    ## create new SGVariants object
+    object <- SGVariants(object)
+
+    return(object)
+
+})
+
+##' @rdname updateObject
+setMethod("updateObject", "SGVariantCounts", function(object, verbose) {
+
+    current <- names(assays(object))
+
+    required <- c(
+        "countsVariant5p",
+        "countsVariant3p",
+        "countsEvent5p",
+        "countsEvent3p",
+        "variantFreq")
+
+    if (all(required %in% current)) return(object)
+
+    if (verbose) {
+
+        msg <- c(
+        "SGVariantCounts object was created with previous version of SGSeq.",
+        "Please use updateObject() to update. Note that for each event all",
+        "variants must be included for updated object to be valid.")
+        msg <- paste(msg, collapse = "\n")
+        warning(msg, call. = FALSE)
+
+    }
+
+    object <- as(object, "RangedSummarizedExperiment")
+
+    ## update SGVariants
+    rowRanges(object) <- updateObject(rowRanges(object))
+
+    ## remove assay countsTotal
+    assays(object)$countsTotal <- NULL
+
+    ## update assay names
+    old2new <- c(
+        countsTotal5p = "countsEvent5p",
+        countsTotal3p = "countsEvent3p",
+        countsVariant = "countsVariant5pOr3p")
+    j <- which(names(assays(object)) %in% names(old2new))
+    names(assays(object))[j] <- old2new[names(assays(object))[j]]
+
+    ## create new SGVariantCounts object
+    object <- SGVariantCounts(object)
+
+    return(object)
+
+})

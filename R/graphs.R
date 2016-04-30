@@ -329,7 +329,7 @@ findSGSegmentsPerGene <- function(g, geneID)
 ##'   \dQuote{closed} (only include closed variants) and \dQuote{all}
 ##'   (include all variants).
 ##' @param cores Number of cores available for parallel processing
-##' @return An \code{SGVariants} object
+##' @return \code{SGVariants} object
 ##' @examples
 ##' sgv <- findSGVariants(sgf_pred)
 ##' @author Leonard Goldstein

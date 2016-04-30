@@ -72,7 +72,7 @@ and can slow down processing. To disable this filter, set to \code{NA}.}
 \item{cores}{Number of cores available for parallel processing}
 }
 \value{
-A \code{TxFeatures} object
+\code{TxFeatures} object
 }
 \description{
 Splice junctions and exons are predicted from genomic RNA-seq read

@@ -11,7 +11,7 @@ SGSegments(x)
 outer metadata columns}
 }
 \value{
-A \code{SGSegments} object
+\code{SGSegments} object
 }
 \description{
 Creates an instance of S4 class \code{SGSegments} for storing
