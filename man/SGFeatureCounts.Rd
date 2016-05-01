@@ -2,13 +2,13 @@
 % Please edit documentation in R/classes.R
 \name{SGFeatureCounts}
 \alias{SGFeatureCounts}
-\title{Constructor function for S4 class \code{SGFeatureCounts}}
+\title{Splice graph feature counts}
 \usage{
 SGFeatureCounts(x)
 }
 \arguments{
 \item{x}{\code{RangedSummarizedExperiment} with \code{SGFeatures}
-as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}}
+as \code{rowRanges} and assays \dQuote{counts} and \dQuote{FPKM}}
 }
 \value{
 \code{SGFeatureCounts} object

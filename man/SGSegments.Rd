@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{SGSegments}
 \alias{SGSegments}
-\title{Constructor function for S4 class \code{SGSegments}}
+\title{Splice graph segments}
 \usage{
 SGSegments(x)
 }

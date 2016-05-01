@@ -272,10 +272,10 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SGFeatures",
 ##' \code{txName} and \code{geneName} are CharacterLists storing
 ##' transcript and gene annotation, respectively.
 ##'
-##' @title Constructor function for S4 class \code{TxFeatures}
+##' @title Transcript features
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
-##' @param type Character vector or factor, taking values in
-##'   \code{J}, \code{I}, \code{F}, \code{L}, \code{U}
+##' @param type Character vector or factor, taking value
+##'   \code{J}, \code{I}, \code{F}, \code{L}, or \code{U}
 ##' @param txName \code{CharacterList} of transcript names or \code{NULL}
 ##' @param geneName \code{CharacterList} of gene names or \code{NULL}
 ##' @return \code{TxFeatures} object
@@ -336,10 +336,10 @@ TxFeatures <- function(x, type = mcols(x)$type, txName = mcols(x)$txName,
 ##' \code{txName} and \code{geneName} are CharacterLists storing
 ##' transcript and gene annotation, respectively.
 ##'
-##' @title Constructor function for S4 class \code{SGFeatures}
+##' @title Splice graph features
 ##' @param x \code{GRanges} with known strand (\dQuote{+}, \dQuote{-})
-##' @param type Character vector or factor taking values in \code{J},
-##'   \code{E}, \code{D}, \code{A}
+##' @param type Character vector or factor taking value \code{J},
+##'   \code{E}, \code{D}, or \code{A}
 ##' @param splice5p Logical vector indicating a mandatory splice at the
 ##'   5' end of an exon bin (determining whether reads extending across
 ##'   the 5' boundary must be spliced to be considered compatible)
@@ -394,7 +394,7 @@ SGFeatures <- function(x, type = mcols(x)$type,
 ##' Creates an instance of S4 class \code{SGSegments} for storing
 ##' splice graph segments.
 ##'
-##' @title Constructor function for S4 class \code{SGSegments}
+##' @title Splice graph segments
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
 ##' @return \code{SGSegments} object
@@ -439,7 +439,48 @@ SGSegments <- function(x)
 ##' Creates an instance of S4 class \code{SGVariants} for storing
 ##' splice variants.
 ##'
-##' @title Constructor function for S4 class \code{SGVariants}
+##' \code{SGVariants} includes columns as described below.
+##'
+##' \itemize{
+##'  \item{}{\code{from} and \code{to} indicate the variant start and end,
+##'   respectively. \code{from} nodes are splice donors (\dQuote{D})
+##'   or transcript starts (\dQuote{S}). \code{to} nodes are splice
+##'   acceptors (\dQuote{A}) or transcript ends (\dQuote{E}).}
+##'  \item{}{\code{type} and \code{featureID} describe the variant in
+##'   terms of the splice graph features that make up the variant.}
+##'  \item{}{\code{segmentID} specifies unique identifiers labelling
+##'   unbranched segments of the splice graph.}
+##'  \item{}{\code{closed5p} indicates whether nodes in the variant can be
+##'   reached from nodes outside of the variant exclusively through the
+##'   \code{from} node.}
+##'  \item{}{\code{closed3p} indicates whether nodes in the variant can reach
+##'   nodes outside of the variant exclusively through the \code{to} node.}
+##'  \item{}{\code{closed5pEvent} indicates whether nodes in the event can
+##'   be reached from nodes outside of the event exclusively through the
+##'   \code{from} node.}
+##'  \item{}{\code{closed3pEvent} indicates whether nodes in the event can
+##'   reach nodes outside of the event exclusively through the \code{to}
+##'   node.}
+##'  \item{}{\code{geneID} has the same interpretation as for
+##'   \code{SGFeatures}.}
+##'  \item{}{\code{eventID} and \code{variantID} are unique identifiers for
+##'   each event and variant, respectively.}
+##'  \item{}{\code{featureID5p} and \code{featureID3p} indicate representative
+##'   features used for variant quantification at the start and end of the
+##'   variant, respectively.}
+##'  \item{\code{featureID5pEvent} and \code{featureID3pEvent} indicate the
+##'   ensemble of representative features at the start and end of the event,
+##'   respectively.}
+##'  \item{}{\code{txName} indicates structurally compatible transcripts.}
+##'  \item{}{\code{geneName} behaves as for \code{SGFeatures}.}
+##'  \item{}{\code{variantType} indicates whether a splice variant is
+##'   consistent with a canonical splice event (for a list of possible
+##'   values, see the manual page for \code{annotateSGVariants}).}
+##'  \item{}{\code{variantName} provides a unique name for each splice variant
+##'   (for details, see the manual page for \code{makeVariantNames}).}
+##' }
+##'
+##' @title Splice graph variants
 ##' @param x \code{GRangesList} of \code{SGFeatures} with appropriate
 ##'   outer metadata columns
 ##' @return \code{SGVariants} object
@@ -501,9 +542,9 @@ SGVariants <- function(x)
 ##' Creates an instance of S4 class \code{SGFeatureCounts} for storing
 ##' compatible splice graph feature counts.
 ##'
-##' @title Constructor function for S4 class \code{SGFeatureCounts}
+##' @title Splice graph feature counts
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGFeatures}
-##'   as \code{rowRanges} and assays \dQuote{counts}, \dQuote{FPKM}
+##'   as \code{rowRanges} and assays \dQuote{counts} and \dQuote{FPKM}
 ##' @return \code{SGFeatureCounts} object
 ##' @examples
 ##' sgfc <- SGFeatureCounts()
@@ -529,9 +570,12 @@ SGFeatureCounts <- function(x)
 ##' Creates an instance of S4 class \code{SGVariantCounts} for storing
 ##' splice variant counts.
 ##'
-##' @title Constructor function for S4 class \code{SGFeatureCounts}
+##' @title Splice graph variant counts
 ##' @param x \code{RangedSummarizedExperiment} with \code{SGVariants}
-##'   as \code{rowRanges} and appropriate assays
+##'   as \code{rowRanges} and assays \dQuote{variantFreq},
+##'   \dQuote{countsVariant5p}, \dQuote{countsVariant3p},
+##'   \dQuote{countsEvent5p}, \dQuote{countsEvent3p}, and
+##'   optionally \dQuote{countsVariant5pOr3p}
 ##' @return \code{SGVariantCounts} object
 ##' @examples
 ##' sgvc <- SGVariantCounts()

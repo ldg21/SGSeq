@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{SGFeatures}
 \alias{SGFeatures}
-\title{Constructor function for S4 class \code{SGFeatures}}
+\title{Splice graph features}
 \usage{
 SGFeatures(x, type = mcols(x)$type, splice5p = mcols(x)$splice5p,
   splice3p = mcols(x)$splice3p, featureID = mcols(x)$featureID,
@@ -12,8 +12,8 @@ SGFeatures(x, type = mcols(x)$type, splice5p = mcols(x)$splice5p,
 \arguments{
 \item{x}{\code{GRanges} with known strand (\dQuote{+}, \dQuote{-})}
 
-\item{type}{Character vector or factor taking values in \code{J},
-\code{E}, \code{D}, \code{A}}
+\item{type}{Character vector or factor taking value \code{J},
+\code{E}, \code{D}, or \code{A}}
 
 \item{splice5p}{Logical vector indicating a mandatory splice at the
 5' end of an exon bin (determining whether reads extending across

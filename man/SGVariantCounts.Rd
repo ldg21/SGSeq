@@ -2,13 +2,16 @@
 % Please edit documentation in R/classes.R
 \name{SGVariantCounts}
 \alias{SGVariantCounts}
-\title{Constructor function for S4 class \code{SGFeatureCounts}}
+\title{Splice graph variant counts}
 \usage{
 SGVariantCounts(x)
 }
 \arguments{
 \item{x}{\code{RangedSummarizedExperiment} with \code{SGVariants}
-as \code{rowRanges} and appropriate assays}
+as \code{rowRanges} and assays \dQuote{variantFreq},
+\dQuote{countsVariant5p}, \dQuote{countsVariant3p},
+\dQuote{countsEvent5p}, \dQuote{countsEvent3p}, and
+optionally \dQuote{countsVariant5pOr3p}}
 }
 \value{
 \code{SGVariantCounts} object

@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{SGVariants}
 \alias{SGVariants}
-\title{Constructor function for S4 class \code{SGVariants}}
+\title{Splice graph variants}
 \usage{
 SGVariants(x)
 }
@@ -16,6 +16,48 @@ outer metadata columns}
 \description{
 Creates an instance of S4 class \code{SGVariants} for storing
 splice variants.
+}
+\details{
+\code{SGVariants} includes columns as described below.
+
+\itemize{
+ \item{}{\code{from} and \code{to} indicate the variant start and end,
+  respectively. \code{from} nodes are splice donors (\dQuote{D})
+  or transcript starts (\dQuote{S}). \code{to} nodes are splice
+  acceptors (\dQuote{A}) or transcript ends (\dQuote{E}).}
+ \item{}{\code{type} and \code{featureID} describe the variant in
+  terms of the splice graph features that make up the variant.}
+ \item{}{\code{segmentID} specifies unique identifiers labelling
+  unbranched segments of the splice graph.}
+ \item{}{\code{closed5p} indicates whether nodes in the variant can be
+  reached from nodes outside of the variant exclusively through the
+  \code{from} node.}
+ \item{}{\code{closed3p} indicates whether nodes in the variant can reach
+  nodes outside of the variant exclusively through the \code{to} node.}
+ \item{}{\code{closed5pEvent} indicates whether nodes in the event can
+  be reached from nodes outside of the event exclusively through the
+  \code{from} node.}
+ \item{}{\code{closed3pEvent} indicates whether nodes in the event can
+  reach nodes outside of the event exclusively through the \code{to}
+  node.}
+ \item{}{\code{geneID} has the same interpretation as for
+  \code{SGFeatures}.}
+ \item{}{\code{eventID} and \code{variantID} are unique identifiers for
+  each event and variant, respectively.}
+ \item{}{\code{featureID5p} and \code{featureID3p} indicate representative
+  features used for variant quantification at the start and end of the
+  variant, respectively.}
+ \item{\code{featureID5pEvent} and \code{featureID3pEvent} indicate the
+  ensemble of representative features at the start and end of the event,
+  respectively.}
+ \item{}{\code{txName} indicates structurally compatible transcripts.}
+ \item{}{\code{geneName} behaves as for \code{SGFeatures}.}
+ \item{}{\code{variantType} indicates whether a splice variant is
+  consistent with a canonical splice event (for a list of possible
+  values, see the manual page for \code{annotateSGVariants}).}
+ \item{}{\code{variantName} provides a unique name for each splice variant
+  (for details, see the manual page for \code{makeVariantNames}).}
+}
 }
 \examples{
 sgv <- SGVariants()

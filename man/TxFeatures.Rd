@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{TxFeatures}
 \alias{TxFeatures}
-\title{Constructor function for S4 class \code{TxFeatures}}
+\title{Transcript features}
 \usage{
 TxFeatures(x, type = mcols(x)$type, txName = mcols(x)$txName,
   geneName = mcols(x)$geneName)
@@ -10,8 +10,8 @@ TxFeatures(x, type = mcols(x)$type, txName = mcols(x)$txName,
 \arguments{
 \item{x}{\code{GRanges} with known strand (\dQuote{+}, \dQuote{-})}
 
-\item{type}{Character vector or factor, taking values in
-\code{J}, \code{I}, \code{F}, \code{L}, \code{U}}
+\item{type}{Character vector or factor, taking value
+\code{J}, \code{I}, \code{F}, \code{L}, or \code{U}}
 
 \item{txName}{\code{CharacterList} of transcript names or \code{NULL}}
 
