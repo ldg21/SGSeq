@@ -55,7 +55,7 @@ When starting a new project, *SGSeq* requires information about the samples to b
 
 Sample information can be stored in a *data.frame* or *DataFrame* object (if BAM files are specified as a *BamFileList*, it must be stored in a *DataFrame*). Sample information can be obtained automatically with function *getBamInfo()*, which takes as input a data frame with columns *sample_name* and *file_bam* and extracts the required information from the specified BAM files.
 
-For *SGSeq* to work correctly it is essential that BAM files were generated with a splice-aware alignment program, such as GSNAP [@Wu:2010ep], HISAT [@Kim:2015be] or STAR [@Dobin:2013fg], which generates the custom tag 'XS' for spliced reads, indicating the direction of transcription. Also note that *lib_size* should be the total number of sequenced and aligned fragments, even if BAM files were subset to genomic regions of interest. The total number of fragments is required for accurate calculation of FPKM values (fragments per kilobase and million sequenced fragments). Here the term 'fragment' denotes a sequenced cDNA fragment, which is represented by a single read in single-end data, or a pair of reads in paired-end data.
+For *SGSeq* to work correctly it is essential that BAM files were generated with a splice-aware alignment program, such as GSNAP [@Wu:2010ep], HISAT [@Kim:2015be] or STAR [@Dobin:2013fg], which generates the custom tag 'XS' for spliced reads, indicating the direction of transcription. Note that *lib_size* should be the total number of sequenced and aligned fragments, even if BAM files were subset to genomic regions of interest. The total number of fragments is required for accurate calculation of FPKM values (fragments per kilobase and million sequenced fragments). Here the term 'fragment' denotes a sequenced cDNA fragment, which is represented by a single read in single-end data, or a pair of reads in paired-end data.
 
 This vignette illustrates an analysis of paired-end RNA-seq data from four tumor and four normal colorectal samples, which are part of a data set published in [@Seshagiri:2012gr]. RNA-seq reads were mapped to the human reference genome using GSNAP [@Wu:2010ep]. The analysis is based on BAM files subset to reads mapping to a single gene of interest (*FBXO31*). A *data.frame* *si* with sample information was generated from the original BAM files with function *getBamInfo()*. Note that column *lib_size* reflects the total number of aligned fragments in the original BAM files.
 
@@ -143,7 +143,7 @@ head(FPKM(sgfc_ucsc))
 
 Counts for exons and splice junctions are based on structurally compatible fragments. In the case of splice donors and acceptors, counts indicate the number of fragments with reads spanning the spliced boundary (overlapping the splice site and the flanking intronic position).
 
-FPKM values are calculated as $\frac{x}{NL}10^6$, where $x$ is the number of compatible fragments, $N$ is the library size (stored in *lib_size*) and *L* is the effective feature length (the number of possible positions for a compatible fragment). For paired-end data, it is assumed that fragment length is equal to *frag_length*.
+FPKM values are calculated as $\frac{x}{NL}10^6$, where $x$ is the number of compatible fragments, $N$ is the library size (stored in *lib_size*) and *L* is the effective feature length (the number of possible positions for a compatible fragment). For paired-end data it is assumed that fragment length is equal to *frag_length*.
 
 FPKMs for splice graph features can be visualized with function *plotFeatures*. *plotFeatures* generates a two-panel figure with a splice graph shown in the top panel and a heatmap of expression levels for individual features in the bottom panel. For customization of *plotFeatures* output, see section [Visualization]. The plotting function invisibly returns a *data.frame* with details about the splice graph features included in the plot.
 
@@ -194,7 +194,7 @@ mcols(sgvc_pred)
 
 Splice variants are quantified locally, in terms of fragment counts overlapping the start or end of each variant. Local estimates of relative usage $\psi_i$ for variant $i$ are obtained as the number of fragments compatible with $i$, divided by the number of fragments compatible with any of the variants belonging to the same event. At the variant start $S$ and variant end $E$, $\psi_i^S = x_i^S / x_.^S$ and $\psi_i^E = x_i^E / x_.^E$, respectively. For variants with valid estimates $\psi_i^S$ and $\psi_i^E$, a single estimate is calculated as a weighted mean of local estimates $\psi_i = x_.^S/(x_.^S + x_.^E) \psi_i^S + x_.^E/(x_.^S + x_.^E) \psi_i^E$.
 
-Estimates of relative usage can be unreliable for events with low read count. If argument *min_denominator* for functions *analyzeVariants()* or *getSGVariantCounts()* is specified, estimates are set to *NA* unless at least one of $x_.^S$ or $x_.^E$ is equal or greater to the specified value.
+Estimates of relative usage can be unreliable for events with low read count. If argument *min_denominator* is specified for functions *analyzeVariants()* or *getSGVariantCounts()*, estimates are set to *NA* unless at least one of $x_.^S$ or $x_.^E$ is equal or greater to the specified value.
 
 ```{r}
 variantFreq(sgvc_pred)
