@@ -15,7 +15,7 @@ per fragment}
 
 \item{frag_intron}{\code{IRangesList} of introns, one entry per fragment}
 
-\item{min_anchor}{Integer specifiying minimum anchor length}
+\item{min_anchor}{Integer specifying minimum anchor length}
 
 \item{counts}{Logical indicating whether counts or indices of
 compatible fragments should be returned}

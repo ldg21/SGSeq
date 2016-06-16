@@ -3,7 +3,7 @@
 ##' @title Compatible fragment counts for splice junctions
 ##' @inheritParams exonCompatible
 ##' @param junctions \code{IRanges} of splice junctions
-##' @param min_anchor Integer specifiying minimum anchor length
+##' @param min_anchor Integer specifying minimum anchor length
 ##' @return Counts or list of indices of compatible fragments
 ##' @keywords internal
 ##' @author Leonard Goldstein
@@ -262,7 +262,7 @@ exonCoverage <- function(exons, exons_i_frag, frag_exonic)
     ## coverage() returns a SimpleRleList
     ## need RleList() to obtain a CompressedRleList
     coverage <- RleList(coverage)
-    
+
     return(coverage)
 
 }
