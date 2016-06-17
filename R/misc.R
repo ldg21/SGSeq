@@ -488,7 +488,7 @@ splitCharacterList <- function(x, f)
 asGRanges <- function(from)
 {
 
-    granges(from, TRUE)
+    granges(from, use.mcols=TRUE)
 
 }
 
