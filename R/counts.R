@@ -580,7 +580,8 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
     mcols(splicesites)$geneID <- geneID(variants)[i]
 
     splicesites <- SGFeatures(splicesites)
-    seqinfo(splicesites) <- seqinfo(features)
+    new2old <- match(seqlevels(features), seqlevels(splicesites))
+    seqinfo(splicesites, new2old = new2old) <- seqinfo(features)
 
     features <- c(features, splicesites)
 
