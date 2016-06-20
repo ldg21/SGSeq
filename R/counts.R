@@ -576,7 +576,7 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
     mcols(splicesites)$type <- rep(type, length(splicesites))
     mcols(splicesites)$splice5p <- rep(NA, length(splicesites))
     mcols(splicesites)$splice3p <- rep(NA, length(splicesites))
-    mcols(splicesites)$featureID <- unlist(fid[i])
+    mcols(splicesites)$featureID <- unlist(fid[i], use.names = FALSE)
     mcols(splicesites)$geneID <- geneID(variants)[i]
 
     splicesites <- SGFeatures(splicesites)

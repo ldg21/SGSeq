@@ -41,7 +41,10 @@ annotate <- function(query, subject)
         query_class <- class(query)
         query_mcols <- mcols(query)
         query_unlisted <- unlist(query, use.names = FALSE)
-        query_unlisted <- annotate(query_unlisted, subject)
+        extended <- addDummySpliceSites(query_unlisted)
+        extended <- annotate(extended, subject)
+        i <- match(featureID(query_unlisted), featureID(extended))
+        query_unlisted <- extended[i]
         query <- relist(query_unlisted, query)
         mcols(query) <- query_mcols
         query <- new(query_class, query)
@@ -56,6 +59,35 @@ annotate <- function(query, subject)
     }
 
     return(query)
+
+}
+
+addDummySpliceSites <- function(features)
+{
+
+    junctions <- features[type(features) == "J"]
+
+    for (type in c("D", "A")) {
+
+        S <- flank(junctions, -1, switch(type, "D" = TRUE, "A" = FALSE))
+        S <- granges(S)
+        i <- which(!duplicated(S))
+        S <- S[i]
+
+        mcols(S)$type <- rep(type, length(i))
+        mcols(S)$splice5p <- rep(NA, length(i))
+        mcols(S)$splice3p <- rep(NA, length(i))
+        mcols(S)$featureID <- seq_along(i) + max(featureID(features))
+        mcols(S)$geneID <- geneID(junctions)[i]
+
+        S <- SGFeatures(S)
+        new2old <- match(seqlevels(features), seqlevels(S))
+        seqinfo(S, new2old = new2old) <- seqinfo(features)
+        features <- c(features, S)
+
+    }
+
+    return(features)
 
 }
 
@@ -109,47 +141,40 @@ propagateAnnotation <- function(query)
     g <- spliceGraph(query)
 
     ## Remove annotated parts of the splice graph. Specifically,
-    ## remove annotated edges with annotated 'from' and 'to' vertices.
-    ## Then remove edge-free vertices (vertices that are annotated and with
-    ## all incoming and outgoing edges annotated in the original graph)
+    ## remove annotated edges with annotated 'from' and 'to' nodes.
 
-    gv <- nodes(g)
     gd <- edges(g)
+    gv <- nodes(g)
 
-    gd_ann <- elementNROWS(gd$geneName) > 0
+    gd_ann <- elementNROWS(gd$txName) > 0
     i <- match(gv$featureID[match(gd$from, gv$name)], featureID(query))
-    from_ann <- elementNROWS(geneName(query))[i] > 0
+    from_ann <- elementNROWS(txName(query))[i] > 0
     i <- match(gv$featureID[match(gd$to, gv$name)], featureID(query))
-    to_ann <- elementNROWS(geneName(query))[i] > 0
+    to_ann <- elementNROWS(txName(query))[i] > 0
+
+    ## NOTE 'from_ann' and 'to_ann' are 'NA' for transcript starts and ends
 
     excl <- which(
-        (is.na(from_ann) | is.na(to_ann)) |
-        (gd_ann & from_ann & to_ann))
-
-    if (length(excl) > 0)  g <- delete.edges(g, excl)
-
-    gd <- edges(g)
-
-    excl <- which(!gv$name %in% c(gd$from, gd$to))
-
-    if (length(excl) > 0) g <- delete.vertices(g, excl)
+        gd_ann & (from_ann | is.na(from_ann)) & (to_ann | is.na(to_ann)))
+    if (length(excl) > 0) g <- delete.edges(g, excl)
 
     ## Unnannotated parts of the splice graph are assigned gene names
-    ## of connected annotated vertices or edges.
+    ## of connected annotated nodes.
 
-    gv <- nodes(g)
     gd <- edges(g)
-
-    gv_geneName <- geneName(query)[match(gv$featureID, featureID(query))]
-    gd_geneName <- geneName(query)[match(gd$featureID, featureID(query))]
+    gv <- nodes(g)
 
     gv_cluster <- as.character(clusters(g)$membership)
     gd_cluster <- gv_cluster[match(gd$from, gv$name)]
 
+    i <- which(!is.na(gv$featureID))
+
     ann <- DataFrame(
-        featureID = c(gv$featureID, gd$featureID),
-        geneName = c(gv_geneName, gd_geneName),
-        cluster = c(gv_cluster, gd_cluster))
+        featureID = c(gv$featureID[i], gd$featureID),
+        geneName = c(
+            geneName(query)[match(gv$featureID[i], featureID(query))],
+            geneName(query)[match(gd$featureID, featureID(query))]),
+        cluster = c(gv_cluster[i], gd_cluster))
 
     cluster_geneName <- splitCharacterList(ann$geneName, factor(ann$cluster))
     ann <- ann[elementNROWS(ann$geneName) == 0, ]

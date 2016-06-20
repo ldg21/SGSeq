@@ -438,17 +438,9 @@ getHGVSVariantDeletionInsertion <- function(var)
 
     }
 
-    if (grepl("*", hgvs, fixed = TRUE)) {
-
-        out <- getHGVSVariantFrameshift(var)
-
-    } else {
-
-        out <- list(
-            type = paste0("in-frame_", paste(type, collapse = "/")),
-            HGVS = hgvs)
-
-    }
+    out <- list(
+        type = paste0("in-frame_", paste(type, collapse = "/")),
+        HGVS = hgvs)
 
     return(out)
 
@@ -955,7 +947,11 @@ getVariantProtein <- function(var, ref, sgv, genome)
     }
 
     event_ref <- mapEventToProtein(ref, event)
+    if (!is.na(event_ref$end) && event_ref$end == nchar(ref_seq) + 1)
+        event_ref$end <- nchar(ref_seq)
     event_var <- mapEventToProtein(var, event)
+    if (!is.na(event_var$end) && event_var$end == nchar(var_seq) + 1)
+        event_var$end <- nchar(var_seq)
 
     if (!is.na(event_ref$start) && !is.na(event_ref$end) &&
         !is.na(event_var$start) && !is.na(event_var$end)) {
