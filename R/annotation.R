@@ -179,7 +179,7 @@ propagateAnnotation <- function(query)
     cluster_geneName <- splitCharacterList(ann$geneName, factor(ann$cluster))
     ann <- ann[elementNROWS(ann$geneName) == 0, ]
     i <- match(ann$cluster, names(cluster_geneName))
-    ann$geneName <- cluster_geneName[i]
+    ann$geneName <- setNames(cluster_geneName[i], NULL)
     i <- match(ann$featureID, featureID(query))
     geneName(query)[i] <- ann$geneName
 
@@ -187,11 +187,8 @@ propagateAnnotation <- function(query)
 
 }
 
-annotateSGSegments <- function(ids, features)
+annotateSegments <- function(ids, features)
 {
-
-    ## ids is a character vector with comma-separatated lists of
-    ## feature IDs, or txNames in the format {tx1;...;txn}
 
     out <- vector("list", length(ids))
 
@@ -280,7 +277,7 @@ annotatePaths <- function(paths)
         list_ids <- strsplit(b, "|", fixed = TRUE)
         ids <- unlist(list_ids)
         ids_path <- i[togroup0(list_ids)]
-        ids_ann <- annotateSGSegments(ids, features)
+        ids_ann <- annotateSegments(ids, features)
         ann <- unlist(ids_ann)
         ann_id <- togroup0(ids_ann)
         ann_path <- ids_path[ann_id]
@@ -301,16 +298,21 @@ annotatePaths <- function(paths)
 
     }
 
-    out <- annotateSGSegments(x, features)
+    out <- annotateSegments(x, features)
     out <- as(out, "CharacterList")
 
     ## decode txName
     out <- relist(txName_unique[as.integer(unlist(out))], out)
-
     txName(paths) <- out
-    geneName(paths) <- geneName(features)[match(seq_along(paths),
-        togroup0(paths))]
 
+    ## geneName
+    path_ids <- extractIDs(featureID(paths))
+    path_ids_unlisted <- unlist(path_ids)
+    i <- match(path_ids_unlisted, featureID(features))
+    f <- factor(togroup0(path_ids), levels = seq_along(path_ids))
+    path_ann <- splitCharacterList(geneName(features)[i], f)
+    geneName(paths) <- setNames(path_ann, NULL)
+    
     return(paths)
 
 }

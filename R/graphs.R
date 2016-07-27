@@ -614,6 +614,10 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
         paths_featureID <- unstrsplit(split(ref$featureID[i], f), ",")
         paths_segmentID <- unstrsplit(split(ref$segmentID[i], f), ",")
 
+        names(paths_type) <- NULL
+        names(paths_featureID) <- NULL
+        names(paths_segmentID) <- NULL
+        
         o <- order(nchar(paths_type), paths_type)
 
         paths_type <- paths_type[o]
@@ -674,8 +678,8 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             segmentID = paths_segmentID,
             closed5p = closed5pVariant,
             closed3p = closed3pVariant,
-            closed5pEvent = closed5pEvent,
-            closed3pEvent = closed3pEvent,
+            closed5pEvent = rep(closed5pEvent, length(o)),
+            closed3pEvent = rep(closed3pEvent, length(o)),
             stringsAsFactors = FALSE)
 
     }
@@ -1412,7 +1416,11 @@ makeVariantNames <- function(variants)
 
     } else {
 
-        GENE <- unstrsplit(geneName(variants), ",")
+        eventID_geneNames <- sort(splitCharacterList(geneName(variants),
+            factor(eventID(variants))))
+        i <- match(eventID(variants), names(eventID_geneNames))
+        variant_geneNames <- setNames(eventID_geneNames[i], NULL)
+        GENE <- unstrsplit(variant_geneNames, ",")
         GENE[GENE == ""] <- "NA"
 
     }

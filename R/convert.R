@@ -384,6 +384,8 @@ convertToSGFeatures <- function(x, coerce = FALSE)
         mcols(features)$type[mcols(features)$type != "J"] <- "E"
         mcols(features)$splice5p <- splice5p
         mcols(features)$splice3p <- splice3p
+        mcols(features)$txName <- txName(x)
+        mcols(features)$geneName <- geneName(x)
 
     } else {
 
@@ -394,7 +396,12 @@ convertToSGFeatures <- function(x, coerce = FALSE)
     features <- addFeatureID(features)
     features <- addGeneID(features)
     features <- SGFeatures(features)
-    features <- annotate(features, x)
+
+    if (!coerce) {
+      
+        features <- annotate(features, x)
+
+    }
 
     return(features)
 
