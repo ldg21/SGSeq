@@ -839,3 +839,35 @@ silent_select <- function(...)
     suppressMessages(select(...))
 
 }
+
+pintersect <- function(x, y)
+{
+
+    n <- length(x)
+    i_x <- paste0(togroup0(x), ":", unlist(x))
+    i_y <- paste0(togroup0(y), ":", unlist(y))
+    i_x <- i_x[i_x %in% i_y]
+    i <- factor(as.integer(sub(":\\S+$", "", i_x)), seq_len(n))
+    x <- sub("^\\S+:", "", i_x)
+    o <- order(x)
+    z <- split(x[o], i[o])
+    names(z) <- NULL
+
+    return(z)
+
+}
+
+punion <- function(x, y)
+{
+
+  n <- length(x)
+  z <- c(unlist(x), unlist(y))
+  i <- c(togroup0(x), togroup0(y))
+  i <- factor(i, seq_len(n))
+  o <- order(z)
+  z <- as.list(tapply(z[o], i[o], unique, simplify = FALSE))
+  names(z) <- NULL
+
+  return(z)
+  
+}

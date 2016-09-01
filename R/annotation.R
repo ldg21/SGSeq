@@ -159,30 +159,32 @@ propagateAnnotation <- function(query)
     if (length(excl) > 0) g <- delete.edges(g, excl)
 
     ## Unnannotated parts of the splice graph are assigned gene names
-    ## of connected annotated nodes.
+    ## of connected annotated nodes
 
     gd <- edges(g)
     gv <- nodes(g)
-
-    gv_cluster <- as.character(clusters(g)$membership)
-    gd_cluster <- gv_cluster[match(gd$from, gv$name)]
-
+    gv$geneName <- as.list(CharacterList(vector("list", nrow(gv))))
     i <- which(!is.na(gv$featureID))
+    gv$geneName[i] <- as.list(geneName(query)[match(gv$featureID[i], featureID(query))])
 
-    ann <- DataFrame(
-        featureID = c(gv$featureID[i], gd$featureID),
-        geneName = c(
-            geneName(query)[match(gv$featureID[i], featureID(query))],
-            geneName(query)[match(gd$featureID, featureID(query))]),
-        cluster = c(gv_cluster[i], gd_cluster))
+    i_gd <- which(elementNROWS(gd$geneName) == 0)
+    i_gv <- which(elementNROWS(gv$geneName) == 0 & !is.na(gv$featureID))
 
-    cluster_geneName <- splitCharacterList(ann$geneName, factor(ann$cluster))
-    ann <- ann[elementNROWS(ann$geneName) == 0, ]
-    i <- match(ann$cluster, names(cluster_geneName))
-    ann$geneName <- setNames(cluster_geneName[i], NULL)
-    i <- match(ann$featureID, featureID(query))
-    geneName(query)[i] <- ann$geneName
+    f <- c(gd$featureID[i_gd], gv$featureID[i_gv])
+    u <- c(gd$from[i_gd], gv$name[i_gv])
+    v <- c(gd$to[i_gd], gv$name[i_gv])
 
+    bwd <- lapply(u, function(x) { 
+        sort(unique(unlist(gv$geneName[subcomponent(g, x, "in")]))) })
+    fwd <- lapply(v, function(x) { 
+        sort(unique(unlist(gv$geneName[subcomponent(g, x, "out")]))) })
+
+    ann <- pintersect(bwd, fwd)
+    i <- which(elementNROWS(ann) == 0)
+    ann[i] <- punion(bwd[i], fwd[i])
+    
+    geneName(query)[match(f, featureID(query))] <- CharacterList(ann)
+    
     return(query)
 
 }
@@ -314,23 +316,6 @@ annotatePaths <- function(paths)
     geneName(paths) <- setNames(path_ann, NULL)
     
     return(paths)
-
-}
-
-plintersect <- function(x, y)
-{
-
-    n <- length(x)
-    ix <- paste0(togroup0(x), ":", unlist(x))
-    iy <- paste0(togroup0(y), ":", unlist(y))
-    ix <- ix[ix %in% iy]
-    i <- sub(":\\S+$", "", ix)
-    x <- sub("^\\S+:", "", ix)
-    z <- split(x, i)
-    z <- z[match(seq_len(n), names(z))]
-    names(z) <- NULL
-
-    return(z)
 
 }
 
