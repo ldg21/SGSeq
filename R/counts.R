@@ -522,6 +522,7 @@ createSGFeaturesFromSGVariants <- function(variants)
 {
 
     features <- unlist(variants)
+    features <- features[!duplicated(featureID(features))]
     features <- addSpliceSites(features, variants, "D")
     features <- addSpliceSites(features, variants, "A")
 
@@ -536,11 +537,11 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
 
     if (type == "D") {
 
-        fid <- featureID5p(variants)
+        fid <- featureID5pEvent(variants)
 
     } else if (type == "A") {
 
-        fid <- featureID3p(variants)
+        fid <- featureID3pEvent(variants)
 
     }
 
@@ -580,9 +581,11 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
     mcols(splicesites)$geneID <- geneID(variants)[i]
 
     splicesites <- SGFeatures(splicesites)
+    splicesites <- splicesites[!duplicated(featureID(splicesites))]
+
     new2old <- match(seqlevels(features), seqlevels(splicesites))
     seqinfo(splicesites, new2old = new2old) <- seqinfo(features)
-
+    
     features <- c(features, splicesites)
 
     return(features)
@@ -659,7 +662,7 @@ getSGVariantCountsPerStrand <- function(variants, features,
     ## changes in the relative usage of the intra-variant nested variants)
 
     i <- which(elementNROWS(v5p) > 0 & elementNROWS(v3p) > 0 &
-        grep("(", featureID(variants), fixed = TRUE))
+        grepl("(", featureID(variants), fixed = TRUE))
 
     if (length(i) > 0) {
 

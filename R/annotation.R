@@ -138,11 +138,16 @@ annotateFeatures <- function(query, subject)
 propagateAnnotation <- function(query)
 {
 
-    g <- spliceGraph(query)
+    ## Remove unannotated components of the splice graph
 
-    ## Remove annotated parts of the splice graph. Specifically,
-    ## remove annotated edges with annotated 'from' and 'to' nodes.
+    g_ann <- unique(geneID(query)[elementNROWS(geneName(query)) > 0])
+    i_ann_comp <- which(geneID(query) %in% g_ann)
+    if (length(i_ann_comp) == 0) return(query)
 
+    ## Remove annotated parts of the splice graph:
+    ## remove annotated edges with annotated 'from' and 'to' nodes
+
+    g <- spliceGraph(query[i_ann_comp])
     gd <- edges(g)
     gv <- nodes(g)
 
@@ -165,7 +170,8 @@ propagateAnnotation <- function(query)
     gv <- nodes(g)
     gv$geneName <- as.list(CharacterList(vector("list", nrow(gv))))
     i <- which(!is.na(gv$featureID))
-    gv$geneName[i] <- as.list(geneName(query)[match(gv$featureID[i], featureID(query))])
+    gv$geneName[i] <- as.list(geneName(query)[
+        match(gv$featureID[i], featureID(query))])
 
     i_gd <- which(elementNROWS(gd$geneName) == 0)
     i_gv <- which(elementNROWS(gv$geneName) == 0 & !is.na(gv$featureID))

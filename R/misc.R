@@ -844,8 +844,10 @@ pintersect <- function(x, y)
 {
 
     n <- length(x)
-    i_x <- paste0(togroup0(x), ":", unlist(x))
-    i_y <- paste0(togroup0(y), ":", unlist(y))
+    if (length(unlist(x)) == 0) i_x <- character()
+    else i_x <- paste0(togroup0(x), ":", unlist(x))
+    if (length(unlist(y)) == 0) i_y <- character()
+    else i_y <- paste0(togroup0(y), ":", unlist(y))
     i_x <- i_x[i_x %in% i_y]
     i <- factor(as.integer(sub(":\\S+$", "", i_x)), seq_len(n))
     x <- sub("^\\S+:", "", i_x)
@@ -860,6 +862,8 @@ pintersect <- function(x, y)
 punion <- function(x, y)
 {
 
+  if (length(unlist(x)) == 0 && length(unlist(y)) == 0) return(x)
+  
   n <- length(x)
   z <- c(unlist(x), unlist(y))
   i <- c(togroup0(x), togroup0(y))
