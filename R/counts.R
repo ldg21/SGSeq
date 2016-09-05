@@ -537,11 +537,11 @@ addSpliceSites <- function(features, variants, type = c("D", "A"))
 
     if (type == "D") {
 
-        fid <- featureID5pEvent(variants)
+        fid <- unique(pc(featureID5p(variants), featureID5pEvent(variants)))
 
     } else if (type == "A") {
 
-        fid <- featureID3pEvent(variants)
+        fid <- unique(pc(featureID3p(variants), featureID3pEvent(variants)))
 
     }
 
@@ -671,8 +671,6 @@ getSGVariantCountsPerStrand <- function(variants, features,
     }
 
     ## extract ranges for relevant features
-    fid <- sort(unique(c(unlist(e5p), unlist(e3p))))
-    features <- features[match(fid, featureID(features))]
     ir <- extractRangesFromFeatures(features)
 
     ## obtain exons and introns
