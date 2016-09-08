@@ -138,58 +138,71 @@ annotateFeatures <- function(query, subject)
 propagateAnnotation <- function(query)
 {
 
-    ## Remove unannotated components of the splice graph
+    ## select partially annotated components
+    query_ann <- elementNROWS(geneName(query)) > 0
+    gid <- intersect(geneID(query)[query_ann], geneID(query)[!query_ann])
+    if (length(gid) == 0) return(query)
+    g <- spliceGraph(query[geneID(query) %in% gid])
 
-    g_ann <- unique(geneID(query)[elementNROWS(geneName(query)) > 0])
-    i_ann_comp <- which(geneID(query) %in% g_ann)
-    if (length(i_ann_comp) == 0) return(query)
-
-    ## Remove annotated parts of the splice graph:
-    ## remove annotated edges with annotated 'from' and 'to' nodes
-
-    g <- spliceGraph(query[i_ann_comp])
-    gd <- edges(g)
+    ## remove uninformative edges
+    ## (annotated edges with annotated 'from' and 'to' nodes)
     gv <- nodes(g)
-
-    gd_ann <- elementNROWS(gd$txName) > 0
-    i <- match(gv$featureID[match(gd$from, gv$name)], featureID(query))
-    from_ann <- elementNROWS(txName(query))[i] > 0
-    i <- match(gv$featureID[match(gd$to, gv$name)], featureID(query))
-    to_ann <- elementNROWS(txName(query))[i] > 0
-
-    ## NOTE 'from_ann' and 'to_ann' are 'NA' for transcript starts and ends
-
-    excl <- which(
-        gd_ann & (from_ann | is.na(from_ann)) & (to_ann | is.na(to_ann)))
+    gd <- edges(g)
+    gd$from <- match(gd$from, gv$name)
+    gd$to <- match(gd$to, gv$name)
+    gd_ann <- elementNROWS(gd$geneName) > 0
+    fr_ann <- query_ann[match(gv$featureID[gd$from], featureID(query))]
+    to_ann <- query_ann[match(gv$featureID[gd$to], featureID(query))]
+    excl <- which(gd_ann & (fr_ann | is.na(fr_ann)) & (to_ann | is.na(to_ann)))
     if (length(excl) > 0) g <- delete.edges(g, excl)
 
-    ## Unnannotated parts of the splice graph are assigned gene names
-    ## of connected annotated nodes
+    ## remove uninformative nodes (unconnected nodes)
+    excl <- which(degree(g, mode = "in") == 0 & degree(g, mode = "out") == 0)
+    if (length(excl) > 0) g <- delete.vertices(g, excl)    
 
-    gd <- edges(g)
+    ## graph information
     gv <- nodes(g)
-    gv$geneName <- as.list(CharacterList(vector("list", nrow(gv))))
+    gd <- edges(g)
+    gd$from <- match(gd$from, gv$name)
+    gd$to <- match(gd$to, gv$name)
+    gv$geneName <- lapply(vector("list", nrow(gv)), as.character)
     i <- which(!is.na(gv$featureID))
-    gv$geneName[i] <- as.list(geneName(query)[
-        match(gv$featureID[i], featureID(query))])
-
+    gv$geneName[i] <- as.list(geneName(query))[
+        match(gv$featureID[i], featureID(query))]
+    gv$cluster <- clusters(g)$membership
+    gd$cluster <- gv$cluster[gd$from]
+    cluster2geneName <- splitCharacterList(
+        c(gv$geneName, gd$geneName), factor(c(gv$cluster, gd$cluster)))
+    cluster2geneName <- cluster2geneName[elementNROWS(cluster2geneName) == 1]
+    
+    ## select unannotated features
     i_gd <- which(elementNROWS(gd$geneName) == 0)
     i_gv <- which(elementNROWS(gv$geneName) == 0 & !is.na(gv$featureID))
+    fid <- c(gd$featureID[i_gd], gv$featureID[i_gv])
+    n_1 <- c(gd$from[i_gd], i_gv)
+    n_2 <- c(gd$to[i_gd], i_gv)
+    cluster <- gv$cluster[n_1]
+ 
+    ## unannotated features inherit gene names from connected features
+    ann <- CharacterList(vector("list", length(fid)))
+    i <- which(as.character(cluster) %in% names(cluster2geneName))
+    ann[i] <- cluster2geneName[match(cluster[i], names(cluster2geneName))]
+    i <- which(!as.character(cluster) %in% names(cluster2geneName))
+    bwd <- lapply(n_1[i], function(x) {
+        v <- subcomponent(g, x, "in")
+        d <- which(gd$to %in% v)
+        sort(unique(unlist(c(gv$geneName[v], gd$geneName[d])))) })
+    fwd <- lapply(n_2[i], function(x) {
+        v <- subcomponent(g, x, "out")
+        d <- which(gd$from %in% v)
+        sort(unique(unlist(c(gv$geneName[v], gd$geneName[d])))) })
+    w <- pintersect(bwd, fwd)
+    j <- which(elementNROWS(w) == 0)
+    w[j] <- punion(bwd[j], fwd[j])
+    ann[i] <- CharacterList(w)
 
-    f <- c(gd$featureID[i_gd], gv$featureID[i_gv])
-    u <- c(gd$from[i_gd], gv$name[i_gv])
-    v <- c(gd$to[i_gd], gv$name[i_gv])
-
-    bwd <- lapply(u, function(x) { 
-        sort(unique(unlist(gv$geneName[subcomponent(g, x, "in")]))) })
-    fwd <- lapply(v, function(x) { 
-        sort(unique(unlist(gv$geneName[subcomponent(g, x, "out")]))) })
-
-    ann <- pintersect(bwd, fwd)
-    i <- which(elementNROWS(ann) == 0)
-    ann[i] <- punion(bwd[i], fwd[i])
-    
-    geneName(query)[match(f, featureID(query))] <- CharacterList(ann)
+    ## update query geneName column 
+    geneName(query)[match(fid, featureID(query))] <- ann
     
     return(query)
 
