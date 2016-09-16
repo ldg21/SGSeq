@@ -536,6 +536,18 @@ plast <- function(x, use_names = FALSE)
 rbindListOfDFs <- function(x, cores)
 {
 
+    i_nonempty <- which(elementNROWS(x) > 0)
+
+    if (length(i_nonempty) == 0) {
+
+        return(DataFrame())
+
+    } else {
+
+        x <- x[i_nonempty]
+
+    }
+    
     k <- names(x[[1]])
 
     df <- vector("list", length(k))
