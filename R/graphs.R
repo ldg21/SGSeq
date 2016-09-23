@@ -638,8 +638,12 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hme, mode = "out")) }))) })
+        paths_edges_out <- lapply(paths_int_nodes,
+            function(x) { hd$segmentID[hd$from %in% x] })
         closed3pVariant <- elementNROWS(mapply(intersect,
-            paths_nodes_out, paths_ext_nodes)) == 0
+            paths_nodes_out, paths_ext_nodes)) == 0 &
+            elementNROWS(mapply(setdiff, paths_edges_out,
+            paths_segmentIDs)) == 0
         closed3pEvent <- all(elementNROWS(lapply(paths_nodes_out,
             intersect, event_ext_nodes)) == 0)
         hms <- delete.vertices(h, b$start[k])
@@ -647,8 +651,12 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
             function(x) { unique(unlist(lapply(x,
                 function(y) { names(subcomponent(y,
                     graph = hms, mode = "in")) }))) })
+        paths_edges_in <- lapply(paths_int_nodes,
+            function(x) { hd$segmentID[hd$to %in% x] })
         closed5pVariant <- elementNROWS(mapply(intersect,
-            paths_nodes_in, paths_ext_nodes)) == 0
+            paths_nodes_in, paths_ext_nodes)) == 0 &
+            elementNROWS(mapply(setdiff, paths_edges_in,
+            paths_segmentIDs)) == 0
         closed5pEvent <- all(elementNROWS(lapply(paths_nodes_in,
             intersect, event_ext_nodes)) == 0)
 
