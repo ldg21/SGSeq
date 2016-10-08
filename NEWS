@@ -1,10 +1,13 @@
+CHANGES IN VERSION 1.8.0
+------------------------
+
+    o Bug fixes and other improvements
+
+
 CHANGES IN VERSION 1.6.0
 ------------------------
 
     o New vignette
-
-    o Added predictVariantEffects() for predicting the effect of a
-      splice variant on annotated protein-coding transcripts
 
     o Changes in the SGVariants and SGVariantCounts class. Instances
       created with previous versions of SGSeq have to be updated. 
