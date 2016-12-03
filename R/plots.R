@@ -1372,6 +1372,8 @@ restrictFeatures <- function(x, geneID = NULL, eventID = NULL, which = NULL,
 
             index <- which(any(geneName(y) == geneName))
 
+            if (all(type(y)[index] %in% c("D", "A"))) index <- vector()
+            
         }
 
         y <- y[index]
