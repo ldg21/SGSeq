@@ -11,7 +11,7 @@ vignette: >
   %\VignetteIndexEntry{SGSeq}
   %\VignettePackage{SGSeq}
 output:
-  BiocStyle::html_document:
+  BiocStyle::html_document2:
     toc: true
     fig_caption: true
 bibliography: SGSeq.bib
@@ -267,7 +267,7 @@ for (j in 1:4) {
 
 # Testing for differential splice variant usage
 
-*SGSeq* does not implement statistical tests for differential splice variant usage. However, existing software packages such as `r Biocpkg("DEXSeq")` [@Anders:2012es] and `r Biocpkg("limma")` [@Ritchie:2015fa] can be used for this purpose. These packages allow infererence of differential exon usage within a gene (between groups of samples). In the *SGSeq* framework, this approach can be used to test for differential splice variant usage within a splice event, whereby splice variants and splice events are used analogously to exons and genes, respectively.
+*SGSeq* does not implement statistical tests for differential splice variant usage. However, existing software packages such as `r BiocStyle::Biocpkg("DEXSeq")` [@Anders:2012es] and `r BiocStyle::Biocpkg("limma")` [@Ritchie:2015fa] can be used for this purpose. These packages allow infererence of differential exon usage within a gene (between groups of samples). In the *SGSeq* framework, this approach can be used to test for differential splice variant usage within a splice event, whereby splice variants and splice events are used analogously to exons and genes, respectively.
 
 For these methods to be applicable, a single count is required for each splice variant. *SGVariantCounts* objects as described above store two counts for each splice variant, one for the 5$^\prime$ and one for the 3$^\prime$ end of the variant. These counts can be readily obtained from *SGFeatureCounts* objects, but are impractical for count-based differential testing. A single count for each variant (based on fragments compatible at either end of the variant) can be obtained from BAM files using function *getSGVariantCounts()*. The output is an *SGVariantCounts* object with additional assay *countsVariant5pOr3p*.
 
@@ -285,7 +285,7 @@ vid <- variantID(sgvc)
 eid <- eventID(sgvc)
 ```
 
-Treating these three objects analogously to per-exon counts, exon identifiers and gene identifiers, they can be used to construct a *DEXSeqDataSet* object for use with `r Biocpkg("DEXSeq")` or as input for function *diffSplice()* in combination with *voom()* for use with `r Biocpkg("limma")`.
+Treating these three objects analogously to per-exon counts, exon identifiers and gene identifiers, they can be used to construct a *DEXSeqDataSet* object for use with `r BiocStyle::Biocpkg("DEXSeq")` or as input for function *diffSplice()* in combination with *voom()* for use with `r BiocStyle::Biocpkg("limma")`.
 
 # Advanced usage
 
