@@ -27,6 +27,10 @@ Obtain paired-end status, median aligned read length,
 median aligned insert size and library size from BAM files.
 }
 \details{
+BAM files must have been generated with a splice-aware alignment
+program that outputs the custom tag \sQuote{XS} for spliced reads,
+indicating the direction of transcription. BAM files must be indexed.
+
 Library information can be inferred from a subset of BAM records
 by setting the number of records via argument \code{yieldSize}.
 Note that library size is only obtained if \code{yieldSize} is {NULL}.
