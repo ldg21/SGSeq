@@ -4,7 +4,7 @@ author: "Leonard D Goldstein"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SGSeq')`"
 abstract: >
-  *SGSeq* is a software package for analyzing splice events from RNA-seq data. Input data are sequence reads mapped to a reference genome in BAM format. In the *SGSeq* framework genes are represented as a genome-wide splice graph, which can be obtained from existing annotation or predicted from RNA-seq data. Splice events are identified from the graph and are quantified locally using structurally compatible reads at the start or end of each splice variant. The package includes functions for splice event prediction, quantification, visualization and interpretation.
+  *SGSeq* is a software package for analyzing splice events from RNA-seq data. Input data are RNA-seq reads mapped to a reference genome in BAM format. Genes are represented as a splice graph, which can be obtained from existing annotation or predicted from the mapped sequence reads. Splice events are identified from the graph and are quantified locally using structurally compatible reads at the start or end of each splice variant. The software includes functions for splice event prediction, quantification, visualization and interpretation.
 vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
@@ -28,7 +28,7 @@ opts_chunk$set(error = FALSE)
 
 # Overview
 
-*SGSeq* implements functions and data structures for analyzing splice events from RNA-seq data. An overview of *SGSeq* classes and how they are related is shown in Figure 1 and summarized below:
+*SGSeq* provides functions and data structures for analyzing splice events from RNA-seq data. An overview of *SGSeq* classes and how they are related is shown in Figure 1 and summarized below:
 
 * The *TxFeatures* class stores discrete transcript features (exons and splice junctions) as they are observed in RNA transcripts. These can be extracted from annotation or predicted from aligned RNA-seq reads.
 * The *SGFeatures* class stores features defining a splice graph [@Heber:2002aa]. The splice graph is a directed acyclic graph with edges corresponding to exonic regions and splice junctions, and nodes corresponding to transcript starts, ends and splice sites. It is directed from the 5$^\prime$ end to the 3$^\prime$ end of a gene.
@@ -46,7 +46,7 @@ If you use *SGSeq*, please cite:
 library(SGSeq)
 ```
 
-When starting a new project, *SGSeq* requires some information about the samples to be analyzed. This information is obtained once initially, and can then be used for all future analyses. Sample information is provided as a data frame with the following columns:
+When starting a new project, *SGSeq* requires information about the samples to be analyzed. This information is obtained once initially, and can then be used for all future analyses. Sample information is provided as a data frame with the following columns:
 
 * *sample_name* Character vector with a unique name for each sample
 * *file_bam* Character vector or *BamFileList* specifying BAM files generated with a splice-aware alignment program
@@ -59,7 +59,7 @@ Sample information can be stored in a *data.frame* or *DataFrame* object (if BAM
 
 For *SGSeq* to work correctly it is essential that reads were mapped with a splice-aware alignment program, such as GSNAP [@Wu:2010ep], HISAT [@Kim:2015be] or STAR [@Dobin:2013fg], which generates SAM/BAM files with a custom tag 'XS' for spliced reads, indicating the direction of transcription. BAM files must be indexed. Note that *lib_size* should be the total number of aligned fragments, even if BAM files were subset to genomic regions of interest. The total number of fragments is required for accurate calculation of FPKM values (fragments per kilobase and million sequenced fragments). Here, the term 'fragment' denotes a sequenced cDNA fragment, which is represented by a single read in single-end data, or a pair of reads in paired-end data.
 
-This vignette illustrates an analysis of paired-end RNA-seq data from four tumor and four normal colorectal samples, which are part of a data set published in [@Seshagiri:2012gr]. RNA-seq reads were mapped to the human reference genome using GSNAP [@Wu:2010ep]. The analysis is based on BAM files subset to reads mapping to a single gene of interest (*FBXO31*). A *data.frame* *si* with sample information was generated from the original BAM files with function *getBamInfo()*. Note that column *lib_size* reflects the total number of aligned fragments in the original BAM files.
+This vignette illustrates an analysis of paired-end RNA-seq data from four tumor and four normal colorectal samples, which are part of a data set published in [@Seshagiri:2012gr]. RNA-seq reads were mapped to the human reference genome using GSNAP [@Wu:2010ep]. The analysis is based on BAM files that were subset to reads mapping to a single gene of interest (*FBXO31*). A *data.frame* *si* with sample information was generated from the original BAM files with function *getBamInfo()*. Note that column *lib_size* reflects the total number of aligned fragments in the original BAM files.
 
 ```{r}
 si
@@ -99,7 +99,7 @@ head(txf_ucsc)
 * *L* (last/5$^\prime$-terminal exon)
 * *U* (unspliced transcript).
 
-Columns *txName* and *geneName* indicate the transcript and gene each feature belongs to. Note that a feature can belong to more than one transcript, and accordingly these columns can store multiple values for each feature. For *TxFeatures* and other data structures defined in *SGSeq*, columns can be accessed with accessor functions as shown in the following code block.
+Columns *txName* and *geneName* indicate the transcript and gene each feature belongs to. Note that a feature can belong to more than one transcript, and accordingly these columns can store multiple values for each feature. For *TxFeatures* and other data structures in *SGSeq*, columns can be accessed with accessor functions as shown in the following code block.
 
 ```{r}
 type(txf_ucsc)
@@ -181,7 +181,7 @@ Note that most exons and splice junctions predicted from RNA-seq data are consis
 
 # Splice variant identification
 
-Instead of considering the full splice graph of a gene, the analysis can be focused on individual splice events. Function *analyzeVariants()* recursively identifies splice events from the graph, obtains representative counts for each splice variant, and computes estimates of relative splice variant usage, sometimes referred to as 'percentage spliced in' (PSI or $\Psi$) [@Venables:2008aa, @Katz:2010aa].
+Instead of considering the full splice graph of a gene, the analysis can be focused on individual splice events. Function *analyzeVariants()* recursively identifies splice events from the graph, obtains representative counts for each splice variant, and computes estimates of relative splice variant usage, also referred to as 'percentage spliced in' (PSI or $\Psi$) [@Venables:2008aa, @Katz:2010aa].
 
 ```{r, message = FALSE}
 sgvc_pred <- analyzeVariants(sgfc_pred)
@@ -196,17 +196,17 @@ mcols(sgvc_pred)
 
 # Splice variant quantification
 
-Splice variants are quantified locally, based on structurally compatible fragments that overlap the start or end of each variant. Local estimates of relative usage $\Psi_i$ for variant $i$ are obtained as the number of fragments compatible with $i$ divided by the number of fragments compatible with any variant belonging to the same event. For variant start $S$ and variant end $E$, $\hat{\Psi}_i^S = x_i^S / x_.^S$ and $\hat{\Psi}_i^E = x_i^E / x_.^E$, respectively. For variants with valid estimates $\hat{\Psi}_i^S$ and $\hat{\Psi}_i^E$, a single estimate is calculated as a weighted mean of local estimates $\hat{\Psi}_i = x_.^S/(x_.^S + x_.^E) \hat{\Psi}_i^S + x_.^E/(x_.^S + x_.^E) \hat{\Psi}_i^E$.
+Splice variants are quantified locally, based on structurally compatible fragments that extend across the start or end of each variant. Local estimates of relative usage $\Psi_i$ for variant $i$ are obtained as the number of fragments compatible with $i$ divided by the number of fragments compatible with any variant belonging to the same event. For variant start $S$ and variant end $E$, $\hat{\Psi}_i^S = x_i^S / x_.^S$ and $\hat{\Psi}_i^E = x_i^E / x_.^E$, respectively. For variants with valid estimates $\hat{\Psi}_i^S$ and $\hat{\Psi}_i^E$, a single estimate is calculated as a weighted mean of local estimates $\hat{\Psi}_i = x_.^S/(x_.^S + x_.^E) \hat{\Psi}_i^S + x_.^E/(x_.^S + x_.^E) \hat{\Psi}_i^E$.
 
 Estimates of relative usage can be unreliable for events with low read count. If argument *min_denominator* is specified for functions *analyzeVariants()* or *getSGVariantCounts()*, estimates are set to *NA* unless at least one of $x_.^S$ or $x_.^E$ is equal or greater to the specified value.
 
-Note that *SGVariantCounts* objects also store the raw count data. These can be used for statistical modeling, for example as suggested in section [Testing for differential splice variant usage].
+Note that *SGVariantCounts* objects also store the raw count data. Count data can be used for statistical modeling, for example as suggested in section [Testing for differential splice variant usage].
 
 ```{r}
 variantFreq(sgvc_pred)
 ```
 
-Splice variants and estimates of relative usage are visualized with function *plotVariants*.
+Splice variants and estimates of relative usage can be visualized with function *plotVariants*.
 
 ```{r figure-3, fig.width=1.5, fig.height=4.5}
 plotVariants(sgvc_pred, eventID = 1, color_novel = "red")
@@ -267,7 +267,7 @@ for (j in 1:4) {
 
 # Testing for differential splice variant usage
 
-*SGSeq* does not implement statistical tests for differential splice variant usage. However, existing software packages such as `r BiocStyle::Biocpkg("DEXSeq")` [@Anders:2012es] and `r BiocStyle::Biocpkg("limma")` [@Ritchie:2015fa] can be used for this purpose. These packages allow infererence of differential exon usage within a gene (between groups of samples). In the *SGSeq* framework, this approach can be used to test for differential splice variant usage within a splice event, whereby splice variants and splice events are used analogously to exons and genes, respectively.
+*SGSeq* does not implement statistical tests for differential splice variant usage. However, existing software packages such as `r BiocStyle::Biocpkg("DEXSeq")` [@Anders:2012es] and `r BiocStyle::Biocpkg("limma")` [@Ritchie:2015fa] can be used for this purpose. These packages allow infererence of differential exon usage within a gene (between groups of samples). In the *SGSeq* framework, this approach can be used to test for differential splice variant usage within a splice event, treating splice variants and splice events as exons and genes, respectively.
 
 For these methods to be applicable, a single count is required for each splice variant. *SGVariantCounts* objects as described above store two counts for each splice variant, one for the 5$^\prime$ and one for the 3$^\prime$ end of the variant. These counts can be readily obtained from *SGFeatureCounts* objects, but are impractical for count-based differential testing. A single count for each variant (based on fragments compatible at either end of the variant) can be obtained from BAM files using function *getSGVariantCounts()*. The output is an *SGVariantCounts* object with additional assay *countsVariant5pOr3p*.
 
@@ -304,7 +304,7 @@ sgvc <- getSGVariantCounts(sgv, sgfc)
 
 # Multi-core use and memory requirements
 
-*SGSeq* supports parallelization across multiple cores on the same compute node. For functions that support parallelization, the number of cores can be specified with the *cores* argument. For most analyses, memory requirements should not exceed 16 Gb per core. Memory issues encountered during feature prediction or read counting are likely due to individual genomic regions with high read coverage. By default, regions with high split-read complexity are skipped during prediction (controlled with argument *max_complexity*). For the counting step, memory issues may be resolved by excluding problematic regions (e.g. mitochondrial genes).
+*SGSeq* supports parallelization across multiple cores on the same compute node. For functions that support parallelization, the number of cores can be specified with the *cores* argument. For most genome-wide analyses, memory requirements should not exceed 16 Gb per core. Memory issues encountered during feature prediction or read counting are likely due to individual genomic regions with high read coverage. By default, regions with high split-read complexity are skipped during prediction (controlled with argument *max_complexity*). For the counting step, memory issues may be resolved by excluding problematic regions (e.g. mitochondrial genes).
 
 # Session information
 
