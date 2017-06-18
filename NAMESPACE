@@ -29,7 +29,7 @@ importFrom(stats, dist, hclust, setNames)
 
 ## IMPORT CLASSES
 
-importClassesFrom(rtracklayer, GenomicRangesORGenomicRangesList)
+importClassesFrom(rtracklayer, GenomicRanges_OR_GenomicRangesList)
 
 ## EXPORT FUNCTIONS
 
