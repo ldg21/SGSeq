@@ -1,7 +1,7 @@
 Package: SGSeq
 Type: Package
 Title: Splice event prediction and quantification from RNA-seq data
-Version: 1.11.1
+Version: 1.11.2
 Author: Leonard Goldstein
 Maintainer: Leonard Goldstein <goldstel@gene.com>
 Description: SGSeq is a software package for analyzing splice events from 

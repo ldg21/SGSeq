@@ -962,7 +962,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
     pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
-    par(cex = cex, mai = pars$mai)
+    par(cex = cex, mai = c(pars$mai[1], 0, pars$mai[3], 0))
 
     df <- plotSpliceGraph(x = features, label = "id", tx_view = tx_view,
         short_output = FALSE, ...)
@@ -984,6 +984,8 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
         labCol = labCol, colLabCol = colLabCol,
         col = col, zlim = zlim)
 
+    frame()
+    
     df <- df[c("id", "name", "type", "featureID")]
 
     invisible(df)
@@ -1079,7 +1081,7 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
     pars <- getLayoutParameters(n_sample, n_feature, margin, heightPanels,
         RowSideColors, square, tx_view)
     layout(pars$mat, heights = pars$hei, widths = pars$wid)
-    par(cex = cex, mai = pars$mai)
+    par(cex = cex, mai = c(pars$mai[1], 0, pars$mai[3], 0))
 
     df <- plotSpliceGraph(x = rowRanges(x), label = "label",
         tx_view = tx_view, ...)
@@ -1099,6 +1101,8 @@ plotVariants <- function(x, eventID = NULL, tx_view = FALSE,
         labCol = labCol, colLabCol = colLabCol,
         col = col, zlim = zlim)
 
+    frame()
+    
     invisible(df)
 
 }
@@ -1123,7 +1127,7 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
     n_RSC <- length(RowSideColors)
 
     mat <- rbind(
-        c(1, 1, 1),
+        c(0, 1, 0),
         c(0, 0, 0),
         c(0, 2, 0),
         c(0, 0, 0))
@@ -1131,7 +1135,7 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
     for (i in seq_len(n_RSC)) {
 
         n <- max(mat) + 1
-        mat <- cbind(c(1, 0, 0, 0), c(1, 0, n, 0), mat)
+        mat <- cbind(c(0, 0, 0, 0), c(0, 0, n, 0), mat)
 
     }
 
@@ -1139,7 +1143,7 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
     heightBottomPanel <- heightPanels[2] / sum(heightPanels)
 
     mar_wid <- c(0.05, margin)
-    mar_hei <- c(0.05, 0.15) * heightBottomPanel
+    mar_hei <- c(0.05, 0.2) * heightBottomPanel
 
     img_wid <- 1 - sum(mar_wid) - 0.025 * n_RSC * 2
     img_hei <- heightBottomPanel - sum(mar_hei)
@@ -1176,6 +1180,10 @@ getLayoutParameters <- function(n_sample, n_feature, margin, heightPanels,
     hei <- c(hei[seq_len(r - 1)], rep(0.05, 2) * heightBottomPanel,
         hei[r] - 0.1 * heightBottomPanel)
 
+    ## reserve top right panel for user-defined plots
+
+    mat[1, ncol(mat)] <- max(mat) + 1
+    
     ## splice graph margins and aspect ratio
 
     ds <- dev.size()
