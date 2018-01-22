@@ -24,7 +24,7 @@ Depends:
 Imports:
     AnnotationDbi,
     BiocGenerics,
-    Biostrings (2.47.6),
+    Biostrings (>= 2.47.6),
     GenomicAlignments (>= 1.15.6),
     GenomicFeatures (>= 1.31.3),
     GenomeInfoDb,
