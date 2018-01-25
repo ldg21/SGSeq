@@ -522,14 +522,14 @@ reorderFeatures <- function(x)
 pfirst <- function(x, use_names = FALSE)
 {
 
-    unlist(phead(x, 1), use.names = use_names)
+    unlist(heads(x, 1), use.names = use_names)
 
 }
 
 plast <- function(x, use_names = FALSE)
 {
 
-    unlist(ptail(x, 1), use.names = use_names)
+    unlist(tails(x, 1), use.names = use_names)
 
 }
 
