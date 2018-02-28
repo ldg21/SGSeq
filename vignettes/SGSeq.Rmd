@@ -11,7 +11,7 @@ vignette: >
   %\VignetteIndexEntry{SGSeq}
   %\VignettePackage{SGSeq}
 output:
-  BiocStyle::html_document2:
+  BiocStyle::html_document:
     toc: true
     fig_caption: true
 bibliography: SGSeq.bib
