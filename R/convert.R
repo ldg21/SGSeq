@@ -305,7 +305,8 @@ collapseFeatures <- function(features)
 
         for (j in seq_along(cols)) {
 
-            z <- relist(suppressWarnings(as.integer(sapply(y, "[", j))), x)
+            z <- relist(suppressWarnings(
+                as.integer(vapply(y, "[", character(1), j))), x)
             z <- IntegerList(z)
             mcols(collapsed)[[cols[j]]] <- setNames(z, NULL)
 

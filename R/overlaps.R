@@ -29,11 +29,11 @@ filterIntrons <- function(frag_intron, frag_exonic, min_anchor)
 
     unlisted_intron <- unlist(frag_intron)
 
-    f_L <- as(flank(unlisted_intron, min_anchor, TRUE), "IntegerRangesList")
+    f_L <- as(flank(unlisted_intron, min_anchor, TRUE), "IRangesList")
     f_L <- intersect(f_L, frag_exonic[togroup0(frag_intron)])
     w_L <- sum(width(f_L))
 
-    f_R <- as(flank(unlisted_intron, min_anchor, FALSE), "IntegerRangesList")
+    f_R <- as(flank(unlisted_intron, min_anchor, FALSE), "IRangesList")
     f_R <- intersect(f_R, frag_exonic[togroup0(frag_intron)])
     w_R <- sum(width(f_R))
 
@@ -139,9 +139,9 @@ splicesiteOverlap <- function(splicesites, side, frag_exonic, frag_intron,
         qH <- queryHits(hits_unspliced)
         sH <- subjectHits(hits_unspliced)
         intron_anchor <- as(flank(splicesites, min_anchor, start = start),
-            "IntegerRangesList")
+            "IRangesList")
         exonic_anchor <- as(flank(splicesites, -min_anchor, start = start),
-            "IntegerRangesList")
+            "IRangesList")
         w_E <- sum(width(intersect(exonic_anchor[qH], frag_exonic[sH])))
         w_I <- sum(width(intersect(intron_anchor[qH], frag_exonic[sH])))
         hits_unspliced <- hits_unspliced[w_E == min_anchor & w_I == min_anchor]

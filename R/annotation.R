@@ -252,7 +252,8 @@ annotateSegments <- function(ids, features)
     }
 
     segment_ann_n <- table(paste0(ann_segment, ":", ann))
-    x_segment <- sapply(strsplit(names(segment_ann_n), ":"), "[", 1)
+    x_segment <- vapply(strsplit(names(segment_ann_n), ":"),
+        "[", character(1), 1)
     x_ann <- sub("^\\d+:", "", names(segment_ann_n))
 
     i <- which(segment_ann_n == segment_n[as.integer(x_segment)])

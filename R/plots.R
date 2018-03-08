@@ -71,7 +71,8 @@ addDummyNodes <- function(v, E, J, tx_view)
 
         if (tx_view) {
 
-            coordinates <- sapply(strsplit(dummy_nodes, "_"), "[", 1)
+            coordinates <- vapply(strsplit(dummy_nodes, "_"), "[",
+                character(1), 1)
 
         } else {
 
@@ -98,7 +99,8 @@ addDummyNodes <- function(v, E, J, tx_view)
         }
         if (tx_view) {
 
-            v_dummy$tx_name <- sapply(strsplit(dummy_nodes, "_"), "[", 2)
+            v_dummy$tx_name <- vapply(strsplit(dummy_nodes, "_"), "[",
+                character(1), 2)
 
         }
 
@@ -549,7 +551,7 @@ plotTrackScore <- function(exon_coordinates, score, color, ylim, ypos,
         as.integer(cut(bp_x_end, bin_breaks, right = TRUE)))
 
     bin_y <- tapply(bp_y[rep(seq_along(bp_bin), width(bp_bin))],
-        as.integer(bp_bin), summary)
+        unlist(as(bp_bin, "IntegerList")), summary)
 
     if (is.null(ylim)) {
 

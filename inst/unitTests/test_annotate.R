@@ -2,9 +2,17 @@ test_annotate <- function()
 {
 
     sgf <- annotate(sgf_ann, txf_ann)
-    checkIdentical(sgf_ann, sgf)
+    target <- sgf_ann
+    current <- sgf
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
+    checkIdentical(target, current)
 
     sgv <- annotate(sgv_ann, txf_ann)
-    checkIdentical(sgv_ann, sgv)
+    target <- sgv_ann
+    current <- sgv
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
+    checkIdentical(target, current)
 
 }

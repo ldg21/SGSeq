@@ -62,11 +62,11 @@ co2gr <- function(co)
 {
 
     x <- strsplit(co, split = ":", fixed = TRUE)
-    r <- strsplit(sapply(x, "[", 2), split = "-", fixed = TRUE)
-    sn <- sapply(x, "[", 1)
-    start <- as.integer(sapply(r, "[", 1))
-    end <- as.integer(sapply(r, "[", 2))
-    st <- sapply(x, "[", 3)
+    r <- strsplit(vapply(x, "[", character(1), 2), split = "-", fixed = TRUE)
+    sn <- vapply(x, "[", character(1), 1)
+    start <- as.integer(vapply(r, "[", character(1), 1))
+    end <- as.integer(vapply(r, "[", character(1), 2))
+    st <- vapply(x, "[", character(1), 3)
     GRanges(sn, IRanges(start, end), st)
 
 }
@@ -97,9 +97,9 @@ pos2gr <- function(x)
 {
 
     x <- strsplit(x, split = ":", fixed = TRUE)
-    sn <- sapply(x, "[", 1)
-    pos <- as.integer(sapply(x, "[", 2))
-    st <- sapply(x, "[", 3)
+    sn <- vapply(x, "[", character(1), 1)
+    pos <- as.integer(vapply(x, "[", character(1), 2))
+    st <- vapply(x, "[", character(1), 3)
     GRanges(sn, IRanges(pos, pos), st)
 
 }
@@ -569,7 +569,7 @@ rbindListOfDFs <- function(x, cores)
 checkApplyResultsForErrors <- function(out, fun_name, items, error_class)
 {
 
-    failed <- sapply(out, is, error_class)
+    failed <- vapply(out, is, logical(1), error_class)
 
     if (any(failed)) {
 
@@ -717,7 +717,11 @@ checkIdenticalSummarizedExperiment <- function(target, current,
 
     for (s in slots) {
 
-        checkIdentical(slot(target, s), slot(current, s))
+        a <- slot(target, s)
+        b <- slot(current, s)
+        ## a <- as.data.frame(a)
+        ## b <- as.data.frame(b)
+        checkIdentical(a, b)
 
     }
 
@@ -841,7 +845,7 @@ togroup0 <- S4Vectors:::quick_togroup
 isOr <- function(object, class2)
 {
 
-    any(sapply(class2, is, object = object))
+    any(vapply(class2, is, logical(1), object = object))
 
 }
 

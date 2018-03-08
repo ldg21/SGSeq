@@ -163,7 +163,7 @@ predictTxFeaturesPerSample <- function(file_bam, which, paired_end,
         gr2co(unlist(range(list_which))),
         "try-error")
 
-    list_features <- list_features[!sapply(list_features, is.null)]
+    list_features <- list_features[!vapply(list_features, is.null, logical(1))]
 
     if (length(list_features) == 0) {
 

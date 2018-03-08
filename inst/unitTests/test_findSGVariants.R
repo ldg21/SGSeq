@@ -3,7 +3,11 @@ test_findSGVariants <- function()
 
     ## example data
     sgv <- findSGVariants(sgf_pred)
-    checkIdentical(sgv_pred, sgv)
+    target <- sgv_pred
+    current <- sgv
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
+    checkIdentical(target, current)
 
     ## complex event 1
     txf <- TxFeatures(c(
@@ -56,6 +60,8 @@ test_findSGVariants <- function()
             c(4, 9), c(4, 9), c(5, 10, 14), c(5, 10, 14),
             c(5, 10, 14), c(5, 10, 14), NULL, NULL))
     current <- mcols(sgv)[names(target)]
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
     checkIdentical(target, current)
 
     ## complex event 2
@@ -122,6 +128,8 @@ test_findSGVariants <- function()
             c(5, 9, 14), c(5, 9, 14), c(5, 9, 14), NULL, NULL, NULL,
             NULL, NULL, NULL, NULL, NULL, NULL))
     current <- mcols(sgv)[names(target)]
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
     checkIdentical(target, current)
 
     ## complex event 3
@@ -188,6 +196,8 @@ test_findSGVariants <- function()
             c(3, 9), c(15, 19, 11), c(6, 10), c(15, 19, 11), c(3, 9), c(6, 10),
             c(15, 19, 11), c(15, 19, 11), c(15, 19, 11), NULL, NULL, NULL))
     current <- mcols(sgv)[names(target)]
+    ## target <- as.data.frame(target)
+    ## current <- as.data.frame(current)
     checkIdentical(target, current)
 
 }

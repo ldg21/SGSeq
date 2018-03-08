@@ -493,7 +493,7 @@ checkSampleInfo <- function(sample_info, complete = TRUE)
          frag_length = "numeric",
          lib_size = "numeric")
 
-    if (!complete) col_type <- col_type[1:2]
+    if (!complete) col_type <- col_type[c(1, 2)]
 
     if (!is(sample_info, "data.frame") && !is(sample_info, "DataFrame")) {
 

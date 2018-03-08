@@ -94,9 +94,9 @@ spliceGraph <- function(features)
     ## For each gene, reorder nodes 5' to 3' and by type (S -> A -> D -> E)
 
     tmp <- strsplit(gv$name, split = ":", fixed = TRUE)
-    type <- c(S = 0, A = 1, D = 2, E = 3)[sapply(tmp, "[", 1)]
-    pos <- as.integer(sapply(tmp, "[", 3))
-    strand <- sapply(tmp, "[", 4)
+    type <- c(S = 0, A = 1, D = 2, E = 3)[vapply(tmp, "[", character(1), 1)]
+    pos <- as.integer(vapply(tmp, "[", character(1), 3))
+    strand <- vapply(tmp, "[", character(1), 4)
     i_neg <- which(strand == "-")
     pos[i_neg] <- -1 * pos[i_neg]
     gv <- gv[order(gv$geneID, pos, type), ]
@@ -105,9 +105,9 @@ spliceGraph <- function(features)
 
     split_from <- strsplit(gd$from, split = ":", fixed = TRUE)
     split_to <- strsplit(gd$to, split = ":", fixed = TRUE)
-    start <- as.integer(sapply(split_from, "[", 3))
-    end <- as.integer(sapply(split_to, "[", 3))
-    strand <- sapply(split_from, "[", 4)
+    start <- as.integer(vapply(split_from, "[", character(1), 3))
+    end <- as.integer(vapply(split_to, "[", character(1), 3))
+    strand <- vapply(split_from, "[", character(1), 4)
     i_neg <- which(strand == "-")
     tmp_start_neg <- start[i_neg]
     tmp_end_neg <- end[i_neg]
@@ -295,7 +295,7 @@ findSGSegmentsPerGene <- function(g, geneID)
     segments_1 <- mapply(fun, s, n, SIMPLIFY = FALSE)
     segments_2 <- mapply(fun, n, t, SIMPLIFY = FALSE)
 
-    i <- which(sapply(segments_1, is.list))
+    i <- which(vapply(segments_1, is.list, logical(1)))
 
     if (length(i) > 0) {
 
@@ -740,8 +740,8 @@ findEvents <- function(g)
         alt_prox <- neighborhood2(g, 1, s, "out")[[1]]
 
         ## Proximal nodes with connectivity > 1 complete events
-        i <- which(sapply(alt_prox, edge.connectivity, graph = g, source = s)
-            > 1)
+        i <- which(vapply(alt_prox, edge.connectivity, numeric(1),
+            graph = g, source = s) > 1)
         t <- c(t, alt_prox[i])
 
         ## Consider branchpoints reachable from s (excluding s)
@@ -815,9 +815,9 @@ sortEvents <- function(events, g)
 {
 
     name_split <- strsplit(nodes(g)$name, ":", fixed = TRUE)
-    gv_type <- sapply(name_split, "[", 1)
-    gv_pos <- as.integer(sapply(name_split, "[", 3))
-    st <- setdiff(sapply(name_split, "[", 4), NA)
+    gv_type <- vapply(name_split, "[", character(1), 1)
+    gv_pos <- as.integer(vapply(name_split, "[", character(1), 3))
+    st <- setdiff(vapply(name_split, "[", character(1), 4), NA)
 
     start_type <- gv_type[events$start]
     start_pos <- gv_pos[events$start]
@@ -872,7 +872,7 @@ findAllPaths <- function(from, to, path, ref, nodes)
                 SIMPLIFY = FALSE,
                 USE.NAMES = FALSE)
 
-            i <- which(sapply(paths, is.list))
+            i <- which(vapply(paths, is.list, logical(1)))
 
             if (length(i) > 0) {
 
@@ -1467,7 +1467,7 @@ reindex <- function(f)
     f_n <- table(f)
     f_n <- f_n[order(names(f_n))]
     o <- order(f)
-    i <- as.integer(IRanges(1, f_n))
+    i <- unlist(as(IRanges(1, f_n), "IntegerList"))
     i[match(seq_along(f), o)]
 
 }
