@@ -612,7 +612,7 @@ SGVariantCounts <- function(x)
 NULL
 
 ##' @rdname updateObject
-setMethod("updateObject", "SGVariants", function(object, verbose) {
+setMethod("updateObject", "SGVariants", function(object, ..., verbose=FALSE) {
 
     current <- names(mcols(object))
 
@@ -698,7 +698,7 @@ setMethod("updateObject", "SGVariants", function(object, verbose) {
 })
 
 ##' @rdname updateObject
-setMethod("updateObject", "SGVariantCounts", function(object, verbose) {
+setMethod("updateObject", "SGVariantCounts", function(object, ..., verbose=FALSE) {
 
     current <- names(assays(object))
 
