@@ -38,4 +38,3 @@ Obtain counts of compatible fragments for splice graph features.
 Leonard Goldstein
 }
 \keyword{internal}
-

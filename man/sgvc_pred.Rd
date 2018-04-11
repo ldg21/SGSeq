@@ -12,4 +12,3 @@ Splice variants were predicted from example BAM files.
 Leonard Goldstein
 }
 \keyword{internal}
-

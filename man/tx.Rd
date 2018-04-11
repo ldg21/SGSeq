@@ -13,4 +13,3 @@ Suitable as input for \code{convertToTxFeatures} and
 Leonard Goldstein
 }
 \keyword{internal}
-

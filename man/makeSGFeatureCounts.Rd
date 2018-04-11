@@ -28,4 +28,3 @@ sgfc <- makeSGFeatureCounts(sgf_pred, si,
 \author{
 Leonard Goldstein
 }
-

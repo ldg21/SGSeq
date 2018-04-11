@@ -30,4 +30,3 @@ Identify fragments compatible with splice junctions.
 Leonard Goldstein
 }
 \keyword{internal}
-

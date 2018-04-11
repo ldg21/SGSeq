@@ -52,4 +52,3 @@ predictVariantEffects(sgv_pred, tx, Hsapiens)
 \author{
 Leonard Goldstein
 }
-

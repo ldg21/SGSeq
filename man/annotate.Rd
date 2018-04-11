@@ -38,4 +38,3 @@ sgv_annotated <- annotate(sgv_pred, txf_ann)
 \author{
 Leonard Goldstein
 }
-

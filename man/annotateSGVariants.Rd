@@ -50,4 +50,3 @@ variant of the canonical event.
 Leonard Goldstein
 }
 \keyword{internal}
-

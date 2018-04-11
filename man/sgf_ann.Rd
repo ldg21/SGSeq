@@ -11,4 +11,3 @@ Splice graph features for FBXO31, based on UCSC knownGene annotation.
 Leonard Goldstein
 }
 \keyword{internal}
-

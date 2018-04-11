@@ -23,4 +23,3 @@ sgfc <- SGFeatureCounts()
 \author{
 Leonard Goldstein
 }
-

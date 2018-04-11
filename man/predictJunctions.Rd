@@ -38,4 +38,3 @@ Identify splice junctions from genomic RNA-seq read alignments.
 Leonard Goldstein
 }
 \keyword{internal}
-

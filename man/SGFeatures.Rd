@@ -63,4 +63,3 @@ sgf <- SGFeatures()
 \author{
 Leonard Goldstein
 }
-

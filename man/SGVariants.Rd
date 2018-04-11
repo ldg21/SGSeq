@@ -65,4 +65,3 @@ sgv <- SGVariants()
 \author{
 Leonard Goldstein
 }
-

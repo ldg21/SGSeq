@@ -99,4 +99,3 @@ sgfc <- analyzeFeatures(si, gr)
 \author{
 Leonard Goldstein
 }
-

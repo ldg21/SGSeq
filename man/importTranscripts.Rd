@@ -31,4 +31,3 @@ NULL
 \author{
 Leonard Goldstein
 }
-

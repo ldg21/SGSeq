@@ -12,4 +12,3 @@ predicted from example BAM files.
 Leonard Goldstein
 }
 \keyword{internal}
-

@@ -19,4 +19,3 @@ Remove exons with no flanking splice junctions.
 Leonard Goldstein
 }
 \keyword{internal}
-

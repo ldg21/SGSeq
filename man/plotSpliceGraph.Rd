@@ -125,4 +125,3 @@ NULL
 \author{
 Leonard Goldstein
 }
-

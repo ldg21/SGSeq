@@ -28,4 +28,3 @@ makeVariantNames(sgv_pred)
 Leonard Goldstein
 }
 \keyword{internal}
-

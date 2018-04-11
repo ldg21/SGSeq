@@ -14,4 +14,3 @@ Sample information for example BAM files included in the
 Leonard Goldstein
 }
 \keyword{internal}
-

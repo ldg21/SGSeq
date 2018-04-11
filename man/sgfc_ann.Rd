@@ -12,4 +12,3 @@ based on UCSC knownGene annotation.
 Leonard Goldstein
 }
 \keyword{internal}
-

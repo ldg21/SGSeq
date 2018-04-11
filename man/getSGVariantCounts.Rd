@@ -55,4 +55,3 @@ sgvc_from_bam <- getSGVariantCounts(sgv_pred, sample_info = si)
 \author{
 Leonard Goldstein
 }
-

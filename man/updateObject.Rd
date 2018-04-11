@@ -3,16 +3,18 @@
 \docType{methods}
 \name{updateObject}
 \alias{updateObject}
-\alias{updateObject,SGVariantCounts-method}
 \alias{updateObject,SGVariants-method}
+\alias{updateObject,SGVariantCounts-method}
 \title{Update object}
 \usage{
-\S4method{updateObject}{SGVariants}(object, verbose)
+\S4method{updateObject}{SGVariants}(object, ..., verbose = FALSE)
 
-\S4method{updateObject}{SGVariantCounts}(object, verbose)
+\S4method{updateObject}{SGVariantCounts}(object, ..., verbose = FALSE)
 }
 \arguments{
 \item{object}{Object to be updated}
+
+\item{...}{Additional arguments}
 
 \item{verbose}{Should a warning message be generated}
 }
@@ -25,4 +27,3 @@ Update object created with previous version of SGSeq.
 \author{
 Leonard Goldstein
 }
-

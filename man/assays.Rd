@@ -2,19 +2,19 @@
 % Please edit documentation in R/slots-generics.R, R/slots-methods.R
 \docType{methods}
 \name{assays}
-\alias{FPKM}
-\alias{FPKM,SGFeatureCounts-method}
-\alias{FPKM,SGVariantCounts-method}
-\alias{FPKM<-}
-\alias{FPKM<-,SGFeatureCounts-method}
 \alias{assays}
-\alias{counts,SGFeatureCounts-method}
-\alias{counts,SGVariantCounts-method}
-\alias{counts<-,SGFeatureCounts-method}
-\alias{counts<-,SGVariantCounts-method}
+\alias{FPKM}
+\alias{FPKM<-}
 \alias{variantFreq}
-\alias{variantFreq,SGVariantCounts-method}
 \alias{variantFreq<-}
+\alias{counts,SGFeatureCounts-method}
+\alias{counts<-,SGFeatureCounts-method}
+\alias{FPKM,SGFeatureCounts-method}
+\alias{FPKM<-,SGFeatureCounts-method}
+\alias{counts,SGVariantCounts-method}
+\alias{counts<-,SGVariantCounts-method}
+\alias{FPKM,SGVariantCounts-method}
+\alias{variantFreq,SGVariantCounts-method}
 \alias{variantFreq<-,SGVariantCounts-method}
 \title{Accessing and replacing assay data}
 \usage{
@@ -78,4 +78,3 @@ v <- FPKM(sgvc_pred, option = "variant5p")
 \author{
 Leonard Goldstein
 }
-

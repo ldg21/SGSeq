@@ -605,6 +605,7 @@ SGVariantCounts <- function(x)
 ##'
 ##' @title Update object
 ##' @param object Object to be updated
+##' @param ... Additional arguments
 ##' @param verbose Should a warning message be generated
 ##' @return Updated object
 ##' @author Leonard Goldstein
@@ -612,7 +613,7 @@ SGVariantCounts <- function(x)
 NULL
 
 ##' @rdname updateObject
-setMethod("updateObject", "SGVariants", function(object, ..., verbose=FALSE) {
+setMethod("updateObject", "SGVariants", function(object, ..., verbose = FALSE) {
 
     current <- names(mcols(object))
 
@@ -698,7 +699,7 @@ setMethod("updateObject", "SGVariants", function(object, ..., verbose=FALSE) {
 })
 
 ##' @rdname updateObject
-setMethod("updateObject", "SGVariantCounts", function(object, ..., verbose=FALSE) {
+setMethod("updateObject", "SGVariantCounts", function(object, ..., verbose = FALSE) {
 
     current <- names(assays(object))
 

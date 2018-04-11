@@ -27,4 +27,3 @@ NULL
 \author{
 Leonard Goldstein
 }
-

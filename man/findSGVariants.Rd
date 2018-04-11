@@ -38,4 +38,3 @@ sgv <- findSGVariants(sgf_pred)
 \author{
 Leonard Goldstein
 }
-

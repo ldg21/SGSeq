@@ -45,4 +45,3 @@ sgvc <- analyzeVariants(sgfc_pred)
 \author{
 Leonard Goldstein
 }
-

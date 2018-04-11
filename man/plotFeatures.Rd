@@ -66,7 +66,7 @@ if \code{NULL} range of finite values}
 \item{heightPanels}{Numeric vector of length two indicating height of
 the top and bottom panels.}
 
-\item{...}{further parameters passed to \code{plotSpliceGraph}}
+\item{...}{further arguments passed to \code{plotSpliceGraph}}
 }
 \value{
 \code{data.frame} with information on exon bins and
@@ -85,4 +85,3 @@ NULL
 \author{
 Leonard Goldstein
 }
-

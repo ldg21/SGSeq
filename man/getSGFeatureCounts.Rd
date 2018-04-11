@@ -40,4 +40,3 @@ sgfc <- getSGFeatureCounts(si, sgf_pred)
 \author{
 Leonard Goldstein
 }
-

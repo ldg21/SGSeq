@@ -26,4 +26,3 @@ sgvc <- SGVariantCounts()
 \author{
 Leonard Goldstein
 }
-

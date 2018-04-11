@@ -58,7 +58,7 @@ the top and bottom panels.}
 
 \item{expand_variants}{Experimental option - leave set to \code{FALSE}}
 
-\item{...}{further parameters passed to \code{plotSpliceGraph}}
+\item{...}{further arguments passed to \code{plotSpliceGraph}}
 }
 \value{
 \code{data.frame} with information on exon bins and
@@ -77,4 +77,3 @@ NULL
 \author{
 Leonard Goldstein
 }
-

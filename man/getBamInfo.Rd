@@ -51,4 +51,3 @@ DF_complete <- getBamInfo(DF)
 \author{
 Leonard Goldstein
 }
-

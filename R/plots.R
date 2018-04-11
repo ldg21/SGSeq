@@ -914,7 +914,7 @@ addAlpha <- function(col, alpha)
 ##'   if \code{NULL} range of finite values
 ##' @param heightPanels Numeric vector of length two indicating height of
 ##'   the top and bottom panels.
-##' @param ... further parameters passed to \code{plotSpliceGraph}
+##' @param ... further arguments passed to \code{plotSpliceGraph}
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples
@@ -1003,7 +1003,7 @@ plotFeatures <- function(x, geneID = NULL, geneName = NULL,
 ##' @param cex Scale parameter for feature labels and annotation
 ##' @param transform Transformation applied to splice variant frequencies
 ##' @param expand_variants Experimental option - leave set to \code{FALSE}
-##' @param ... further parameters passed to \code{plotSpliceGraph}
+##' @param ... further arguments passed to \code{plotSpliceGraph}
 ##' @return \code{data.frame} with information on exon bins and
 ##'   splice junctions included in the splice graph
 ##' @examples

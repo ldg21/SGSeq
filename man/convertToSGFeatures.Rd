@@ -50,4 +50,3 @@ sgf <- convertToSGFeatures(txf_ann)
 \author{
 Leonard Goldstein
 }
-

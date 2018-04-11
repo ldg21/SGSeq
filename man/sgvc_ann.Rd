@@ -12,4 +12,3 @@ Splice variants are based on UCSC knownGene annotation.
 Leonard Goldstein
 }
 \keyword{internal}
-

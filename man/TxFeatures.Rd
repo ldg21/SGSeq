@@ -41,4 +41,3 @@ txf <- TxFeatures(gr, type = "J")
 \author{
 Leonard Goldstein
 }
-
