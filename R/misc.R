@@ -411,22 +411,22 @@ exportFeatures <- function(features, file)
     }
 
     i_junction <- which(mcols(features)$type == "J")
-    color <- mcols(features)$color
-    mcols(features) <- NULL
 
-    bed <- split(features, seq_along(features))
+    tmp <- features
+    mcols(tmp) <- NULL
+    bed <- split(tmp, seq_along(tmp))
 
     if (length(i_junction) > 0) {
 
         bed[i_junction] <- setdiff(
-           split(features[i_junction], seq_along(i_junction)),
-           split(features[i_junction] - 1, seq_along(i_junction)))
+           split(tmp[i_junction], seq_along(i_junction)),
+           split(tmp[i_junction] - 1, seq_along(i_junction)))
 
     }
 
-    if (!is.null(color)) {
+    if (!is.null(mcols(features)$color)) {
 
-        itemRgb <- rgb(t(col2rgb(color)), maxColorValue = 255)
+        itemRgb <- rgb(t(col2rgb(mcols(features)$color)), maxColorValue = 255)
         mcols(bed)$itemRgb <- itemRgb
 
     }
