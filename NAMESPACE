@@ -28,10 +28,6 @@ importFrom(parallel, mclapply, mcmapply)
 importFrom(rtracklayer, export, import)
 importFrom(stats, dist, hclust, setNames)
 
-## IMPORT CLASSES
-
-importClassesFrom(rtracklayer, GenomicRanges_OR_GenomicRangesList)
-
 ## EXPORT FUNCTIONS
 
 export(
