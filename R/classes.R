@@ -215,13 +215,13 @@ setClass(
 setClass(
     Class = "SGSegments",
     slots = c(unlistData = "SGFeatures"),
-    contains = "GRangesList"
+    contains = "CompressedGRangesList"
 )
 
 setClass(
     Class = "SGVariants",
     slots = c(unlistData = "SGFeatures"),
-    contains = "GRangesList"
+    contains = "CompressedGRangesList"
 )
 
 setClass(
