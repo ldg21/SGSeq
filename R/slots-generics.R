@@ -47,12 +47,6 @@ NULL
 
 ## all classes
 
-## NOTE generic type() imported from Biostrings
-
-##' @rdname slots
-setGeneric("type<-",
-    function(x, value) standardGeneric("type<-"))
-
 ##' @rdname slots
 setGeneric("txName",
     function(x) standardGeneric("txName"))

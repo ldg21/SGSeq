@@ -12,7 +12,7 @@ import(methods)
 ## IMPORT FUNCTIONS
 
 importFrom(AnnotationDbi, select)
-importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate, type)
+importFrom(Biostrings, DNAString, DNAStringSet, getSeq, translate)
 importFrom(GenomicFeatures, cdsBy, exonsBy, mapFromTranscripts,
     mapToTranscripts)
 importFrom(GenomeInfoDb, keepSeqlevels, seqinfo, seqlengths, seqlevels)
