@@ -257,10 +257,10 @@ processTerminalExons <- function(features, min_overhang = NA)
             u_Z <- flank(f_Z, -1, start)
             s_X <- flank(f_X, -1, start)
 
-            hits_2 <- findOverlaps(u_Z[queryHits(hits)],
-                f_X[subjectHits(hits)])
-            hits_2 <- hits_2[queryHits(hits_2) == subjectHits(hits_2)]
-            hits <- hits[!seq_along(hits) %in% queryHits(hits_2)]
+	    ## discard terminal exons contained in overlapping exons
+	    ## (no trimming required)
+	    hits_2 <- findOverlaps(u_Z, f_X)
+	    hits <- setdiff(hits, hits_2)
 
             if (length(hits) > 0) {
 
