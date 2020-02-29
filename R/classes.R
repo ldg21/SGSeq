@@ -167,7 +167,7 @@ validMcols <- function(object, mcol_type)
 validAssays <- function(object, assay_type)
 {
 
-    i <- which(!names(assay_type) %in% names(assays(object)))
+    i <- which(!names(assay_type) %in% assayNames(object))
 
     if (length(i) > 0) {
 
@@ -701,7 +701,7 @@ setMethod("updateObject", "SGVariants", function(object, ..., verbose = FALSE) {
 ##' @rdname updateObject
 setMethod("updateObject", "SGVariantCounts", function(object, ..., verbose = FALSE) {
 
-    current <- names(assays(object))
+    current <- assayNames(object)
 
     required <- c(
         "countsVariant5p",
@@ -729,15 +729,15 @@ setMethod("updateObject", "SGVariantCounts", function(object, ..., verbose = FAL
     rowRanges(object) <- updateObject(rowRanges(object))
 
     ## remove assay countsTotal
-    assays(object)$countsTotal <- NULL
+    assays(object, withDimnames=FALSE)$countsTotal <- NULL
 
     ## update assay names
     old2new <- c(
         countsTotal5p = "countsEvent5p",
         countsTotal3p = "countsEvent3p",
         countsVariant = "countsVariant5pOr3p")
-    j <- which(names(assays(object)) %in% names(old2new))
-    names(assays(object))[j] <- old2new[names(assays(object))[j]]
+    j <- which(assayNames(object) %in% names(old2new))
+    assayNames(object)[j] <- old2new[assayNames(object)[j]]
 
     ## create new SGVariantCounts object
     object <- SGVariantCounts(object)

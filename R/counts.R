@@ -212,7 +212,7 @@ makeSGFeatureCounts <- function(rowRanges, colData, counts, min_anchor = 1)
         assays = list(counts = counts),
         rowRanges = rowRanges,
         colData = colData)
-    assays(x)$FPKM <- getScaledCounts(x, min_anchor)
+    assays(x, withDimnames=FALSE)$FPKM <- getScaledCounts(x, min_anchor)
     x <- SGFeatureCounts(x)
 
     return(x)
@@ -470,7 +470,7 @@ getVariantFreq <- function(object, min_denominator)
 
     }
 
-    assay(object, "variantFreq") <- X
+    assay(object, "variantFreq", withDimnames=FALSE) <- X
 
     return(object)
 

@@ -424,7 +424,7 @@ setMethod("counts", "SGFeatureCounts",
 
 ##' @rdname assays
 setReplaceMethod("counts", "SGFeatureCounts",
-    function(object, value) { assays(object)$counts <- value; object })
+    function(object, value) { assays(object, withDimnames=FALSE)$counts <- value; object })
 
 ##' @rdname assays
 setMethod("FPKM", "SGFeatureCounts",
@@ -432,7 +432,7 @@ setMethod("FPKM", "SGFeatureCounts",
 
 ##' @rdname assays
 setReplaceMethod("FPKM", "SGFeatureCounts",
-    function(object, value) { assays(object)$FPKM <- value; object })
+    function(object, value) { assays(object, withDimnames=FALSE)$FPKM <- value; object })
 
 ## SGVariantCounts
 
@@ -454,7 +454,7 @@ setMethod("counts", "SGVariantCounts", function(object, ...) {
     }
 
     if (option == "variant5pOr3p" &&
-        !"countsVariant5pOr3p" %in% names(assays(object))) {
+        !"countsVariant5pOr3p" %in% assayNames(object)) {
 
         msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
             "run getSGVariantCounts() first")
@@ -491,7 +491,7 @@ setReplaceMethod("counts", "SGVariantCounts", function(object, ..., value) {
     }
 
     if (option == "variant5pOr3p" &&
-        !"countsVariant5pOr3p" %in% names(assays(object))) {
+        !"countsVariant5pOr3p" %in% assayNames(object)) {
 
         msg <- paste("object is missing assay \"countsVariant5pOr3p\",",
             "run getSGVariantCounts() first")
@@ -506,7 +506,7 @@ setReplaceMethod("counts", "SGVariantCounts", function(object, ..., value) {
         event3p = "countsEvent3p",
         variant5pOr3p = "countsVariant5pOr3p")
 
-    assays(object)[[assay_name]] <- value
+    assays(object, withDimnames=FALSE)[[assay_name]] <- value
 
     object
 
@@ -541,4 +541,4 @@ setMethod("variantFreq", "SGVariantCounts",
 
 ##' @rdname assays
 setReplaceMethod("variantFreq", "SGVariantCounts",
-    function(object, value) { assays(object)$variantFreq <- value; object })
+    function(object, value) { assays(object, withDimnames=FALSE)$variantFreq <- value; object })

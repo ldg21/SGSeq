@@ -725,8 +725,8 @@ checkIdenticalSummarizedExperiment <- function(target, current,
 
     }
 
-    assays_target <- names(assays(target))
-    assays_current <- names(assays(current))
+    assays_target <- assayNames(target)
+    assays_current <- assayNames(current)
 
     checkIdentical(assays_target, assays_current)
 
