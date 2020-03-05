@@ -585,7 +585,7 @@ findVariantsPerGene <- function(g, geneID, maxnvariant)
         paths_index_ref <- findAllPaths(from, to, NULL, ref, hv$name)
 
         if (!is.na(maxnvariant) && (length(paths_index_ref) > maxnvariant ||
-            is.na(paths_index_ref))) {
+            (length(paths_index_ref) == 1L && is.na(paths_index_ref)))) {
 
             n_skipped <- n_skipped + 1
 
