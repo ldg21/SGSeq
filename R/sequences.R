@@ -87,6 +87,8 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
     list_expanded_sgv <- split(expanded_sgv, seq_along(expanded_sgv))
     list_expanded_tx <- split(expanded_tx, seq_along(expanded_tx))
 
+    message("OK-1")
+
     list_res <- mcmapply(
         predictVariantEffectPerVariantAndTranscript,
         list_expanded_sgv,
@@ -100,8 +102,12 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
         mc.preschedule = setPreschedule(cores),
         mc.cores = cores)
 
+    message("OK-2")
+
     items <- paste("variant", variantID(expanded_sgv),
         "and transcript", names(expanded_tx))
+
+    message("OK-3")
 
     checkApplyResultsForErrors(
         list_res,
@@ -109,7 +115,11 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
         items,
         "character")
 
+    message("OK-4")
+
     res <- do.call(rbindDfsWithoutRowNames, list_res)
+
+    message("OK-5")
 
     return(res)
 
