@@ -172,28 +172,26 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
     ref_utr_5p <- range(c(flank(ref_loc, -1, TRUE), flank(ref_cds, 1, TRUE)))
     ref_utr_3p <- range(c(flank(ref_cds, 1, FALSE), flank(ref_loc, -1, FALSE)))
 
-    message("OK-1")
-    
     event <- getEventLocation(sgv, ref)
     event_start <- flank(event, -1, TRUE)
     event_end <- flank(event, -1, FALSE)
 
-    message("OK-2")
-
     del <- intersect(ref[[1]], event)
     ins <- reduce(granges(sgv[[1]][type(sgv[[1]]) == "E"]))
 
-    message("OK-3")
+    message("OK-1")
 
     var <- GRangesList(reduce(c(setdiff(ref[[1]], del), ins)))
+
+    message("OK-2")
+    
     var_3p <- getVariant(var, ref, sgv, genome, fix = "start")
+
+    message("OK-3")
+
     var_5p <- getVariant(var, ref, sgv, genome, fix = "stop")
 
-    message("OK-4")
-
     alt_RNA <- getHGVSVariantRNA(var_3p, ref)
-
-    message("OK-5")
 
     if (event_start %over% ref_utr_5p && event_end %over% ref_utr_5p) {
 
@@ -294,8 +292,6 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
 
     }
 
-    message("OK-6")
-
     n <- length(var)
 
     res <- data.frame(
@@ -309,8 +305,6 @@ predictVariantEffectPerVariantAndTranscript <- function(sgv, ref, genome,
         stringsAsFactors = FALSE)
 
     res <- cbind(res, as.data.frame(mcols(var)))
-
-    message("OK-7")
 
     if (output == "short") {
 
@@ -649,6 +643,8 @@ getVariant <- function(var, ref, sgv, genome, fix = c("start", "stop"))
 
     fix <- match.arg(fix)
 
+    message("getVariant-1")
+    
     if (fix == "start") {
 
         var <- findCDS(var, cdsStart(ref), NA_integer_, genome)
@@ -659,7 +655,12 @@ getVariant <- function(var, ref, sgv, genome, fix = c("start", "stop"))
 
     }
 
+    message("getVariant-2")
+
     var <- getVariantRNA(var, ref, sgv, genome)
+
+    message("getVariant-3")
+
     var <- getVariantProtein(var, ref, sgv, genome)
 
     return(var)
