@@ -61,6 +61,10 @@ predictVariantEffects <- function(sgv, tx, genome, fix_start_codon = TRUE,
 
     }
 
+    common <- intersect(seqlevels(sgv), seqlevels(tx))
+    sgv <- keepSeqlevels(sgv, common, "coarse")
+    tx <- keepSeqlevels(tx, common, "coarse")
+    
     sgv_vid <- variantID(sgv)
     excl <- grep("(", type(sgv), fixed = TRUE)
 
